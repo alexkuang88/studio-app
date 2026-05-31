@@ -76,7 +76,12 @@ export default function OrdersPage() {
       dayStart.setHours(0, 0, 0, 0);
       const dayEnd = new Date(dateFilter);
       dayEnd.setHours(23, 59, 59, 999);
-      query = query.gte("created_at", dayStart.toISOString()).lte("created_at", dayEnd.toISOString());
+      // 已完成/已取消用完成时间，其他的用创建时间
+      if (activeFilter === "completed" || activeFilter === "cancelled") {
+        query = query.gte("actual_completed_at", dayStart.toISOString()).lte("actual_completed_at", dayEnd.toISOString());
+      } else {
+        query = query.gte("created_at", dayStart.toISOString()).lte("created_at", dayEnd.toISOString());
+      }
     }
     // 今日筛选（没有日期筛选时才生效）
     if (activeToday && !dateFilter) {
