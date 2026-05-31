@@ -176,8 +176,6 @@ export async function POST(
       actual_completed_at: actualCompletedAt,
       completion_note: note || null,
       force_complete_reason: force_complete_reason || null,
-      current_employee_id: null,
-      current_machine_id: null,
       updated_at: new Date().toISOString(),
     })
     .eq("id", orderId)

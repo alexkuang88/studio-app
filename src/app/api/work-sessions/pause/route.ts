@@ -84,8 +84,6 @@ export async function POST(request: NextRequest) {
     .update({
       completed_amount: newCompleted,
       status: "paused",
-      current_employee_id: null,
-      current_machine_id: null,
       updated_at: new Date().toISOString(),
     })
     .eq("id", session.order_id);

@@ -82,7 +82,12 @@ export default function OrdersPage() {
     if (activeToday && !dateFilter) {
       const todayStart = new Date();
       todayStart.setHours(0, 0, 0, 0);
-      query = query.gte("created_at", todayStart.toISOString());
+      // completed 状态用实际完成时间，其他用创建时间
+      if (activeFilter === "completed") {
+        query = query.gte("actual_completed_at", todayStart.toISOString());
+      } else {
+        query = query.gte("created_at", todayStart.toISOString());
+      }
     }
 
     const { data } = await query;
@@ -302,9 +307,9 @@ export default function OrdersPage() {
                       </td>
                       <td className="px-3 py-3 hidden lg:table-cell text-xs">
                         {emp
-                          ? `${emp.employee_code} ${emp.chinese_name}`
+                          ? `${String(emp.employee_code).replace(/^N0*/, "")}号${emp.chinese_name}`
                           : "—"}
-                        {machine ? ` / ${machine.machine_code}` : ""}
+                        {machine ? ` / ${String(machine.machine_code).replace(/^M0*/, "")}号机` : ""}
                       </td>
                       <td className="px-3 py-3 text-xs hidden md:table-cell">
                         {formatDateTime(order.expected_completion_at as string)}
