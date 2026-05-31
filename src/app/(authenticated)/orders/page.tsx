@@ -70,28 +70,25 @@ export default function OrdersPage() {
     if (sourceFilter) query = query.eq("order_source", sourceFilter);
     if (search) query = query.ilike("order_code", `%${search}%`);
 
-    // 日期筛选：已完成/已取消按完成时间，其他按创建时间
-    // Madagascar = UTC+3，用本地午夜构建日期范围
+    // 日期/今日筛选：统一用本地时间（马达加斯加 UTC+3）
+    // new Date(y,m,d) 创建本地午夜，toISOString() 自动转 UTC
     if (dateFilter) {
-      const [y, m, d] = dateFilter.split("-").map(Number);
-      const offsetMs = 3 * 60 * 60 * 1000; // UTC+3
-      const utcMidnight = new Date(dateFilter).getTime(); // UTC midnight
-      const dayStartISO = new Date(utcMidnight - offsetMs).toISOString(); // Madagascar 00:00
-      const dayEndISO = new Date(utcMidnight + 24*3600000 - offsetMs - 1).toISOString(); // Madagascar 23:59:59
+      const [y, mn, d] = dateFilter.split("-").map(Number);
+      const start = new Date(y, mn-1, d, 0, 0, 0);
+      const end = new Date(y, mn-1, d, 23, 59, 59, 999);
       if (activeFilter === "completed" || activeFilter === "cancelled") {
-        query = query.gte("actual_completed_at", dayStartISO).lte("actual_completed_at", dayEndISO);
+        query = query.gte("actual_completed_at", start.toISOString()).lte("actual_completed_at", end.toISOString());
       } else {
-        query = query.gte("created_at", dayStartISO).lte("created_at", dayEndISO);
+        query = query.gte("created_at", start.toISOString()).lte("created_at", end.toISOString());
       }
     }
-    // 今日筛选
     if (activeToday && !dateFilter) {
-      const now = new Date();
-      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
+      const n = new Date();
+      const start = new Date(n.getFullYear(), n.getMonth(), n.getDate(), 0, 0, 0);
       if (activeFilter === "completed") {
-        query = query.gte("actual_completed_at", todayStart.toISOString());
+        query = query.gte("actual_completed_at", start.toISOString());
       } else {
-        query = query.gte("created_at", todayStart.toISOString());
+        query = query.gte("created_at", start.toISOString());
       }
     }
 
@@ -230,19 +227,20 @@ export default function OrdersPage() {
                 <th className="px-3 py-3 text-left">状态</th>
                 <th className="px-3 py-3 text-left hidden lg:table-cell">打手/设备</th>
                 <th className="px-3 py-3 text-left hidden md:table-cell">要求完成</th>
+                <th className="px-3 py-3 text-left hidden md:table-cell">完成时间</th>
                 <th className="px-3 py-3 text-left hidden lg:table-cell">剩余时间</th>
               </tr>
             </thead>
             <tbody className="divide-y">
               {loading ? (
                 <tr>
-                  <td colSpan={11} className="px-4 py-6 text-center text-gray-500">
+                  <td colSpan={12} className="px-4 py-6 text-center text-gray-500">
                     加载中...
                   </td>
                 </tr>
               ) : orders.length === 0 ? (
                 <tr>
-                  <td colSpan={11} className="px-4 py-6 text-center text-gray-500">
+                  <td colSpan={12} className="px-4 py-6 text-center text-gray-500">
                     暂无订单 / Aucune commande
                   </td>
                 </tr>
@@ -323,6 +321,9 @@ export default function OrdersPage() {
                             ⚠️
                           </span>
                         )}
+                      </td>
+                      <td className="px-3 py-3 text-xs hidden md:table-cell">
+                        {formatDateTime(order.actual_completed_at as string)}
                       </td>
                       <td className="px-3 py-3 hidden lg:table-cell">
                         {status === "completed" ? (
