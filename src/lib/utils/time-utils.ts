@@ -2,41 +2,48 @@
 // 时间工具函数
 // =====================================================
 
-import { format, parseISO, startOfMonth, endOfMonth, isValid } from "date-fns";
+import { format, parseISO, startOfMonth, endOfMonth, isValid, addHours } from "date-fns";
 import { zhCN } from "date-fns/locale";
 
+// 马达加斯加 UTC+3
+const MG_OFFSET = 3;
+
+function toMG(d: Date): Date {
+  return addHours(d, MG_OFFSET);
+}
+
 /**
- * 格式化为标准日期时间字符串 (YYYY-MM-DD HH:mm)
+ * 格式化为标准日期时间字符串 (YYYY-MM-DD HH:mm) — 马达加斯加时间
  */
 export function formatDateTime(date: string | Date | null | undefined): string {
   if (!date) return "—";
   const d = typeof date === "string" ? new Date(date) : date;
   if (!isValid(d)) return "—";
-  return format(d, "yyyy-MM-dd HH:mm");
+  return format(toMG(d), "yyyy-MM-dd HH:mm");
 }
 
 /**
- * 格式化为日期 (YYYY-MM-DD)
+ * 格式化为日期 (YYYY-MM-DD) — 马达加斯加时间
  */
 export function formatDate(date: string | Date | null | undefined): string {
   if (!date) return "—";
   const d = typeof date === "string" ? new Date(date) : date;
   if (!isValid(d)) return "—";
-  return format(d, "yyyy-MM-dd");
+  return format(toMG(d), "yyyy-MM-dd");
 }
 
 /**
- * 格式化为时间 (HH:mm)
+ * 格式化为时间 (HH:mm) — 马达加斯加时间
  */
 export function formatTime(date: string | Date | null | undefined): string {
   if (!date) return "—";
   const d = typeof date === "string" ? new Date(date) : date;
   if (!isValid(d)) return "—";
-  return format(d, "HH:mm");
+  return format(toMG(d), "HH:mm");
 }
 
 /**
- * 格式化为中文日期时间
+ * 格式化为中文日期时间 — 马达加斯加时间
  */
 export function formatDateTimeCN(
   date: string | Date | null | undefined
@@ -44,7 +51,7 @@ export function formatDateTimeCN(
   if (!date) return "—";
   const d = typeof date === "string" ? new Date(date) : date;
   if (!isValid(d)) return "—";
-  return format(d, "yyyy年MM月dd日 HH:mm", { locale: zhCN });
+  return format(toMG(d), "yyyy年MM月dd日 HH:mm", { locale: zhCN });
 }
 
 /**
