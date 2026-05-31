@@ -35,6 +35,7 @@ export default function OrdersPage() {
   const [overdueOnly, setOverdueOnly] = useState(false);
   const [nearingOnly, setNearingOnly] = useState(false);
   const [label, setLabel] = useState("");
+  const [dateFilter, setDateFilter] = useState(""); // 按日期筛选
 
   const supabase = createClient();
 
@@ -69,8 +70,16 @@ export default function OrdersPage() {
     if (sourceFilter) query = query.eq("order_source", sourceFilter);
     if (search) query = query.ilike("order_code", `%${search}%`);
 
-    // 今日筛选
-    if (activeToday) {
+    // 日期筛选
+    if (dateFilter) {
+      const dayStart = new Date(dateFilter);
+      dayStart.setHours(0, 0, 0, 0);
+      const dayEnd = new Date(dateFilter);
+      dayEnd.setHours(23, 59, 59, 999);
+      query = query.gte("created_at", dayStart.toISOString()).lte("created_at", dayEnd.toISOString());
+    }
+    // 今日筛选（没有日期筛选时才生效）
+    if (activeToday && !dateFilter) {
       const todayStart = new Date();
       todayStart.setHours(0, 0, 0, 0);
       query = query.gte("created_at", todayStart.toISOString());
@@ -138,6 +147,7 @@ export default function OrdersPage() {
           </h1>
           <p className="text-gray-500 mt-1">
             共 {orders.length} 个订单
+            {dateFilter && <span className="ml-2 text-blue-600 font-medium">· {dateFilter}</span>}
             {todayOnly && <span className="ml-2 text-blue-600 font-medium">· 今日</span>}
             {overdueOnly && <span className="ml-2 text-red-600 font-medium">· 已超时</span>}
             {nearingOnly && <span className="ml-2 text-orange-600 font-medium">· 即将超时</span>}
@@ -158,6 +168,13 @@ export default function OrdersPage() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="flex-1"
+        />
+        <input
+          type="date"
+          value={dateFilter}
+          onChange={(e) => { setDateFilter(e.target.value); setTodayOnly(false); }}
+          className="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          title="选择日期筛选"
         />
         <Select
           value={statusFilter}
