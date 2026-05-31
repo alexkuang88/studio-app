@@ -27,10 +27,11 @@ function defaultExpectedTime(): string {
 }
 
 function calcExpectedTime(orderAmount: number): string {
-  const d = new Date();
+  // 马达加斯加时间 (UTC+3)
+  const mg = new Date(new Date().getTime() + 3 * 3600000);
   const hours = orderAmount > 0 ? Math.ceil(orderAmount / 100) : 24;
-  d.setHours(d.getHours() + hours);
-  return d.toISOString().slice(0, 16);
+  mg.setUTCHours(mg.getUTCHours() + hours);
+  return mg.toISOString().slice(0, 16);
 }
 
 export default function NewOrderPage() {
