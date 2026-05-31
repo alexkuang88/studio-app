@@ -265,7 +265,7 @@ export default function DashboardPage() {
           icon={CheckCircle}
           loading={loading}
           variant="green"
-          href="/orders?status=completed&today=1"
+          href="/revenue"
         />
         <StatCard
           title="今日接单总额"
@@ -274,10 +274,11 @@ export default function DashboardPage() {
           icon={DollarSign}
           loading={loading}
           variant="green"
+          href="/orders?today=1"
         />
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <StatCard
           title="使用中设备 / En utilisation"
           value={stats.inUseMachines}
@@ -304,15 +305,6 @@ export default function DashboardPage() {
           loading={loading}
           variant={stats.nearingDueOrders > 0 ? "orange" : "gray"}
           href="/orders?nearing=1"
-        />
-        <StatCard
-          title="今日完成 / Terminées"
-          value={stats.todayCompletedOrders}
-          unit="单"
-          icon={CheckCircle}
-          loading={loading}
-          variant="green"
-          href="/orders?status=completed&today=1"
         />
       </div>
     </div>
