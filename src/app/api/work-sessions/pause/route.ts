@@ -30,16 +30,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "未找到进行中的记录" }, { status: 404 });
   }
 
-  // 工资锁定检查
-  const currentMonth = new Date().toISOString().slice(0, 7);
-  const { data: lockData } = await supabase.from("salary_locks").select("id").eq("month", currentMonth).single();
-  if (lockData) {
-    const { data: profile } = await supabase.from("profiles").select("role").eq("id", userData.user.id).single();
-    if (profile?.role !== "admin") {
-      return NextResponse.json({ error: `该月份(${currentMonth})工资已锁定 / Salaire verrouillé` }, { status: 403 });
-    }
-  }
-
   const endAmt = parseFloat(String(end_amount));
   const startAmt = parseFloat(String(session.start_amount));
   if (endAmt < startAmt) {
