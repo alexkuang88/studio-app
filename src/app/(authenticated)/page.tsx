@@ -30,6 +30,7 @@ interface DashboardStats {
   todayCompletedAmount: number;
   todayOrderAmount: number;
   pausedOrders: number;
+  notStartedOrders: number;
 }
 
 export default function DashboardPage() {
@@ -45,6 +46,7 @@ export default function DashboardPage() {
     todayCompletedAmount: 0,
     todayOrderAmount: 0,
     pausedOrders: 0,
+    notStartedOrders: 0,
   });
   const [loading, setLoading] = useState(true);
 
@@ -129,6 +131,12 @@ export default function DashboardPage() {
         .select("*", { count: "exact", head: true })
         .eq("status", "paused");
 
+      // 未开始订单（not_started 或 ready_to_complete）
+      const { count: notStartedCount } = await supabase
+        .from("orders")
+        .select("*", { count: "exact", head: true })
+        .in("status", ["not_started", "ready_to_complete"]);
+
       setStats({
         todayNewOrders: todayNew || 0,
         todayCompletedOrders: todayCompleted || 0,
@@ -140,6 +148,7 @@ export default function DashboardPage() {
         todayCompletedAmount: todayAmount,
         todayOrderAmount,
         pausedOrders: pausedCount || 0,
+        notStartedOrders: notStartedCount || 0,
       });
       setLoading(false);
     }
@@ -265,7 +274,7 @@ export default function DashboardPage() {
           icon={CheckCircle}
           loading={loading}
           variant="green"
-          href="/revenue"
+          href="/orders?status=completed&today=1"
         />
         <StatCard
           title="今日接单总额"
@@ -278,7 +287,7 @@ export default function DashboardPage() {
         />
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         <StatCard
           title="使用中设备 / En utilisation"
           value={stats.inUseMachines}
@@ -305,6 +314,15 @@ export default function DashboardPage() {
           loading={loading}
           variant={stats.nearingDueOrders > 0 ? "orange" : "gray"}
           href="/orders?nearing=1"
+        />
+        <StatCard
+          title="未开始订单"
+          value={stats.notStartedOrders}
+          unit="单"
+          icon={ShoppingCart}
+          loading={loading}
+          variant="gray"
+          href="/orders?status=not_started"
         />
       </div>
     </div>

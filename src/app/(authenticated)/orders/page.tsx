@@ -212,6 +212,7 @@ export default function OrdersPage() {
                 <th className="px-3 py-3 text-left">订单号</th>
                 <th className="px-3 py-3 text-left hidden lg:table-cell max-w-[120px]">客户备注</th>
                 <th className="px-3 py-3 text-left hidden sm:table-cell">来源</th>
+                <th className="px-3 py-3 text-left hidden lg:table-cell">接单时间</th>
                 <th className="px-3 py-3 text-right">订单金额(万)</th>
                 <th className="px-3 py-3 text-right">初始余额(万)</th>
                 <th className="px-3 py-3 text-right">完成余额(万)</th>
@@ -225,13 +226,13 @@ export default function OrdersPage() {
             <tbody className="divide-y">
               {loading ? (
                 <tr>
-                  <td colSpan={10} className="px-4 py-6 text-center text-gray-500">
+                  <td colSpan={11} className="px-4 py-6 text-center text-gray-500">
                     加载中...
                   </td>
                 </tr>
               ) : orders.length === 0 ? (
                 <tr>
-                  <td colSpan={10} className="px-4 py-6 text-center text-gray-500">
+                  <td colSpan={11} className="px-4 py-6 text-center text-gray-500">
                     暂无订单 / Aucune commande
                   </td>
                 </tr>
@@ -278,6 +279,9 @@ export default function OrdersPage() {
                       </td>
                       <td className="px-3 py-3 hidden sm:table-cell text-gray-500">
                         {ORDER_SOURCE_LABELS[order.order_source as keyof typeof ORDER_SOURCE_LABELS] || order.order_source as string}
+                      </td>
+                      <td className="px-3 py-3 hidden lg:table-cell text-xs text-gray-500 whitespace-nowrap">
+                        {formatDateTime(order.order_received_at as string)}
                       </td>
                       <td className="px-3 py-3 text-right font-mono font-medium text-blue-600">
                         {clientGoal.toLocaleString("zh-CN")}
