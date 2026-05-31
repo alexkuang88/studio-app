@@ -1,4 +1,4 @@
-// GET /api/revenue — 订单收入统计（全部订单，区分已完成/进行中）
+// GET /api/revenue — 订单收入统计（按日/月，支持日期范围）
 import { createServerSupabase } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -8,7 +8,9 @@ export async function GET(request: NextRequest) {
   if (!userData.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { searchParams } = new URL(request.url);
-  const groupBy = searchParams.get("group") || "month";
+  const groupBy = searchParams.get("group") || "day";
+  const dateFrom = searchParams.get("from");
+  const dateTo = searchParams.get("to");
 
   const { data: all } = await supabase
     .from("orders")
@@ -22,17 +24,20 @@ export async function GET(request: NextRequest) {
     unit_price: o.unit_price || 0,
   })).filter((o: any) => o.status !== "cancelled" && (o.order_amount || 0) > 0);
 
-  // Group all orders by period
-  const groups: Record<string, {
-    count: number; completed_count: number; pending_count: number;
-    total_revenue: number; pending_revenue: number; total_amount: number;
-  }> = {};
+  // 日期范围筛选
+  const filtered = dateFrom || dateTo ? list.filter((o: any) => {
+    const d = new Date(o.created_at).toISOString().slice(0, 10);
+    if (dateFrom && d < dateFrom) return false;
+    if (dateTo && d > dateTo) return false;
+    return true;
+  }) : list;
 
-  for (const o of list) {
+  // Group
+  const groups: Record<string, any> = {};
+  for (const o of filtered) {
     const d = new Date(o.created_at);
     const key = groupBy === "day" ? d.toISOString().slice(0, 10) : d.toISOString().slice(0, 7);
     if (!groups[key]) groups[key] = { count: 0, completed_count: 0, pending_count: 0, total_revenue: 0, pending_revenue: 0, total_amount: 0 };
-
     groups[key].count++;
     groups[key].total_amount += o.order_amount || 0;
     if (o.status === "completed") {
@@ -44,35 +49,21 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  const completed = list.filter((o: any) => o.status === "completed");
-  const pending = list.filter((o: any) => o.status !== "completed");
-
+  const completed = filtered.filter((o: any) => o.status === "completed");
+  const pending = filtered.filter((o: any) => o.status !== "completed");
   const totalRevenue = completed.reduce((s: number, o: any) => s + (o.order_revenue || 0), 0);
   const pendingRevenue = pending.reduce((s: number, o: any) => s + (o.order_revenue || 0), 0);
   const totalAmount = completed.reduce((s: number, o: any) => s + (o.order_amount || 0), 0);
   const pendingAmount = pending.reduce((s: number, o: any) => s + (o.order_amount || 0), 0);
 
-  const rows = Object.entries(groups)
-    .map(([key, g]) => ({
-      period: key,
-      count: g.count,
-      completed_count: g.completed_count,
-      pending_count: g.pending_count,
-      total_revenue: g.total_revenue,
-      pending_revenue: g.pending_revenue,
-      total_amount: g.total_amount,
-    }))
-    .sort((a, b) => b.period.localeCompare(a.period));
-
   return NextResponse.json({
     group_by: groupBy,
-    total_revenue: totalRevenue,
-    pending_revenue: pendingRevenue,
-    total_amount: totalAmount,
-    pending_amount: pendingAmount,
-    completed_count: completed.length,
-    pending_count: pending.length,
-    total_orders: list.length,
-    periods: rows,
+    total_revenue: totalRevenue, pending_revenue: pendingRevenue,
+    total_amount: totalAmount, pending_amount: pendingAmount,
+    completed_count: completed.length, pending_count: pending.length,
+    total_orders: filtered.length,
+    periods: Object.entries(groups)
+      .map(([key, g]) => ({ period: key, ...g }))
+      .sort((a, b) => b.period.localeCompare(a.period)),
   });
 }
