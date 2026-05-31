@@ -30,8 +30,6 @@ interface DashboardStats {
   todayCompletedAmount: number;
   todayOrderAmount: number;
   pausedOrders: number;
-  totalOrderAmount: number;
-  totalCompletedAmount: number;
 }
 
 export default function DashboardPage() {
@@ -47,8 +45,6 @@ export default function DashboardPage() {
     todayCompletedAmount: 0,
     todayOrderAmount: 0,
     pausedOrders: 0,
-    totalOrderAmount: 0,
-    totalCompletedAmount: 0,
   });
   const [loading, setLoading] = useState(true);
 
@@ -133,22 +129,6 @@ export default function DashboardPage() {
         .select("*", { count: "exact", head: true })
         .eq("status", "paused");
 
-      // 全部订单总金额
-      const { data: allOrders } = await supabase
-        .from("orders")
-        .select("order_amount, target_amount, initial_balance, completed_amount, status")
-        .neq("status", "cancelled");
-
-      const totalOrderAmount = (allOrders || []).reduce(
-        (sum, o) => sum + ((o.order_amount as number) || ((o.target_amount as number) || 0) - ((o.initial_balance as number) || 0)),
-        0
-      );
-
-      // 全部已完成金额
-      const totalCompletedAmount = (allOrders || [])
-        .filter((o) => o.status === "completed")
-        .reduce((sum, o) => sum + ((o.completed_amount as number) || 0), 0);
-
       setStats({
         todayNewOrders: todayNew || 0,
         todayCompletedOrders: todayCompleted || 0,
@@ -160,8 +140,6 @@ export default function DashboardPage() {
         todayCompletedAmount: todayAmount,
         todayOrderAmount,
         pausedOrders: pausedCount || 0,
-        totalOrderAmount,
-        totalCompletedAmount,
       });
       setLoading(false);
     }
@@ -281,8 +259,8 @@ export default function DashboardPage() {
           href="/orders"
         />
         <StatCard
-          title="已完成总额"
-          value={stats.totalCompletedAmount}
+          title="今日完成金额"
+          value={stats.todayCompletedAmount}
           unit="万"
           icon={CheckCircle}
           loading={loading}
@@ -290,8 +268,8 @@ export default function DashboardPage() {
           href="/orders?status=completed"
         />
         <StatCard
-          title="接单总额"
-          value={stats.totalOrderAmount}
+          title="今日接单总额"
+          value={stats.todayOrderAmount}
           unit="万"
           icon={DollarSign}
           loading={loading}
