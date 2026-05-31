@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { Input } from "@/components/ui/Input";
 import { createClient } from "@/lib/supabase/client";
-import { nowDatetimeLocal } from "@/lib/utils/time-utils";
+import { nowDatetimeLocal, mgDatetimeToUTC } from "@/lib/utils/time-utils";
 import { ArrowLeft, Play } from "lucide-react";
 import Link from "next/link";
 
@@ -169,7 +169,7 @@ export default function StartSessionPage() {
         order_id: selectedOrder,
         employee_id: selectedEmployee,
         machine_id: selectedMachine,
-        start_time: new Date(startTime).toISOString(),
+        start_time: mgDatetimeToUTC(startTime),
         start_amount: parseFloat(startAmount) || 0,
         balance_gap: hasGap ? balanceGap : 0,
         gap_reason: hasGap ? gapReason : null,

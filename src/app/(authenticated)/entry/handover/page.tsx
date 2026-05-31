@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { Input } from "@/components/ui/Input";
 import { createClient } from "@/lib/supabase/client";
-import { nowDatetimeLocal, formatDateTime } from "@/lib/utils/time-utils";
+import { nowDatetimeLocal, formatDateTime, mgDatetimeToUTC } from "@/lib/utils/time-utils";
 import { calcWorkHours, calcEfficiency, calcResultAmount } from "@/lib/utils/calculations";
 import { ArrowLeft, ArrowRightLeft } from "lucide-react";
 import Link from "next/link";
@@ -142,7 +142,7 @@ export default function HandoverPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         running_session_id: selectedSession,
-        end_time: new Date(endTime).toISOString(),
+        end_time: mgDatetimeToUTC(endTime),
         end_amount: endAmt,
         next_employee_id: nextEmployee,
         next_machine_id: actualNextMachine,

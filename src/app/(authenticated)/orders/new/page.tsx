@@ -10,7 +10,7 @@ import {
   ORDER_SOURCE_LABELS,
   type OrderSource,
 } from "@/lib/types/database";
-import { nowDatetimeLocal } from "@/lib/utils/time-utils";
+import { nowDatetimeLocal, mgDatetimeToUTC } from "@/lib/utils/time-utils";
 import { ArrowLeft, Save } from "lucide-react";
 import Link from "next/link";
 
@@ -27,11 +27,11 @@ function defaultExpectedTime(): string {
 }
 
 function calcExpectedTime(orderAmount: number): string {
-  // 马达加斯加时间 (UTC+3)
-  const mg = new Date(new Date().getTime() + 3 * 3600000);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const mg = new Date(Date.now() + 3 * 3600000);
   const hours = orderAmount > 0 ? Math.ceil(orderAmount / 100) : 24;
   mg.setUTCHours(mg.getUTCHours() + hours);
-  return mg.toISOString().slice(0, 16);
+  return `${mg.getUTCFullYear()}-${pad(mg.getUTCMonth()+1)}-${pad(mg.getUTCDate())}T${pad(mg.getUTCHours())}:${pad(mg.getUTCMinutes())}`;
 }
 
 export default function NewOrderPage() {
@@ -109,8 +109,8 @@ export default function NewOrderPage() {
         initial_balance: parseFloat(order.initial_balance) || 0,
         target_amount: finalBalance,
         unit_price: parseFloat(order.unit_price) || 0,
-        order_received_at: new Date(order.order_received_at).toISOString(),
-        expected_completion_at: new Date(expectedTime).toISOString(),
+        order_received_at: mgDatetimeToUTC(order.order_received_at),
+        expected_completion_at: mgDatetimeToUTC(expectedTime),
         responsible_user: order.responsible_user || null,
         note: order.note || null,
       }),

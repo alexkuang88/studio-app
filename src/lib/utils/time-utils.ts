@@ -2,14 +2,23 @@
 // 时间工具函数
 // =====================================================
 
-import { format, parseISO, startOfMonth, endOfMonth, isValid, addHours } from "date-fns";
-import { zhCN } from "date-fns/locale";
+import { format, startOfMonth, endOfMonth, isValid } from "date-fns";
 
 // 马达加斯加 UTC+3
 const MG_OFFSET = 3;
 
-function toMG(d: Date): Date {
-  return addHours(d, MG_OFFSET);
+/**
+ * 将 Date 转为马达加斯加时间字符串，不依赖浏览器时区
+ */
+function formatMG(d: Date, pattern: string): string {
+  const mg = new Date(d.getTime() + MG_OFFSET * 3600000);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return pattern
+    .replace("yyyy", String(mg.getUTCFullYear()))
+    .replace("MM", pad(mg.getUTCMonth() + 1))
+    .replace("dd", pad(mg.getUTCDate()))
+    .replace("HH", pad(mg.getUTCHours()))
+    .replace("mm", pad(mg.getUTCMinutes()));
 }
 
 /**
@@ -19,39 +28,39 @@ export function formatDateTime(date: string | Date | null | undefined): string {
   if (!date) return "—";
   const d = typeof date === "string" ? new Date(date) : date;
   if (!isValid(d)) return "—";
-  return format(toMG(d), "yyyy-MM-dd HH:mm");
+  return formatMG(d, "yyyy-MM-dd HH:mm");
 }
 
 /**
- * 格式化为日期 (YYYY-MM-DD) — 马达加斯加时间
+ * 格式化为日期 (YYYY-MM-DD)
  */
 export function formatDate(date: string | Date | null | undefined): string {
   if (!date) return "—";
   const d = typeof date === "string" ? new Date(date) : date;
   if (!isValid(d)) return "—";
-  return format(toMG(d), "yyyy-MM-dd");
+  return formatMG(d, "yyyy-MM-dd");
 }
 
 /**
- * 格式化为时间 (HH:mm) — 马达加斯加时间
+ * 格式化为时间 (HH:mm)
  */
 export function formatTime(date: string | Date | null | undefined): string {
   if (!date) return "—";
   const d = typeof date === "string" ? new Date(date) : date;
   if (!isValid(d)) return "—";
-  return format(toMG(d), "HH:mm");
+  return formatMG(d, "HH:mm");
 }
 
 /**
- * 格式化为中文日期时间 — 马达加斯加时间
+ * 格式化为中文日期时间
  */
-export function formatDateTimeCN(
-  date: string | Date | null | undefined
-): string {
+export function formatDateTimeCN(date: string | Date | null | undefined): string {
   if (!date) return "—";
   const d = typeof date === "string" ? new Date(date) : date;
   if (!isValid(d)) return "—";
-  return format(toMG(d), "yyyy年MM月dd日 HH:mm", { locale: zhCN });
+  const mg = new Date(d.getTime() + MG_OFFSET * 3600000);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${mg.getUTCFullYear()}年${pad(mg.getUTCMonth() + 1)}月${pad(mg.getUTCDate())}日 ${pad(mg.getUTCHours())}:${pad(mg.getUTCMinutes())}`;
 }
 
 /**
@@ -117,8 +126,23 @@ export function toDatetimeLocalValue(date: string | Date | null | undefined): st
 /**
  * Current local datetime value
  */
+/**
+ * 当前马达加斯加时间，用于 datetime-local input 默认值
+ */
+/** 马达加斯加当前时间 UTC+3，用于 input[type=datetime-local] 默认值 */
 export function nowDatetimeLocal(): string {
-  return format(new Date(), "yyyy-MM-dd'T'HH:mm");
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const mg = new Date(Date.now() + 3 * 3600000);
+  return `${mg.getUTCFullYear()}-${pad(mg.getUTCMonth()+1)}-${pad(mg.getUTCDate())}T${pad(mg.getUTCHours())}:${pad(mg.getUTCMinutes())}`;
+}
+
+/**
+ * 将马达加斯加时间字符串转为 UTC ISO 字符串
+ * 用于 API 提交时先转 UTC
+ * 例: "2026-05-31T14:18" → "2026-05-31T11:18:00.000Z"
+ */
+export function mgDatetimeToUTC(mgDatetime: string): string {
+  return new Date(mgDatetime + "+03:00").toISOString();
 }
 
 /**
