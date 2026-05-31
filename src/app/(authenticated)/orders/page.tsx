@@ -31,17 +31,26 @@ export default function OrdersPage() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [sourceFilter, setSourceFilter] = useState("");
+  const [todayOnly, setTodayOnly] = useState(false);
 
   const supabase = createClient();
 
   const fetchOrders = async () => {
     setLoading(true);
 
-    // Read URL param directly to avoid timing issues
+    // Read URL params
     let activeFilter = statusFilter;
-    if (!activeFilter && typeof window !== "undefined") {
-      activeFilter = new URLSearchParams(window.location.search).get("status") || "";
-      if (activeFilter) setStatusFilter(activeFilter);
+    let activeToday = todayOnly;
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      if (!activeFilter) {
+        activeFilter = params.get("status") || "";
+        if (activeFilter) setStatusFilter(activeFilter);
+      }
+      if (!activeToday && params.get("today") === "1") {
+        activeToday = true;
+        setTodayOnly(true);
+      }
     }
 
     let query = supabase
@@ -55,6 +64,13 @@ export default function OrdersPage() {
     if (activeFilter) query = query.eq("status", activeFilter);
     if (sourceFilter) query = query.eq("order_source", sourceFilter);
     if (search) query = query.ilike("order_code", `%${search}%`);
+
+    // 今日筛选
+    if (activeToday) {
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+      query = query.gte("actual_completed_at", todayStart.toISOString());
+    }
 
     const { data } = await query;
     setOrders((data as Record<string, unknown>[]) || []);
@@ -91,7 +107,10 @@ export default function OrdersPage() {
           <h1 className="text-2xl font-bold text-gray-900">
             订单管理 / Commandes
           </h1>
-          <p className="text-gray-500 mt-1">共 {orders.length} 个订单</p>
+          <p className="text-gray-500 mt-1">
+            共 {orders.length} 个订单
+            {todayOnly && <span className="ml-2 text-blue-600 font-medium">（仅显示今日）</span>}
+          </p>
         </div>
         <Link href="/orders/new">
           <Button variant="primary">

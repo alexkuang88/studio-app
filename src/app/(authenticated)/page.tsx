@@ -265,7 +265,7 @@ export default function DashboardPage() {
           icon={CheckCircle}
           loading={loading}
           variant="green"
-          href="/orders?status=completed"
+          href="/orders?status=completed&today=1"
         />
         <StatCard
           title="今日接单总额"
