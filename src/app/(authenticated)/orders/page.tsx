@@ -71,20 +71,23 @@ export default function OrdersPage() {
     if (search) query = query.ilike("order_code", `%${search}%`);
 
     // 日期筛选：已完成/已取消按完成时间，其他按创建时间
+    // Madagascar = UTC+3，用本地午夜构建日期范围
     if (dateFilter) {
-      const dayStart = new Date(dateFilter + "T00:00:00");
-      const dayEnd = new Date(dateFilter + "T23:59:59");
+      const [y, m, d] = dateFilter.split("-").map(Number);
+      const offsetMs = 3 * 60 * 60 * 1000; // UTC+3
+      const utcMidnight = new Date(dateFilter).getTime(); // UTC midnight
+      const dayStartISO = new Date(utcMidnight - offsetMs).toISOString(); // Madagascar 00:00
+      const dayEndISO = new Date(utcMidnight + 24*3600000 - offsetMs - 1).toISOString(); // Madagascar 23:59:59
       if (activeFilter === "completed" || activeFilter === "cancelled") {
-        query = query.gte("actual_completed_at", dayStart.toISOString()).lte("actual_completed_at", dayEnd.toISOString());
+        query = query.gte("actual_completed_at", dayStartISO).lte("actual_completed_at", dayEndISO);
       } else {
-        query = query.gte("created_at", dayStart.toISOString()).lte("created_at", dayEnd.toISOString());
+        query = query.gte("created_at", dayStartISO).lte("created_at", dayEndISO);
       }
     }
-    // 今日筛选（没有日期筛选时才生效）
+    // 今日筛选
     if (activeToday && !dateFilter) {
-      const todayStart = new Date();
-      todayStart.setHours(0, 0, 0, 0);
-      // completed 状态用实际完成时间，其他用创建时间
+      const now = new Date();
+      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
       if (activeFilter === "completed") {
         query = query.gte("actual_completed_at", todayStart.toISOString());
       } else {
