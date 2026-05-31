@@ -70,25 +70,24 @@ export default function OrdersPage() {
     if (sourceFilter) query = query.eq("order_source", sourceFilter);
     if (search) query = query.ilike("order_code", `%${search}%`);
 
-    // 日期/今日筛选：统一用本地时间（马达加斯加 UTC+3）
-    // new Date(y,m,d) 创建本地午夜，toISOString() 自动转 UTC
+    // 日期筛选：用马达加斯加时间 (+03:00)
     if (dateFilter) {
-      const [y, mn, d] = dateFilter.split("-").map(Number);
-      const start = new Date(y, mn-1, d, 0, 0, 0);
-      const end = new Date(y, mn-1, d, 23, 59, 59, 999);
+      const startISO = `${dateFilter}T00:00:00+03:00`;
+      const endISO = `${dateFilter}T23:59:59+03:00`;
       if (activeFilter === "completed" || activeFilter === "cancelled") {
-        query = query.gte("actual_completed_at", start.toISOString()).lte("actual_completed_at", end.toISOString());
+        query = query.gte("actual_completed_at", startISO).lte("actual_completed_at", endISO);
       } else {
-        query = query.gte("created_at", start.toISOString()).lte("created_at", end.toISOString());
+        query = query.gte("created_at", startISO).lte("created_at", endISO);
       }
     }
+    // 今日筛选：马达加斯加时间 (UTC+3)
     if (activeToday && !dateFilter) {
-      const n = new Date();
-      const start = new Date(n.getFullYear(), n.getMonth(), n.getDate(), 0, 0, 0);
+      const mgToday = new Date(new Date().getTime() + 3 * 3600000).toISOString().slice(0, 10);
+      const startISO = `${mgToday}T00:00:00+03:00`;
       if (activeFilter === "completed") {
-        query = query.gte("actual_completed_at", start.toISOString());
+        query = query.gte("actual_completed_at", startISO);
       } else {
-        query = query.gte("created_at", start.toISOString());
+        query = query.gte("created_at", startISO);
       }
     }
 

@@ -53,21 +53,22 @@ export default function DashboardPage() {
   useEffect(() => {
     async function fetchStats() {
       const supabase = createClient();
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
+      // 马达加斯加今天 (UTC+3)，中国和马达加斯加打开都一样
+      const mgToday = new Date(new Date().getTime() + 3 * 3600000).toISOString().slice(0, 10);
+      const todayISO = `${mgToday}T00:00:00+03:00`;
 
       // 今日新增订单
       const { count: todayNew } = await supabase
         .from("orders")
         .select("*", { count: "exact", head: true })
-        .gte("created_at", today.toISOString());
+        .gte("created_at", todayISO);
 
       // 今日完成订单
       const { count: todayCompleted } = await supabase
         .from("orders")
         .select("*", { count: "exact", head: true })
         .eq("status", "completed")
-        .gte("actual_completed_at", today.toISOString());
+        .gte("actual_completed_at", todayISO);
 
       // 进行中订单
       const { count: inProgress } = await supabase
@@ -109,7 +110,7 @@ export default function DashboardPage() {
         .from("work_sessions")
         .select("result_amount")
         .eq("status", "completed")
-        .gte("end_time", today.toISOString());
+        .gte("end_time", todayISO);
 
       const todayAmount =
         todaySessions?.reduce((sum, s) => sum + (s.result_amount || 0), 0) || 0;
@@ -118,7 +119,7 @@ export default function DashboardPage() {
       const { data: todayOrders } = await supabase
         .from("orders")
         .select("order_amount, target_amount, initial_balance")
-        .gte("created_at", today.toISOString());
+        .gte("created_at", todayISO);
 
       const todayOrderAmount = (todayOrders || []).reduce(
         (sum, o) => sum + ((o.order_amount as number) || ((o.target_amount as number) || 0) - ((o.initial_balance as number) || 0)),
