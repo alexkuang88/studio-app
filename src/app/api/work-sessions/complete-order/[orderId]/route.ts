@@ -117,10 +117,10 @@ export async function POST(
       .eq("id", userData.user.id)
       .single();
 
-    if (profile?.role !== "admin") {
+    if (profile?.role !== "admin" && profile?.role !== "operator") {
       return NextResponse.json(
         {
-          error: `还需打${orderAmount - completedAmount}万，Operator不能强制完成`,
+          error: `还需打${orderAmount - completedAmount}万, 不能强制完成`,
           completed_amount: completedAmount,
           order_amount: orderAmount,
           remaining: orderAmount - completedAmount,
@@ -137,9 +137,10 @@ export async function POST(
       .eq("id", userData.user.id)
       .single();
 
-    if (profile?.role !== "admin") {
+    // Allow both admin and operator to force complete
+    if (profile?.role !== "admin" && profile?.role !== "operator") {
       return NextResponse.json(
-        { error: "只有 Admin 可以强制完成订单" },
+        { error: "没有权限强制完成订单" },
         { status: 403 }
       );
     }

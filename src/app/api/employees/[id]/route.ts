@@ -47,7 +47,7 @@ export async function PUT(
     .eq("id", userData.user.id)
     .single();
 
-  if (profile?.role !== "admin") {
+  if (profile?.role !== "admin" && profile?.role !== "operator") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
