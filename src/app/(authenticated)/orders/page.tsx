@@ -32,6 +32,9 @@ export default function OrdersPage() {
   const [statusFilter, setStatusFilter] = useState("");
   const [sourceFilter, setSourceFilter] = useState("");
   const [todayOnly, setTodayOnly] = useState(false);
+  const [overdueOnly, setOverdueOnly] = useState(false);
+  const [nearingOnly, setNearingOnly] = useState(false);
+  const [label, setLabel] = useState("");
 
   const supabase = createClient();
 
@@ -41,16 +44,17 @@ export default function OrdersPage() {
     // Read URL params
     let activeFilter = statusFilter;
     let activeToday = todayOnly;
+    let activeOverdue = overdueOnly;
+    let activeNearing = nearingOnly;
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
       if (!activeFilter) {
         activeFilter = params.get("status") || "";
         if (activeFilter) setStatusFilter(activeFilter);
       }
-      if (!activeToday && params.get("today") === "1") {
-        activeToday = true;
-        setTodayOnly(true);
-      }
+      if (params.get("today") === "1") { activeToday = true; setTodayOnly(true); }
+      if (params.get("overdue") === "1") { activeOverdue = true; setOverdueOnly(true); }
+      if (params.get("nearing") === "1") { activeNearing = true; setNearingOnly(true); }
     }
 
     let query = supabase
@@ -59,7 +63,7 @@ export default function OrdersPage() {
         "*, employees!orders_current_employee_id_fkey(chinese_name, employee_code), machines!orders_current_machine_id_fkey(machine_code, machine_name)"
       )
       .order("created_at", { ascending: false })
-      .limit(100);
+      .limit(200);
 
     if (activeFilter) query = query.eq("status", activeFilter);
     if (sourceFilter) query = query.eq("order_source", sourceFilter);
@@ -69,11 +73,36 @@ export default function OrdersPage() {
     if (activeToday) {
       const todayStart = new Date();
       todayStart.setHours(0, 0, 0, 0);
-      query = query.gte("actual_completed_at", todayStart.toISOString());
+      query = query.gte("created_at", todayStart.toISOString());
     }
 
     const { data } = await query;
-    setOrders((data as Record<string, unknown>[]) || []);
+    let list = (data as Record<string, unknown>[]) || [];
+
+    // 前端过滤超时/即将超时
+    const now = new Date();
+    if (activeOverdue) {
+      list = list.filter((o: any) => {
+        const s = o.status;
+        if (s === "completed" || s === "cancelled" || s === "paused") return false;
+        if (!o.expected_completion_at) return false;
+        return new Date(o.expected_completion_at) < now;
+      });
+      setLabel("已超时");
+    }
+    if (activeNearing) {
+      const warningTime = new Date(now.getTime() + 2 * 60 * 60 * 1000);
+      list = list.filter((o: any) => {
+        const s = o.status;
+        if (s === "completed" || s === "cancelled" || s === "paused") return false;
+        if (!o.expected_completion_at) return false;
+        const exp = new Date(o.expected_completion_at);
+        return exp >= now && exp <= warningTime;
+      });
+      setLabel("即将超时");
+    }
+
+    setOrders(list);
     setLoading(false);
   };
 
@@ -109,7 +138,9 @@ export default function OrdersPage() {
           </h1>
           <p className="text-gray-500 mt-1">
             共 {orders.length} 个订单
-            {todayOnly && <span className="ml-2 text-blue-600 font-medium">（仅显示今日）</span>}
+            {todayOnly && <span className="ml-2 text-blue-600 font-medium">· 今日</span>}
+            {overdueOnly && <span className="ml-2 text-red-600 font-medium">· 已超时</span>}
+            {nearingOnly && <span className="ml-2 text-orange-600 font-medium">· 即将超时</span>}
           </p>
         </div>
         <Link href="/orders/new">

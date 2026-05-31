@@ -229,7 +229,7 @@ export default function DashboardPage() {
           unit="单"
           icon={ShoppingCart}
           loading={loading}
-          href="/orders"
+          href="/orders?today=1"
         />
         <StatCard
           title="进行中 / En cours"
@@ -256,7 +256,7 @@ export default function DashboardPage() {
           icon={Clock}
           loading={loading}
           variant={stats.overdueOrders > 0 ? "red" : "gray"}
-          href="/orders"
+          href="/orders?overdue=1"
         />
         <StatCard
           title="今日完成金额"
@@ -278,15 +278,6 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-        <StatCard
-          title="已完成订单"
-          value={stats.todayCompletedOrders}
-          unit="单"
-          icon={CheckCircle}
-          loading={loading}
-          variant="green"
-          href="/orders?status=completed"
-        />
         <StatCard
           title="使用中设备 / En utilisation"
           value={stats.inUseMachines}
@@ -312,6 +303,7 @@ export default function DashboardPage() {
           icon={AlertTriangle}
           loading={loading}
           variant={stats.nearingDueOrders > 0 ? "orange" : "gray"}
+          href="/orders?nearing=1"
         />
         <StatCard
           title="今日完成 / Terminées"
@@ -320,6 +312,7 @@ export default function DashboardPage() {
           icon={CheckCircle}
           loading={loading}
           variant="green"
+          href="/orders?status=completed&today=1"
         />
       </div>
     </div>
