@@ -70,11 +70,15 @@ export default function OrdersPage() {
     if (sourceFilter) query = query.eq("order_source", sourceFilter);
     if (search) query = query.ilike("order_code", `%${search}%`);
 
-    // 日期筛选（统一用创建时间）
+    // 日期筛选：已完成/已取消按完成时间，其他按创建时间
     if (dateFilter) {
       const dayStart = new Date(dateFilter + "T00:00:00");
       const dayEnd = new Date(dateFilter + "T23:59:59");
-      query = query.gte("created_at", dayStart.toISOString()).lte("created_at", dayEnd.toISOString());
+      if (activeFilter === "completed" || activeFilter === "cancelled") {
+        query = query.gte("actual_completed_at", dayStart.toISOString()).lte("actual_completed_at", dayEnd.toISOString());
+      } else {
+        query = query.gte("created_at", dayStart.toISOString()).lte("created_at", dayEnd.toISOString());
+      }
     }
     // 今日筛选（没有日期筛选时才生效）
     if (activeToday && !dateFilter) {
