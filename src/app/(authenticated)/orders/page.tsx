@@ -162,18 +162,18 @@ export default function OrdersPage() {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-3">
+      <div className="flex flex-wrap items-center gap-2">
         <Input
           placeholder="搜索订单号..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="flex-1"
+          className="flex-1 min-w-[160px]"
         />
         <input
           type="date"
           value={dateFilter}
           onChange={(e) => { setDateFilter(e.target.value); setTodayOnly(false); }}
-          className="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 w-[140px]"
           title="选择日期筛选"
         />
         <Select
