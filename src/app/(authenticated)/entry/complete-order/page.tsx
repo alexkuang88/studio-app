@@ -81,7 +81,7 @@ export default function CompleteOrderPage() {
     const isForce = potentialAmount < orderAmount;
 
     if (isForce && !forceReason.trim()) {
-      setError("强制完成必须填写原因");
+      setError("提前结束必须填写原因");
       return;
     }
 
@@ -190,7 +190,7 @@ export default function CompleteOrderPage() {
               ) : (
                 <div className="bg-orange-100 text-orange-800 px-3 py-2 rounded text-sm">
                   <AlertTriangle size={16} className="inline mr-1" />
-                  还需打 {remainingAmount.toLocaleString("zh-CN")} 万才能达到订单金额。只有 Admin 可以强制完成。
+                  还需打 {remainingAmount.toLocaleString("zh-CN")} 万才能达到订单金额。全员可提前结束。
                 </div>
               )}
             </div>
@@ -206,10 +206,10 @@ export default function CompleteOrderPage() {
             {/* Force complete reason (Admin only, shown when not reached) */}
             {!isGoalReached && isAdmin && (
               <Input
-                label="强制完成原因 / Raison de complétion forcée *"
+                label="提前结束原因 / Raison de complétion forcée *"
                 value={forceReason}
                 onChange={(e) => setForceReason(e.target.value)}
-                placeholder="必须填写强制完成原因..."
+                placeholder="必须填写提前结束原因..."
               />
             )}
 
@@ -222,7 +222,7 @@ export default function CompleteOrderPage() {
               disabled={!isGoalReached && !isAdmin}
             >
               <CheckCircle size={20} className="mr-2" />
-              {isGoalReached ? "完成订单 / Terminer" : "强制完成 / Forcer la complétion"}
+              {isGoalReached ? "完成订单 / Terminer" : "提前结束 / Terminer en avance"}
             </Button>
           </>
         )}
