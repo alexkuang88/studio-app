@@ -150,6 +150,7 @@ export async function POST(
       is_void: isCancelled ? true : false,
       void_reason: isCancelled ? force_complete_reason : null,
       completed_amount: completedAmount,
+      latest_balance: completedAmount,
       actual_completed_at: actualCompletedAt,
       completion_note: note || null,
       force_complete_reason: force_complete_reason || null,

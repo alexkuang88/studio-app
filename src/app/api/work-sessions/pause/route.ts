@@ -82,6 +82,7 @@ export async function POST(request: NextRequest) {
     .update({
       completed_amount: newCompleted,
       status: "paused",
+      latest_balance: endAmt,
       paused_at: new Date().toISOString(),
       total_paused_seconds: accumSecs,
       updated_at: new Date().toISOString(),

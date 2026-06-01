@@ -48,6 +48,7 @@ export async function POST(request: NextRequest) {
       const newTarget = balance + pureOrder - ((ord.completed_amount as number) || 0);
       await supabase.from("orders").update({
         target_amount: newTarget,
+        latest_balance: balance,
         total_client_amount: ((ord.total_client_amount as number) || 0) + balance_gap,
         updated_at: now.toISOString(),
       }).eq("id", session.order_id);
@@ -58,6 +59,11 @@ export async function POST(request: NextRequest) {
       });
     }
   }
+
+  // 同步订单 latest_balance
+  await supabase.from("orders")
+    .update({ latest_balance: balance, updated_at: now.toISOString() })
+    .eq("id", session.order_id);
 
   const { data: updated, error } = await supabase.from("work_sessions")
     .update({ current_balance: balance, balance_gap: balance_gap || 0, gap_reason: gap_reason || null, last_checkpoint_at: now.toISOString(), updated_at: now.toISOString() })

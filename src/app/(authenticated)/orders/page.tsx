@@ -222,6 +222,7 @@ export default function OrdersPage() {
                 <th className="px-3 py-3 text-right">订单金额(万)</th>
                 <th className="px-3 py-3 text-right">初始余额(万)</th>
                 <th className="px-3 py-3 text-right">完成余额(万)</th>
+                <th className="px-3 py-3 text-right">最新余额(万)</th>
                 <th className="px-3 py-3 text-right hidden md:table-cell">收入</th>
                 <th className="px-3 py-3 text-left">状态</th>
                 <th className="px-3 py-3 text-left hidden lg:table-cell">打手/设备</th>
@@ -233,13 +234,13 @@ export default function OrdersPage() {
             <tbody className="divide-y">
               {loading ? (
                 <tr>
-                  <td colSpan={12} className="px-4 py-6 text-center text-gray-500">
+                  <td colSpan={13} className="px-4 py-6 text-center text-gray-500">
                     加载中...
                   </td>
                 </tr>
               ) : orders.length === 0 ? (
                 <tr>
-                  <td colSpan={12} className="px-4 py-6 text-center text-gray-500">
+                  <td colSpan={13} className="px-4 py-6 text-center text-gray-500">
                     暂无订单 / Aucune commande
                   </td>
                 </tr>
@@ -298,6 +299,9 @@ export default function OrdersPage() {
                       </td>
                       <td className="px-3 py-3 text-right font-mono text-xs text-gray-500">
                         {targetAmount.toLocaleString("zh-CN")}
+                      </td>
+                      <td className="px-3 py-3 text-right font-mono font-bold text-xs text-blue-700">
+                        {(order.latest_balance as number) != null ? `${(order.latest_balance as number).toLocaleString("zh-CN")}` : "—"}
                       </td>
                       <td className="px-3 py-3 text-right font-mono text-xs text-green-600 font-medium hidden md:table-cell">
                         {(order.order_revenue as number || 0) > 0 ? `¥ ${(order.order_revenue as number).toLocaleString("zh-CN")}` : "—"}

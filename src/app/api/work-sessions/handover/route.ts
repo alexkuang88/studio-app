@@ -190,6 +190,7 @@ export async function POST(request: NextRequest) {
     .update({
       completed_amount: newCompletedAmount,
       status: newOrderStatus,
+      latest_balance: end_amount,
       current_employee_id: next_employee_id,
       current_machine_id: nextMachine,
       updated_at: new Date().toISOString(),

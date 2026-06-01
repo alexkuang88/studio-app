@@ -193,6 +193,7 @@ export async function POST(request: NextRequest) {
       .from("orders")
       .update({
         status: "in_progress",
+        latest_balance: start_amount,
         current_employee_id: employee_id,
         current_machine_id: machine_id,
         ...(newExpected ? { expected_completion_at: newExpected.toISOString() } : {}),
