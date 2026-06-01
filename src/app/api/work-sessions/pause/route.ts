@@ -74,6 +74,7 @@ export async function POST(request: NextRequest) {
     .update({
       completed_amount: newCompleted,
       status: "paused",
+      paused_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     })
     .eq("id", session.order_id);

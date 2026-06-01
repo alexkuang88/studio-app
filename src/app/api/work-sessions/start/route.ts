@@ -168,6 +168,20 @@ export async function POST(request: NextRequest) {
     });
   }
 
+  // 如果订单之前是暂停状态，恢复时自动延长期限
+  const { data: pausedOrder } = await supabase
+    .from("orders")
+    .select("paused_at, expected_completion_at, status")
+    .eq("id", order_id)
+    .single();
+
+  let newExpected = null;
+  if (pausedOrder?.paused_at && pausedOrder.status === "paused") {
+    const pausedDuration = (new Date().getTime() - new Date(pausedOrder.paused_at as string).getTime()) / 1000;
+    const oldExpected = new Date(pausedOrder.expected_completion_at as string);
+    newExpected = new Date(oldExpected.getTime() + pausedDuration * 1000);
+  }
+
   // 更新订单状态
   await supabase
     .from("orders")
@@ -175,6 +189,8 @@ export async function POST(request: NextRequest) {
       status: "in_progress",
       current_employee_id: employee_id,
       current_machine_id: machine_id,
+      ...(newExpected ? { expected_completion_at: newExpected.toISOString() } : {}),
+      paused_at: null,
       updated_at: new Date().toISOString(),
     })
     .eq("id", order_id);
