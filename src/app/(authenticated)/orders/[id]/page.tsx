@@ -42,8 +42,26 @@ export default function OrderDetailPage() {
   const [addExpectedAt, setAddExpectedAt] = useState("");
   const [adding, setAdding] = useState(false);
   const [addMsg, setAddMsg] = useState("");
+  const [workingNote, setWorkingNote] = useState("");
+  const [savingNote, setSavingNote] = useState(false);
+  const [noteSaved, setNoteSaved] = useState(false);
 
   const supabase = createClient();
+
+  // 加载现场备注
+  useEffect(() => {
+    if (order?.working_note !== undefined) {
+      setWorkingNote((order.working_note as string) || "");
+    }
+  }, [order?.working_note]);
+
+  const handleSaveNote = async () => {
+    setSavingNote(true);
+    await supabase.from("orders").update({ working_note: workingNote }).eq("id", id as string);
+    setSavingNote(false);
+    setNoteSaved(true);
+    setTimeout(() => setNoteSaved(false), 2000);
+  };
 
   useEffect(() => {
     async function fetchOrder() {
@@ -252,23 +270,25 @@ export default function OrderDetailPage() {
           </div>
         )}
 
-        {/* 现场备注 — 随时编辑，自动保存 */}
+        {/* 现场备注 — 随时编辑 */}
         <div className="mt-4 pt-4 border-t">
-          <div className="flex items-center gap-2 mb-1">
+          <div className="flex items-center gap-2 mb-2">
             <span className="text-sm font-medium text-gray-700">📝 现场备注</span>
             <span className="text-xs text-gray-400">| 随时编辑记录现场情况</span>
+            {noteSaved && <span className="text-xs text-green-600 font-medium">✓ 已保存</span>}
           </div>
           <textarea
-            defaultValue={(order.working_note as string) || ""}
+            value={workingNote}
+            onChange={(e) => { setWorkingNote(e.target.value); setNoteSaved(false); }}
             rows={3}
             placeholder="例如：老板挤号，明天上午10点可以登号接着打..."
             className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            onBlur={async (e: React.FocusEvent<HTMLTextAreaElement>) => {
-              const val = e.target.value;
-              await supabase.from("orders").update({ working_note: val }).eq("id", id as string);
-              setOrder({ ...order, working_note: val });
-            }}
           />
+          <div className="flex justify-end mt-2">
+            <Button size="sm" variant="primary" onClick={handleSaveNote} loading={savingNote}>
+              保存备注
+            </Button>
+          </div>
         </div>
 
         {/* 客户加单 — Admin 和 Operator 都能用 */}
