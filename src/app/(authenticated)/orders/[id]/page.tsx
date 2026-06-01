@@ -110,6 +110,30 @@ export default function OrderDetailPage() {
   const orderAmountVal = (order.order_amount as number) || ((order.target_amount as number) || 0) - ((order.initial_balance as number) || 0);
   const remainingAmount = Math.max(0, orderAmountVal - completedAmount);
   const status = (order.status as string) || "not_started";
+  const isCompletedOrCancelled = status === "completed" || status === "cancelled";
+  const [showAddAmount, setShowAddAmount] = useState(false);
+  const [addAmount, setAddAmount] = useState("");
+  const [addExpectedAt, setAddExpectedAt] = useState("");
+  const [adding, setAdding] = useState(false);
+  const [addMsg, setAddMsg] = useState("");
+
+  const handleAddAmount = async () => {
+    if (!addAmount || parseFloat(addAmount) <= 0) return;
+    setAdding(true);
+    const res = await fetch("/api/orders/add-amount", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ order_id: id, extra_amount: parseFloat(addAmount), new_expected_at: addExpectedAt || null }),
+    });
+    const result = await res.json();
+    if (res.ok) {
+      setAddMsg(`✅ 加单 ${addAmount} 万成功，新订单金额 ${result.new_order_amount} 万`);
+      setShowAddAmount(false); setAddAmount("");
+      window.location.reload();
+    } else {
+      setAddMsg("❌ " + (result.error || "失败"));
+    }
+    setAdding(false);
+  };
   const isOverdue =
     status !== "completed" &&
     status !== "cancelled" &&
@@ -225,6 +249,47 @@ export default function OrderDetailPage() {
             {(order.responsible_user as string) && <p>负责人: {order.responsible_user as string}</p>}
             {(order.client_note as string) && <p>客户备注: {order.client_note as string}</p>}
             {(order.note as string) && <p>备注: {order.note as string}</p>}
+          </div>
+        )}
+
+        {/* 客户加单 — Admin 和 Operator 都能用 */}
+        {!isCompletedOrCancelled && (
+          <div className="mt-4 pt-4 border-t">
+            {!showAddAmount ? (
+              <button onClick={() => { setShowAddAmount(true); setAddMsg(""); }}
+                className="w-full py-2 rounded-lg bg-green-500 hover:bg-green-600 text-white text-sm font-medium transition-colors">
+                ➕ 客户加单 / Ajouter au montant
+              </button>
+            ) : (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4 space-y-3">
+                <h4 className="font-semibold text-green-800">客户加单 / Ajouter du montant</h4>
+                <div className="flex items-end gap-3">
+                  <div className="flex-1">
+                    <label className="block text-xs text-gray-600 mb-1">追加金额（万）</label>
+                    <input type="number" value={addAmount} onChange={e => setAddAmount(e.target.value)}
+                      placeholder="例如 500" className="w-full rounded border border-gray-300 px-3 py-2 text-sm" />
+                  </div>
+                  <div className="flex-1">
+                    <label className="block text-xs text-gray-600 mb-1">新要求完成时间（可选）</label>
+                    <input type="datetime-local" value={addExpectedAt} onChange={e => setAddExpectedAt(e.target.value)}
+                      className="w-full rounded border border-gray-300 px-3 py-2 text-sm" />
+                  </div>
+                </div>
+                {addAmount && (
+                  <div className="text-sm text-green-700">
+                    新订单金额: {(orderAmountVal + (parseFloat(addAmount)||0)).toLocaleString("zh-CN")} 万
+                    {(order.unit_price as number || 0) > 0 && (
+                      ` | 新收入: ¥ ${Math.round((orderAmountVal + (parseFloat(addAmount)||0)) / 100 * ((order.unit_price as number)||0)).toLocaleString("zh-CN")}`
+                    )}
+                  </div>
+                )}
+                <div className="flex gap-2">
+                  <Button size="sm" onClick={handleAddAmount} loading={adding} disabled={!addAmount}>确认加单</Button>
+                  <Button size="sm" variant="ghost" onClick={() => { setShowAddAmount(false); setAddAmount(""); }}>取消</Button>
+                </div>
+                {addMsg && <p className={`text-xs ${addMsg.startsWith("✅") ? "text-green-600" : "text-red-600"}`}>{addMsg}</p>}
+              </div>
+            )}
           </div>
         )}
 
