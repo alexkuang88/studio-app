@@ -241,7 +241,7 @@ export default function EmployeeDetailPage() {
                       const machines = ws.machines as Record<string, unknown> | undefined;
                       return (
                         <tr key={ws.id as string} className="hover:bg-gray-50">
-                          <td className="px-3 py-2 text-xs">{formatDateTime(ws.start_time as string).split(" ")[0]}</td>
+                          <td className="px-3 py-2 text-xs">{formatDateTime(ws.end_time as string).split(" ")[0]}</td>
                           <td className="px-3 py-2 font-mono text-xs">{orders?.order_code as string || "—"}</td>
                           <td className="px-3 py-2 text-xs text-gray-500 hidden sm:table-cell">{orders?.order_source as string || "—"}</td>
                           <td className="px-3 py-2 text-xs hidden md:table-cell">{machines?.machine_code as string || "—"}</td>
