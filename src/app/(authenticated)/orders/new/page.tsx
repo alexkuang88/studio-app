@@ -89,6 +89,15 @@ export default function NewOrderPage() {
     e.preventDefault();
     setError("");
 
+    const initBal = parseFloat(order.initial_balance) || 0;
+
+    // 防呆：余额超过 2000 万弹确认
+    if (initBal > 2000) {
+      if (!confirm(`⚠️ 手机当前余额 ${initBal.toLocaleString("zh-CN")} 万，确认正确吗？\n\n请核实手机实际余额！`)) {
+        return;
+      }
+    }
+
     if (!order.order_source || !order.target_amount) {
       setError("请填写必填项：来源、客户要打金额");
       return;

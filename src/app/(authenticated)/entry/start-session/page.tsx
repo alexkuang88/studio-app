@@ -123,6 +123,12 @@ export default function StartSessionPage() {
     setError("");
     setSuccess("");
 
+    // 防呆：余额超过 2000 万弹确认
+    const initBal = parseFloat(startAmount) || 0;
+    if (initBal > 2000) {
+      if (!confirm(`⚠️ 手机当前余额 ${initBal.toLocaleString("zh-CN")} 万，确认正确吗？\n\n请核实手机实际余额！`)) return;
+    }
+
     if (!selectedOrder || !selectedEmployee || !selectedMachine) {
       setError("请选择订单、打手和设备");
       return;
