@@ -204,7 +204,7 @@ export default function CompleteOrderPage() {
             />
 
             {/* Force complete reason (Admin only, shown when not reached) */}
-            {!isGoalReached && isAdmin && (
+            {!isGoalReached && (
               <Input
                 label="提前结束原因 / Raison de complétion forcée *"
                 value={forceReason}
@@ -219,7 +219,7 @@ export default function CompleteOrderPage() {
               block
               onClick={handleComplete}
               loading={loading}
-              disabled={!isGoalReached && !isAdmin}
+              disabled={!isGoalReached && !forceReason.trim()}
             >
               <CheckCircle size={20} className="mr-2" />
               {isGoalReached ? "完成订单 / Terminer" : "提前结束 / Terminer en avance"}
