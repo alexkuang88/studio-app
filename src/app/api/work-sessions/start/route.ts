@@ -168,18 +168,22 @@ export async function POST(request: NextRequest) {
     });
   }
 
-  // 如果订单之前是暂停状态，恢复时自动延长期限
+  // 如果订单是暂停状态，恢复时自动延长期限
   const { data: pausedOrder } = await supabase
     .from("orders")
-    .select("paused_at, expected_completion_at, status")
+    .select("paused_at, total_paused_seconds, expected_completion_at, status")
     .eq("id", order_id)
     .single();
 
   let newExpected = null;
-  if (pausedOrder?.paused_at && pausedOrder.status === "paused") {
-    const pausedDuration = (new Date().getTime() - new Date(pausedOrder.paused_at as string).getTime()) / 1000;
+  if (pausedOrder?.status === "paused") {
+    const totalAccumulated = (pausedOrder.total_paused_seconds as number) || 0;
+    const currentPauseDuration = pausedOrder.paused_at
+      ? (Date.now() - new Date(pausedOrder.paused_at as string).getTime()) / 1000
+      : 0;
+    const totalPaused = totalAccumulated + currentPauseDuration;
     const oldExpected = new Date(pausedOrder.expected_completion_at as string);
-    newExpected = new Date(oldExpected.getTime() + pausedDuration * 1000);
+    newExpected = new Date(oldExpected.getTime() + totalPaused * 1000);
   }
 
   // 恢复暂停 / 首次开始：更新订单状态

@@ -69,12 +69,21 @@ export async function POST(request: NextRequest) {
   const orderAmount = (order?.order_amount as number) ?? ((order?.target_amount || 0) - (order?.initial_balance || 0));
   const newStatus = newCompleted >= orderAmount ? "ready_to_complete" : "in_progress";
 
+  // 累计暂停总时长
+  const { data: pausedOrder } = await supabase.from("orders")
+    .select("paused_at, total_paused_seconds").eq("id", session.order_id).single();
+  let accumSecs = (pausedOrder?.total_paused_seconds as number) || 0;
+  if (pausedOrder?.paused_at) {
+    accumSecs += Math.floor((Date.now() - new Date(pausedOrder.paused_at).getTime()) / 1000);
+  }
+
   await supabase
     .from("orders")
     .update({
       completed_amount: newCompleted,
       status: "paused",
       paused_at: new Date().toISOString(),
+      total_paused_seconds: accumSecs,
       updated_at: new Date().toISOString(),
     })
     .eq("id", session.order_id);
