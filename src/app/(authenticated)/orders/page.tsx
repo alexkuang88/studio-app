@@ -39,24 +39,19 @@ export default function OrdersPage() {
 
   const supabase = createClient();
 
+  // 首次加载时读 URL 参数，后续跟随用户操作
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const s = params.get("status");
+    if (s) setStatusFilter(s);
+    if (params.get("today") === "1") setTodayOnly(true);
+    if (params.get("overdue") === "1") setOverdueOnly(true);
+    if (params.get("nearing") === "1") setNearingOnly(true);
+  }, []);
+
   const fetchOrders = async () => {
     setLoading(true);
-
-    // Read URL params
-    let activeFilter = statusFilter;
-    let activeToday = todayOnly;
-    let activeOverdue = overdueOnly;
-    let activeNearing = nearingOnly;
-    if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search);
-      if (!activeFilter) {
-        activeFilter = params.get("status") || "";
-        if (activeFilter) setStatusFilter(activeFilter);
-      }
-      if (params.get("today") === "1") { activeToday = true; setTodayOnly(true); }
-      if (params.get("overdue") === "1") { activeOverdue = true; setOverdueOnly(true); }
-      if (params.get("nearing") === "1") { activeNearing = true; setNearingOnly(true); }
-    }
 
     let query = supabase
       .from("orders")
@@ -66,7 +61,7 @@ export default function OrdersPage() {
       .order("created_at", { ascending: false })
       .limit(200);
 
-    if (activeFilter) query = query.eq("status", activeFilter);
+    if (statusFilter) query = query.eq("status", statusFilter);
     if (sourceFilter) query = query.eq("order_source", sourceFilter);
     if (search) query = query.ilike("order_code", `%${search}%`);
 
@@ -74,17 +69,17 @@ export default function OrdersPage() {
     if (dateFilter) {
       const startISO = `${dateFilter}T00:00:00+03:00`;
       const endISO = `${dateFilter}T23:59:59+03:00`;
-      if (activeFilter === "completed" || activeFilter === "cancelled") {
+      if (statusFilter === "completed" || statusFilter === "cancelled") {
         query = query.gte("actual_completed_at", startISO).lte("actual_completed_at", endISO);
       } else {
         query = query.gte("created_at", startISO).lte("created_at", endISO);
       }
     }
     // 今日筛选：马达加斯加时间 (UTC+3)
-    if (activeToday && !dateFilter) {
+    if (todayOnly && !dateFilter) {
       const mgToday = new Date(new Date().getTime() + 3 * 3600000).toISOString().slice(0, 10);
       const startISO = `${mgToday}T00:00:00+03:00`;
-      if (activeFilter === "completed") {
+      if (statusFilter === "completed") {
         query = query.gte("actual_completed_at", startISO);
       } else {
         query = query.gte("created_at", startISO);
@@ -96,7 +91,7 @@ export default function OrdersPage() {
 
     // 前端过滤超时/即将超时
     const now = new Date();
-    if (activeOverdue) {
+    if (overdueOnly) {
       list = list.filter((o: any) => {
         const s = o.status;
         if (s === "completed" || s === "cancelled" || s === "paused") return false;
@@ -105,7 +100,7 @@ export default function OrdersPage() {
       });
       setLabel("已超时");
     }
-    if (activeNearing) {
+    if (nearingOnly) {
       const warningTime = new Date(now.getTime() + 2 * 60 * 60 * 1000);
       list = list.filter((o: any) => {
         const s = o.status;
