@@ -60,6 +60,7 @@ export default function NewOrderPage() {
     return amt > 0 ? calcExpectedTime(amt) : order.expected_completion_at;
   }, [order.target_amount, manualTime]);
   const [error, setError] = useState("");
+  const [showConfirm, setShowConfirm] = useState(false);
 
   // 自动获取最新订单号并生成下一个
   useEffect(() => {
@@ -85,18 +86,9 @@ export default function NewOrderPage() {
     return bal + target;
   }, [order.initial_balance, order.target_amount]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-
-    const initBal = parseFloat(order.initial_balance) || 0;
-
-    // 防呆：余额超过 2000 万弹确认
-    if (initBal > 2000) {
-      if (!confirm(`⚠️ 手机当前余额 ${initBal.toLocaleString("zh-CN")} 万，确认正确吗？\n\n请核实手机实际余额！`)) {
-        return;
-      }
-    }
 
     if (!order.order_source || !order.target_amount) {
       setError("请填写必填项：来源、客户要打金额");
@@ -107,7 +99,12 @@ export default function NewOrderPage() {
       return;
     }
 
+    setShowConfirm(true);
+  };
+
+  const doCreate = async () => {
     setSaving(true);
+    setShowConfirm(false);
     const res = await fetch("/api/orders", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -325,6 +322,66 @@ export default function NewOrderPage() {
           </Link>
         </div>
       </form>
+
+      {/* 确认弹框 */}
+      {showConfirm && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 space-y-4 animate-fade-in">
+            <div className="text-center">
+              <span className="text-3xl">⚠️</span>
+              <h2 className="text-xl font-bold text-gray-900 mt-2">确认订单信息</h2>
+              <p className="text-sm text-gray-500">请核实以下数据是否正确</p>
+            </div>
+
+            <div className="bg-gray-50 rounded-xl p-4 space-y-3 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-500">订单号</span>
+                <span className="font-mono font-bold">{autoCode}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500">订单来源</span>
+                <span className="font-medium">{order.order_source}</span>
+              </div>
+              <hr />
+              <div className="flex justify-between">
+                <span className="text-gray-500">手机当前余额</span>
+                <span className="font-mono font-bold text-lg">{(parseFloat(order.initial_balance) || 0).toLocaleString("zh-CN")} 万</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500">客户要打金额</span>
+                <span className="font-mono font-bold text-lg text-blue-600">{(parseFloat(order.target_amount) || 0).toLocaleString("zh-CN")} 万</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500">完成余额</span>
+                <span className="font-mono font-bold text-lg text-green-600">{finalBalance.toLocaleString("zh-CN")} 万</span>
+              </div>
+              {order.unit_price && (
+                <div className="flex justify-between">
+                  <span className="text-gray-500">预计收入</span>
+                  <span className="font-mono font-bold text-green-600">
+                    ¥ {Math.round((parseFloat(order.target_amount) || 0) / 100 * (parseFloat(order.unit_price) || 0)).toLocaleString("zh-CN")}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {(parseFloat(order.initial_balance) || 0) > 2000 && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-700 text-center font-semibold">
+                ⚠️ 余额超过 2000 万，请务必核实手机余额！
+              </div>
+            )}
+
+            <div className="flex gap-3">
+              <Button variant="primary" size="lg" loading={saving} onClick={doCreate} block>
+                确认无误，创建订单
+              </Button>
+              <Button variant="ghost" size="lg" onClick={() => setShowConfirm(false)}>
+                返回修改
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
