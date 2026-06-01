@@ -66,8 +66,8 @@ export default function CompleteOrderPage() {
     if (!selectedOrder) return;
 
     // 如果有 running session 但没填结束余额
-    if (hasRunning && !endAmount.trim()) {
-      setError("当前还有进行中的打单记录，请填写结束余额 / Veuillez saisir le solde final");
+    if ((hasRunning || !isGoalReached) && !endAmount.trim()) {
+      setError("请填写结束余额");
       return;
     }
 
@@ -75,8 +75,8 @@ export default function CompleteOrderPage() {
     const targetAmount = (selectedOrder.target_amount as number) || 0;
     const initialBalance = (selectedOrder.initial_balance as number) || 0;
     const orderAmount = (selectedOrder.order_amount as number) || (targetAmount - initialBalance);
-    const potentialAmount = hasRunning && endAmount
-      ? completedAmount + (parseFloat(endAmount) - (runningStartAmount || 0))
+    const potentialAmount = endAmount
+      ? parseFloat(endAmount)
       : completedAmount;
     const isForce = potentialAmount < orderAmount;
 
@@ -92,7 +92,7 @@ export default function CompleteOrderPage() {
       body: JSON.stringify({
         note: completionNote || null,
         force_complete_reason: isForce ? forceReason : null,
-        end_amount: hasRunning && endAmount ? parseFloat(endAmount) : null,
+        end_amount: endAmount ? parseFloat(endAmount) : null,
       }),
     });
 
@@ -180,6 +180,20 @@ export default function CompleteOrderPage() {
                       完成后总金额: {((completedAmount || 0) + parseFloat(endAmount) - runningStartAmount).toLocaleString("zh-CN")} 万
                     </p>
                   )}
+                </div>
+              )}
+              {!hasRunning && !isGoalReached && (
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mt-2 space-y-2">
+                  <p className="text-sm text-yellow-800">
+                    ⚠️ 订单暂停中，请填写最后一棒结束余额（当前已完成 {completedAmount.toLocaleString("zh-CN")} 万）
+                  </p>
+                  <Input
+                    label={`结束余额 / Solde final *`}
+                    type="number"
+                    value={endAmount}
+                    onChange={(e) => setEndAmount(e.target.value)}
+                    placeholder={`>= ${completedAmount}`}
+                  />
                 </div>
               )}
 
