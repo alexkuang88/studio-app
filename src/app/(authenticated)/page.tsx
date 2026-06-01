@@ -290,6 +290,15 @@ export default function DashboardPage() {
 
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         <StatCard
+          title="今日完成订单"
+          value={stats.todayCompletedOrders}
+          unit="单"
+          icon={CheckCircle}
+          loading={loading}
+          variant="green"
+          href="/orders?status=completed&today=1"
+        />
+        <StatCard
           title="使用中设备 / En utilisation"
           value={stats.inUseMachines}
           unit="台"
