@@ -186,22 +186,18 @@ export async function POST(request: NextRequest) {
     newExpected = new Date(oldExpected.getTime() + totalPaused * 1000);
   }
 
-  // 恢复暂停 / 首次开始：更新订单状态
-  // 只有 not_started 或 paused 才改，避免覆盖其他状态
-  if ((pausedOrder?.status === "paused") || !pausedOrder || pausedOrder.status === "not_started") {
-    await supabase
-      .from("orders")
-      .update({
-        status: "in_progress",
-        latest_balance: start_amount,
-        current_employee_id: employee_id,
-        current_machine_id: machine_id,
-        ...(newExpected ? { expected_completion_at: newExpected.toISOString() } : {}),
-        paused_at: null,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", order_id);
-  }
+  // 更新订单状态
+  const orderUpdate: Record<string, unknown> = {
+    status: "in_progress",
+    latest_balance: start_amount,
+    current_employee_id: employee_id,
+    current_machine_id: machine_id,
+    paused_at: null,
+    updated_at: new Date().toISOString(),
+  };
+  if (newExpected) orderUpdate.expected_completion_at = newExpected.toISOString();
+
+  await supabase.from("orders").update(orderUpdate).eq("id", order_id);
 
   // 更新设备状态
   await supabase
