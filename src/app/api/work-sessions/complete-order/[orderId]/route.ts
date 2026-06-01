@@ -38,29 +38,6 @@ export async function POST(
     return NextResponse.json({ error: "订单已取消" }, { status: 409 });
   }
 
-  // 检查工资是否已锁定（基于当前月份）
-  const currentMonth = new Date().toISOString().slice(0, 7);
-  const { data: lockData } = await supabase
-    .from("salary_locks")
-    .select("id")
-    .eq("month", currentMonth)
-    .single();
-
-  if (lockData && !force_complete_reason) {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", userData.user.id)
-      .single();
-
-    if (profile?.role !== "admin") {
-      return NextResponse.json(
-        { error: `该月份(${currentMonth})工资已锁定，无法完成订单 / Salaire verrouillé` },
-        { status: 403 }
-      );
-    }
-  }
-
   // 检查是否有 running work_session
   const { data: runningSession } = await supabase
     .from("work_sessions")
