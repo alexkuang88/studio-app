@@ -77,12 +77,12 @@ export default function EmployeeDetailPage() {
 
   useEffect(() => {
     if (isNew) return;
-    const [year, month] = selectedMonth.split("-");
-    const monthStart = `${year}-${month}-01`;
-    const monthEnd =
-      month === "12"
-        ? `${parseInt(year) + 1}-01-01`
-        : `${year}-${String(Number(month) + 1).padStart(2, "0")}-01`;
+    const [year, monthNum] = selectedMonth.split("-");
+    // 马达加斯加时区 (UTC+3)
+    const monthStart = `${year}-${monthNum}-01T00:00:00+03:00`;
+    const nextNum = monthNum === "12" ? 1 : Number(monthNum) + 1;
+    const nextYear = monthNum === "12" ? String(parseInt(year) + 1) : year;
+    const monthEnd = `${nextYear}-${String(nextNum).padStart(2, "0")}-01T00:00:00+03:00`;
 
     supabase
       .from("work_sessions")

@@ -79,7 +79,10 @@ export function getMonthRange(month: string): { start: Date; end: Date } {
  * 获取当前月份字符串 YYYY-MM
  */
 export function getCurrentMonth(): string {
-  return format(new Date(), "yyyy-MM");
+  // 马达加斯加时间 (UTC+3)
+  const mg = new Date(new Date().getTime() + 3 * 3600000);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${mg.getUTCFullYear()}-${pad(mg.getUTCMonth() + 1)}`;
 }
 
 /**

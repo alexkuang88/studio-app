@@ -20,10 +20,11 @@ export async function GET(request: NextRequest) {
   }
 
   const [year, monthNum] = month.split("-");
-  const monthStart = `${year}-${monthNum}-01`;
-  const nextMonth = monthNum === "12"
-    ? `${parseInt(year) + 1}-01-01`
-    : `${year}-${String(Number(monthNum) + 1).padStart(2, "0")}-01`;
+  // 用马达加斯加时区 (UTC+3) 做月份边界
+  const monthStart = `${year}-${monthNum}-01T00:00:00+03:00`;
+  const nextMonthNum = monthNum === "12" ? 1 : Number(monthNum) + 1;
+  const nextYear = monthNum === "12" ? String(parseInt(year) + 1) : year;
+  const nextMonth = `${nextYear}-${String(nextMonthNum).padStart(2, "0")}-01T00:00:00+03:00`;
 
   // Get all employees
   const { data: employees } = await supabase
