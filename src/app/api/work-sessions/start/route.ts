@@ -168,23 +168,16 @@ export async function POST(request: NextRequest) {
     });
   }
 
-  // 如果订单是暂停状态，恢复时自动延长期限
-  const { data: pausedOrder } = await supabase
+  // 重新计算要求完成时间：从现在开始 + 订单金额/100 小时
+  const { data: currentOrder } = await supabase
     .from("orders")
-    .select("paused_at, total_paused_seconds, expected_completion_at, status")
+    .select("order_amount, target_amount, initial_balance")
     .eq("id", order_id)
     .single();
-
-  let newExpected = null;
-  if (pausedOrder?.status === "paused") {
-    const totalAccumulated = (pausedOrder.total_paused_seconds as number) || 0;
-    const currentPauseDuration = pausedOrder.paused_at
-      ? (Date.now() - new Date(pausedOrder.paused_at as string).getTime()) / 1000
-      : 0;
-    const totalPaused = totalAccumulated + currentPauseDuration;
-    const oldExpected = new Date(pausedOrder.expected_completion_at as string);
-    newExpected = new Date(oldExpected.getTime() + totalPaused * 1000);
-  }
+  const oa = (currentOrder?.order_amount as number) ??
+    ((currentOrder?.target_amount || 0) - (currentOrder?.initial_balance || 0));
+  const budgetHours = oa > 0 ? Math.ceil(oa / 100) : 24;
+  const newCompletionTime = new Date(Date.now() + budgetHours * 3600000).toISOString();
 
   // 更新订单状态
   const orderUpdate: Record<string, unknown> = {
@@ -193,9 +186,9 @@ export async function POST(request: NextRequest) {
     current_employee_id: employee_id,
     current_machine_id: machine_id,
     paused_at: null,
+    expected_completion_at: newCompletionTime,
     updated_at: new Date().toISOString(),
   };
-  if (newExpected) orderUpdate.expected_completion_at = newExpected.toISOString();
 
   await supabase.from("orders").update(orderUpdate).eq("id", order_id);
 
