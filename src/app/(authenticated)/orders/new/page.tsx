@@ -61,6 +61,7 @@ export default function NewOrderPage() {
   }, [order.target_amount, manualTime]);
   const [error, setError] = useState("");
   const [showConfirm, setShowConfirm] = useState(false);
+  const [snapshot, setSnapshot] = useState({ ib: 0, ta: 0, fb: 0, up: 0, rev: 0 });
 
   // 自动获取最新订单号并生成下一个
   useEffect(() => {
@@ -99,6 +100,14 @@ export default function NewOrderPage() {
       return;
     }
 
+    // 快照当前值，防止渲染瞬间 showConfirm 导致的时序问题
+    setSnapshot({
+      ib: parseFloat(order.initial_balance) || 0,
+      ta: parseFloat(order.target_amount) || 0,
+      fb: finalBalance,
+      up: parseFloat(order.unit_price) || 0,
+      rev: order.unit_price ? Math.round((parseFloat(order.target_amount) || 0) / 100 * (parseFloat(order.unit_price) || 0)) : 0,
+    });
     setShowConfirm(true);
   };
 
@@ -112,9 +121,9 @@ export default function NewOrderPage() {
         order_code: order.order_code.trim(),
         order_source: order.order_source,
         client_note: order.client_note || null,
-        initial_balance: parseFloat(order.initial_balance) || 0,
-        target_amount: finalBalance,
-        unit_price: parseFloat(order.unit_price) || 0,
+        initial_balance: snapshot.ib,
+        target_amount: snapshot.fb,
+        unit_price: snapshot.up,
         order_received_at: mgDatetimeToUTC(order.order_received_at),
         expected_completion_at: mgDatetimeToUTC(expectedTime),
         responsible_user: order.responsible_user || null,
@@ -345,27 +354,27 @@ export default function NewOrderPage() {
               <hr />
               <div className="flex justify-between">
                 <span className="text-gray-500">手机当前余额</span>
-                <span className="font-mono font-bold text-lg">{(parseFloat(order.initial_balance) || 0).toLocaleString("zh-CN")} 万</span>
+                <span className="font-mono font-bold text-lg">{snapshot.ib.toLocaleString("zh-CN")} 万</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-500">客户要打金额</span>
-                <span className="font-mono font-bold text-lg text-blue-600">{(parseFloat(order.target_amount) || 0).toLocaleString("zh-CN")} 万</span>
+                <span className="font-mono font-bold text-lg text-blue-600">{snapshot.ta.toLocaleString("zh-CN")} 万</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-500">完成余额</span>
-                <span className="font-mono font-bold text-lg text-green-600">{finalBalance.toLocaleString("zh-CN")} 万</span>
+                <span className="font-mono font-bold text-lg text-green-600">{snapshot.fb.toLocaleString("zh-CN")} 万</span>
               </div>
-              {order.unit_price && (
+              {snapshot.up > 0 && (
                 <div className="flex justify-between">
                   <span className="text-gray-500">预计收入</span>
                   <span className="font-mono font-bold text-green-600">
-                    ¥ {Math.round((parseFloat(order.target_amount) || 0) / 100 * (parseFloat(order.unit_price) || 0)).toLocaleString("zh-CN")}
+                    ¥ {snapshot.rev.toLocaleString("zh-CN")}
                   </span>
                 </div>
               )}
             </div>
 
-            {(parseFloat(order.initial_balance) || 0) > 2000 && (
+            {snapshot.ib > 2000 && (
               <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-700 text-center font-semibold">
                 ⚠️ 余额超过 2000 万，请务必核实手机余额！
               </div>
