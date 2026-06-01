@@ -37,6 +37,11 @@ export default function OrderDetailPage() {
   const [voidReason, setVoidReason] = useState("");
   const [vodingId, setVodingId] = useState<string | null>(null);
   const [voiding, setVoiding] = useState(false);
+  const [showAddAmount, setShowAddAmount] = useState(false);
+  const [addAmount, setAddAmount] = useState("");
+  const [addExpectedAt, setAddExpectedAt] = useState("");
+  const [adding, setAdding] = useState(false);
+  const [addMsg, setAddMsg] = useState("");
 
   const supabase = createClient();
 
@@ -111,11 +116,6 @@ export default function OrderDetailPage() {
   const remainingAmount = Math.max(0, orderAmountVal - completedAmount);
   const status = (order.status as string) || "not_started";
   const isCompletedOrCancelled = status === "completed" || status === "cancelled";
-  const [showAddAmount, setShowAddAmount] = useState(false);
-  const [addAmount, setAddAmount] = useState("");
-  const [addExpectedAt, setAddExpectedAt] = useState("");
-  const [adding, setAdding] = useState(false);
-  const [addMsg, setAddMsg] = useState("");
 
   const handleAddAmount = async () => {
     if (!addAmount || parseFloat(addAmount) <= 0) return;
