@@ -252,6 +252,25 @@ export default function OrderDetailPage() {
           </div>
         )}
 
+        {/* 现场备注 — 随时编辑，自动保存 */}
+        <div className="mt-4 pt-4 border-t">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-sm font-medium text-gray-700">📝 现场备注</span>
+            <span className="text-xs text-gray-400">| 随时编辑记录现场情况</span>
+          </div>
+          <textarea
+            defaultValue={(order.working_note as string) || ""}
+            rows={3}
+            placeholder="例如：老板挤号，明天上午10点可以登号接着打..."
+            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            onBlur={async (e: React.FocusEvent<HTMLTextAreaElement>) => {
+              const val = e.target.value;
+              await supabase.from("orders").update({ working_note: val }).eq("id", id as string);
+              setOrder({ ...order, working_note: val });
+            }}
+          />
+        </div>
+
         {/* 客户加单 — Admin 和 Operator 都能用 */}
         {!isCompletedOrCancelled && (
           <div className="mt-4 pt-4 border-t">
