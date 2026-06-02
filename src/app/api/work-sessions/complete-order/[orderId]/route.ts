@@ -164,12 +164,18 @@ export async function POST(
     return NextResponse.json({ error: updateError.message }, { status: 500 });
   }
 
-  // 释放设备
+  // 智能释放设备：只有该设备没有其他 running 记录时才释放
   if (order.current_machine_id) {
-    await supabase
-      .from("machines")
-      .update({ status: "available", updated_at: new Date().toISOString() })
-      .eq("id", order.current_machine_id);
+    const { count: stillRunning } = await supabase
+      .from("work_sessions")
+      .select("id", { count: "exact", head: true })
+      .eq("machine_id", order.current_machine_id)
+      .eq("status", "running");
+    if ((stillRunning || 0) === 0) {
+      await supabase.from("machines")
+        .update({ status: "available", updated_at: new Date().toISOString() })
+        .eq("id", order.current_machine_id);
+    }
   }
 
   // 判断是否按时完成
