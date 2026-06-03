@@ -258,7 +258,9 @@ export default function StartSessionPage() {
             {employees.length === 0 && (
               <p className="text-sm text-gray-400 py-2">暂无打手 / Aucun employé</p>
             )}
-            {employees.map((e) => {
+            {employees
+              .filter((e) => e.status !== "training")
+              .map((e) => {
               const isBusy = busyEmployeeIds.has(e.id) && runningForOrder[selectedOrder] !== e.id;
               const isSame = isSamePlayer && selectedEmployee === e.id;
               return (
