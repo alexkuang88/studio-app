@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
       order_code: body.order_code,
       order_source: body.order_source,
       client_note: body.client_note || null,
-      target_amount: body.target_amount,
+      target_amount: Math.round(body.target_amount),
       initial_balance: body.initial_balance || 0,
       order_amount: Math.max(0, body.target_amount - (body.initial_balance || 0)),
       unit_price: body.unit_price || 0,
