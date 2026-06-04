@@ -29,7 +29,9 @@ export default function OrdersPage() {
   const [orders, setOrders] = useState<Array<Record<string, unknown>>>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState(
+    typeof window !== "undefined" ? (new URLSearchParams(window.location.search).get("status") || "") : ""
+  );
   const [sourceFilter, setSourceFilter] = useState("");
   const [todayOnly, setTodayOnly] = useState(false);
   const [overdueOnly, setOverdueOnly] = useState(false);
@@ -39,12 +41,10 @@ export default function OrdersPage() {
 
   const supabase = createClient();
 
-  // 首次加载时读 URL 参数，后续跟随用户操作
+  // 首次加载时读 URL 参数（today/overdue/nearing），statusFilter 已通过 useState 同步初始化
   useEffect(() => {
     if (typeof window === "undefined") return;
     const params = new URLSearchParams(window.location.search);
-    const s = params.get("status");
-    if (s) setStatusFilter(s);
     if (params.get("today") === "1") setTodayOnly(true);
     if (params.get("overdue") === "1") setOverdueOnly(true);
     if (params.get("nearing") === "1") setNearingOnly(true);
