@@ -147,11 +147,11 @@ export default function OrdersPage() {
             订单管理 / Commandes
           </h1>
           <p className="text-gray-500 mt-1">
-            共 {orders.length} 个订单
+            共 {orders.length} 个订单 / {orders.length} commande(s)
             {dateFilter && <span className="ml-2 text-blue-600 font-medium">· {dateFilter}</span>}
-            {todayOnly && <span className="ml-2 text-blue-600 font-medium">· 今日</span>}
-            {overdueOnly && <span className="ml-2 text-red-600 font-medium">· 已超时</span>}
-            {nearingOnly && <span className="ml-2 text-orange-600 font-medium">· 即将超时</span>}
+            {todayOnly && <span className="ml-2 text-blue-600 font-medium">· 今日 / Aujourd'hui</span>}
+            {overdueOnly && <span className="ml-2 text-red-600 font-medium">· 已超时 / En retard</span>}
+            {nearingOnly && <span className="ml-2 text-orange-600 font-medium">· 即将超时 / Bientôt</span>}
           </p>
         </div>
         <Link href="/orders/new">
@@ -210,27 +210,27 @@ export default function OrdersPage() {
           <table className="w-full text-sm">
             <thead className="bg-gray-50 border-b">
               <tr>
-                <th className="px-3 py-3 text-left">订单号</th>
-                <th className="px-3 py-3 text-left hidden lg:table-cell max-w-[120px]">客户备注</th>
-                <th className="px-3 py-3 text-left hidden sm:table-cell">来源</th>
-                <th className="px-3 py-3 text-left hidden lg:table-cell">接单时间</th>
-                <th className="px-3 py-3 text-right">订单金额(万)</th>
-                <th className="px-3 py-3 text-right">初始余额(万)</th>
-                <th className="px-3 py-3 text-right">完成余额(万)</th>
-                <th className="px-3 py-3 text-right">最新余额(万)</th>
+                <th className="px-3 py-3 text-left">订单号 / N°</th>
+                <th className="px-3 py-3 text-left hidden lg:table-cell max-w-[120px]">客户备注 / Note client</th>
+                <th className="px-3 py-3 text-left hidden sm:table-cell">来源 / Source</th>
+                <th className="px-3 py-3 text-left hidden lg:table-cell">接单时间 / Réception</th>
+                <th className="px-3 py-3 text-right">订单金额(万) / Montant</th>
+                <th className="px-3 py-3 text-right">初始余额(万) / Solde initial</th>
+                <th className="px-3 py-3 text-right">完成余额(万) / Objectif</th>
+                <th className="px-3 py-3 text-right">最新余额(万) / Actuel</th>
                 <th className="px-3 py-3 text-right hidden md:table-cell">收入</th>
-                <th className="px-3 py-3 text-left">状态</th>
-                <th className="px-3 py-3 text-left hidden lg:table-cell">打手/设备</th>
-                <th className="px-3 py-3 text-left hidden md:table-cell">要求完成</th>
-                <th className="px-3 py-3 text-left hidden md:table-cell">完成时间</th>
-                <th className="px-3 py-3 text-left hidden lg:table-cell">剩余时间</th>
+                <th className="px-3 py-3 text-left">状态 / Statut</th>
+                <th className="px-3 py-3 text-left hidden lg:table-cell">打手/设备 / Employé/Machine</th>
+                <th className="px-3 py-3 text-left hidden md:table-cell">要求完成 / Échéance</th>
+                <th className="px-3 py-3 text-left hidden md:table-cell">完成时间 / Fini le</th>
+                <th className="px-3 py-3 text-left hidden lg:table-cell">剩余时间 / Restant</th>
               </tr>
             </thead>
             <tbody className="divide-y">
               {loading ? (
                 <tr>
                   <td colSpan={13} className="px-4 py-6 text-center text-gray-500">
-                    加载中...
+                    加载中... / Chargement...
                   </td>
                 </tr>
               ) : orders.length === 0 ? (
@@ -325,18 +325,18 @@ export default function OrdersPage() {
                       </td>
                       <td className="px-3 py-3 hidden lg:table-cell">
                         {status === "completed" ? (
-                          <span className="text-green-600 text-xs">已完成</span>
+                          <span className="text-green-600 text-xs">已完成 / Terminé</span>
                         ) : status === "paused" ? (
-                          <span className="text-orange-600 text-xs font-medium">⏸ 暂停中</span>
+                          <span className="text-orange-600 text-xs font-medium">⏸ 暂停中 / En pause</span>
                         ) : status === "cancelled" ? (
-                          <span className="text-gray-400 text-xs">已取消</span>
+                          <span className="text-gray-400 text-xs">已取消 / Annulé</span>
                         ) : remainingHrs > 0 ? (
                           <span className={`text-xs ${remainingHrs <= 2 ? "text-orange-600 font-bold" : "text-gray-500"}`}>
                             {formatHoursText(remainingHrs)}
                           </span>
                         ) : (
                           <span className="text-red-600 text-xs font-bold">
-                            已超时 {formatHoursText(Math.abs(remainingHrs))}
+                            已超时 / En retard {formatHoursText(Math.abs(remainingHrs))}
                           </span>
                         )}
                       </td>
