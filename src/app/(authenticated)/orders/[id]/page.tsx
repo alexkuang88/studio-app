@@ -232,7 +232,7 @@ export default function OrderDetailPage() {
           <InfoBlock label="初始余额 / Solde initial" value={formatAmount((order.initial_balance as number) || 0)} />
           <InfoBlock label="订单金额 / Montant" value={formatAmount(orderAmountVal)} />
           {(order.unit_price as number || 0) > 0 && (
-            <InfoBlock label="客单价 / Prix unitaire" value={`¥ ${(order.unit_price as number || 0).toLocaleString("zh-CN")} / 100万`} />
+            <InfoBlock label="客单价" value={`¥ ${(order.unit_price as number || 0).toLocaleString("zh-CN")} / 100万`} />
           )}
           <InfoBlock label="订单收入" value={(order.order_revenue as number || 0) > 0 ? `¥ ${(order.order_revenue as number || 0).toLocaleString("zh-CN")}` : "—"} />
           <InfoBlock label="手机目标余额 / Solde cible" value={formatAmount((order.target_amount as number) || 0)} />
@@ -337,7 +337,7 @@ export default function OrderDetailPage() {
           <div className="mt-4 pt-4 border-t">
             <div className="flex items-end gap-3">
               <Input
-                label="客单价（¥/100万） / Prix unitaire"
+                label="客单价（¥/100万）"
                 type="number"
                 value={String((order.unit_price as number) || "")}
                 onChange={async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -458,13 +458,13 @@ export default function OrderDetailPage() {
               <tr>
                 <th className="px-3 py-2 text-left">员工 / Employé</th>
                 <th className="px-3 py-2 text-left hidden md:table-cell">设备 / Machine</th>
-                <th className="px-3 py-2 text-left">开始时间 / Début</th>
-                <th className="px-3 py-2 text-left">结束时间 / Fin</th>
-                <th className="px-3 py-2 text-right">初始游戏币 / Départ</th>
-                <th className="px-3 py-2 text-right">结束游戏币 / Fin</th>
+                <th className="px-3 py-2 text-left">开始时间 / Heure début</th>
+                <th className="px-3 py-2 text-left">结束时间 / Heure fin</th>
+                <th className="px-3 py-2 text-right">初始游戏币 / Solde début</th>
+                <th className="px-3 py-2 text-right">结束游戏币 / Solde fin</th>
                 <th className="px-3 py-2 text-right font-medium">成绩(万) / Résultat</th>
                 <th className="px-3 py-2 text-right hidden sm:table-cell">工时 / Heures</th>
-                <th className="px-3 py-2 text-right hidden sm:table-cell">游戏币/每小时 / /h</th>
+                <th className="px-3 py-2 text-right hidden sm:table-cell">游戏币/每小时 / Pièces/h</th>
                 <th className="px-3 py-2 text-center">状态 / Statut</th>
               </tr>
             </thead>
