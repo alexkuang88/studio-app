@@ -117,13 +117,13 @@ export default function OrderDetailPage() {
 
   if (loading) {
     return (
-      <div className="text-center py-12 text-gray-500">加载中...</div>
+      <div className="text-center py-12 text-gray-500">加载中... / Chargement...</div>
     );
   }
 
   if (!order) {
     return (
-      <div className="text-center py-12 text-gray-500">订单不存在</div>
+      <div className="text-center py-12 text-gray-500">订单不存在 / Commande introuvable</div>
     );
   }
 
@@ -229,23 +229,23 @@ export default function OrderDetailPage() {
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <InfoBlock label="订单来源" value={ORDER_SOURCE_LABELS[order.order_source as keyof typeof ORDER_SOURCE_LABELS] || (order.order_source as string)} />
-          <InfoBlock label="初始余额" value={formatAmount((order.initial_balance as number) || 0)} />
-          <InfoBlock label="订单金额" value={formatAmount(orderAmountVal)} />
+          <InfoBlock label="初始余额 / Solde initial" value={formatAmount((order.initial_balance as number) || 0)} />
+          <InfoBlock label="订单金额 / Montant" value={formatAmount(orderAmountVal)} />
           {(order.unit_price as number || 0) > 0 && (
-            <InfoBlock label="客单价" value={`¥ ${(order.unit_price as number || 0).toLocaleString("zh-CN")} / 100万`} />
+            <InfoBlock label="客单价 / Prix unitaire" value={`¥ ${(order.unit_price as number || 0).toLocaleString("zh-CN")} / 100万`} />
           )}
           <InfoBlock label="订单收入" value={(order.order_revenue as number || 0) > 0 ? `¥ ${(order.order_revenue as number || 0).toLocaleString("zh-CN")}` : "—"} />
-          <InfoBlock label="手机完成余额" value={formatAmount((order.target_amount as number) || 0)} />
+          <InfoBlock label="手机目标余额 / Solde cible" value={formatAmount((order.target_amount as number) || 0)} />
           {((order.total_client_amount as number) || 0) !== 0 && (
-            <InfoBlock label="客户盈亏" value={((order.total_client_amount as number) || 0) > 0 ? `+${formatAmount((order.total_client_amount as number) || 0)}` : formatAmount((order.total_client_amount as number) || 0)} />
+            <InfoBlock label="客户盈亏 / Solde client" value={((order.total_client_amount as number) || 0) > 0 ? `+${formatAmount((order.total_client_amount as number) || 0)}` : formatAmount((order.total_client_amount as number) || 0)} />
           )}
-          <InfoBlock label="已完成" value={formatAmount(completedAmount)} highlight={completedAmount >= orderAmountVal} />
-          <InfoBlock label="还需打" value={formatAmount(remainingAmount)} highlight={remainingAmount <= 0} />
-          <InfoBlock label="下单时间" value={formatDateTime(order.order_received_at as string)} />
-          <InfoBlock label="要求完成" value={formatDateTime(order.expected_completion_at as string)} />
-          <InfoBlock label="实际完成" value={formatDateTime(order.actual_completed_at as string)} />
+          <InfoBlock label="已完成 / Complété" value={formatAmount(completedAmount)} highlight={completedAmount >= orderAmountVal} />
+          <InfoBlock label="未完成 / Restant" value={formatAmount(remainingAmount)} highlight={remainingAmount <= 0} />
+          <InfoBlock label="下单时间 / Réception" value={formatDateTime(order.order_received_at as string)} />
+          <InfoBlock label="要求完成时间 / Échéance" value={formatDateTime(order.expected_completion_at as string)} />
+          <InfoBlock label="实际完成时间 / Fini le" value={formatDateTime(order.actual_completed_at as string)} />
           <InfoBlock
-            label="完成状态"
+            label="完成状态 / Statut"
             value={
               status === "completed"
                 ? isOnTime
@@ -256,37 +256,37 @@ export default function OrderDetailPage() {
           />
           {(order.current_employee_id as string) && (
             <>
-              <InfoBlock label="当前打手" value={emp ? `${emp.employee_code} ${emp.chinese_name}` : "—"} />
-              <InfoBlock label="当前设备" value={machine ? `${machine.machine_code} ${machine.machine_name}` : "—"} />
+              <InfoBlock label="当前打手 / Employé" value={emp ? `${emp.employee_code} ${emp.chinese_name}` : "—"} />
+              <InfoBlock label="当前设备 / Machine" value={machine ? `${machine.machine_code} ${machine.machine_name}` : "—"} />
             </>
           )}
         </div>
 
         {((order.client_note as string) || (order.note as string) || (order.responsible_user as string)) && (
           <div className="mt-4 pt-4 border-t text-sm text-gray-500 space-y-1">
-            {(order.responsible_user as string) && <p>负责人: {order.responsible_user as string}</p>}
-            {(order.client_note as string) && <p>客户备注: {order.client_note as string}</p>}
-            {(order.note as string) && <p>备注: {order.note as string}</p>}
+            {(order.responsible_user as string) && <p>负责人 / Responsable: {order.responsible_user as string}</p>}
+            {(order.client_note as string) && <p>客户备注 / Note client: {order.client_note as string}</p>}
+            {(order.note as string) && <p>备注 / Note: {order.note as string}</p>}
           </div>
         )}
 
         {/* 现场备注 — 随时编辑 */}
         <div className="mt-4 pt-4 border-t">
           <div className="flex items-center gap-2 mb-2">
-            <span className="text-sm font-medium text-gray-700">📝 现场备注</span>
-            <span className="text-xs text-gray-400">| 随时编辑记录现场情况</span>
-            {noteSaved && <span className="text-xs text-green-600 font-medium">✓ 已保存</span>}
+            <span className="text-sm font-medium text-gray-700">📝 现场备注 / Note terrain</span>
+            <span className="text-xs text-gray-400">| 随时编辑记录 / Éditable à tout moment</span>
+            {noteSaved && <span className="text-xs text-green-600 font-medium">✓ 已保存 / Sauvegardé</span>}
           </div>
           <textarea
             value={workingNote}
             onChange={(e) => { setWorkingNote(e.target.value); setNoteSaved(false); }}
             rows={3}
-            placeholder="例如：老板挤号，明天上午10点可以登号接着打..."
+            placeholder="例如：老板挤号，明天上午10点可以登号接着打... / Ex: patron a repris le compte, dispo demain 10h..."
             className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <div className="flex justify-end mt-2">
             <Button size="sm" variant="primary" onClick={handleSaveNote} loading={savingNote}>
-              保存备注
+              保存备注 / Enregistrer
             </Button>
           </div>
         </div>
@@ -304,27 +304,27 @@ export default function OrderDetailPage() {
                 <h4 className="font-semibold text-green-800">客户加单 / Ajouter du montant</h4>
                 <div className="flex items-end gap-3">
                   <div className="flex-1">
-                    <label className="block text-xs text-gray-600 mb-1">追加金额（万）</label>
+                    <label className="block text-xs text-gray-600 mb-1">追加金额（万） / Montant (10k)</label>
                     <input type="number" value={addAmount} onChange={e => setAddAmount(e.target.value)}
-                      placeholder="例如 500" className="w-full rounded border border-gray-300 px-3 py-2 text-sm" />
+                      placeholder="例如 500 / Ex: 500" className="w-full rounded border border-gray-300 px-3 py-2 text-sm" />
                   </div>
                   <div className="flex-1">
-                    <label className="block text-xs text-gray-600 mb-1">新要求完成时间（可选）</label>
+                    <label className="block text-xs text-gray-600 mb-1">新要求完成时间（可选） / Échéance (optionnel)</label>
                     <input type="datetime-local" value={addExpectedAt} onChange={e => setAddExpectedAt(e.target.value)}
                       className="w-full rounded border border-gray-300 px-3 py-2 text-sm" />
                   </div>
                 </div>
                 {addAmount && (
                   <div className="text-sm text-green-700">
-                    新订单金额: {(orderAmountVal + (parseFloat(addAmount)||0)).toLocaleString("zh-CN")} 万
+                    新订单金额 / Nv montant: {(orderAmountVal + (parseFloat(addAmount)||0)).toLocaleString("zh-CN")} 万
                     {(order.unit_price as number || 0) > 0 && (
-                      ` | 新收入: ¥ ${Math.round((orderAmountVal + (parseFloat(addAmount)||0)) / 100 * ((order.unit_price as number)||0)).toLocaleString("zh-CN")}`
+                      ` | 新收入 / Nv revenu: ¥ ${Math.round((orderAmountVal + (parseFloat(addAmount)||0)) / 100 * ((order.unit_price as number)||0)).toLocaleString("zh-CN")}`
                     )}
                   </div>
                 )}
                 <div className="flex gap-2">
-                  <Button size="sm" onClick={handleAddAmount} loading={adding} disabled={!addAmount}>确认加单</Button>
-                  <Button size="sm" variant="ghost" onClick={() => { setShowAddAmount(false); setAddAmount(""); }}>取消</Button>
+                  <Button size="sm" onClick={handleAddAmount} loading={adding} disabled={!addAmount}>确认加单 / Confirmer</Button>
+                  <Button size="sm" variant="ghost" onClick={() => { setShowAddAmount(false); setAddAmount(""); }}>取消 / Annuler</Button>
                 </div>
                 {addMsg && <p className={`text-xs ${addMsg.startsWith("✅") ? "text-green-600" : "text-red-600"}`}>{addMsg}</p>}
               </div>
@@ -337,7 +337,7 @@ export default function OrderDetailPage() {
           <div className="mt-4 pt-4 border-t">
             <div className="flex items-end gap-3">
               <Input
-                label="客单价（¥/100万）"
+                label="客单价（¥/100万） / Prix unitaire"
                 type="number"
                 value={String((order.unit_price as number) || "")}
                 onChange={async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -374,10 +374,10 @@ export default function OrderDetailPage() {
             <table className="w-full text-sm">
               <thead className="bg-orange-50/50 border-b">
                 <tr>
-                  <th className="px-4 py-2 text-left">时间</th>
-                  <th className="px-4 py-2 text-left">原因</th>
-                  <th className="px-4 py-2 text-right">余额变化</th>
-                  <th className="px-4 py-2 text-right">订单目标调整</th>
+                  <th className="px-4 py-2 text-left">时间 / Heure</th>
+                  <th className="px-4 py-2 text-left">原因 / Raison</th>
+                  <th className="px-4 py-2 text-right">余额变化 / Variation</th>
+                  <th className="px-4 py-2 text-right">订单目标调整 / Ajustement</th>
                 </tr>
               </thead>
               <tbody className="divide-y">
@@ -412,11 +412,11 @@ export default function OrderDetailPage() {
             <table className="w-full text-sm">
               <thead className="bg-gray-50 border-b">
                 <tr>
-                  <th className="px-4 py-2 text-left">员工</th>
-                  <th className="px-4 py-2 text-right">完成金额(万)</th>
-                  <th className="px-4 py-2 text-right">总工时(h)</th>
-                  <th className="px-4 py-2 text-right">平均效率(万/h)</th>
-                  <th className="px-4 py-2 text-right">工资估算</th>
+                  <th className="px-4 py-2 text-left">员工 / Employé</th>
+                  <th className="px-4 py-2 text-right">完成金额(万) / Montant</th>
+                  <th className="px-4 py-2 text-right">总工时(h) / Heures</th>
+                  <th className="px-4 py-2 text-right">平均效率(万/h) / Efficacité</th>
+                  <th className="px-4 py-2 text-right">工资估算 / Salaire est.</th>
                 </tr>
               </thead>
               <tbody className="divide-y">
@@ -456,16 +456,16 @@ export default function OrderDetailPage() {
           <table className="w-full text-sm">
             <thead className="bg-gray-50 border-b">
               <tr>
-                <th className="px-3 py-2 text-left">员工</th>
-                <th className="px-3 py-2 text-left hidden md:table-cell">设备</th>
-                <th className="px-3 py-2 text-left">开始</th>
-                <th className="px-3 py-2 text-left">结束</th>
-                <th className="px-3 py-2 text-right">开始余额</th>
-                <th className="px-3 py-2 text-right">结束余额</th>
-                <th className="px-3 py-2 text-right font-medium">成绩(万)</th>
-                <th className="px-3 py-2 text-right hidden sm:table-cell">工时</th>
-                <th className="px-3 py-2 text-right hidden sm:table-cell">效率</th>
-                <th className="px-3 py-2 text-center">状态</th>
+                <th className="px-3 py-2 text-left">员工 / Employé</th>
+                <th className="px-3 py-2 text-left hidden md:table-cell">设备 / Machine</th>
+                <th className="px-3 py-2 text-left">开始时间 / Début</th>
+                <th className="px-3 py-2 text-left">结束时间 / Fin</th>
+                <th className="px-3 py-2 text-right">初始游戏币 / Départ</th>
+                <th className="px-3 py-2 text-right">结束游戏币 / Fin</th>
+                <th className="px-3 py-2 text-right font-medium">成绩(万) / Résultat</th>
+                <th className="px-3 py-2 text-right hidden sm:table-cell">工时 / Heures</th>
+                <th className="px-3 py-2 text-right hidden sm:table-cell">游戏币/每小时 / /h</th>
+                <th className="px-3 py-2 text-center">状态 / Statut</th>
               </tr>
             </thead>
             <tbody className="divide-y">
@@ -522,11 +522,11 @@ export default function OrderDetailPage() {
                       </td>
                       <td className="px-3 py-2 text-center">
                         {wsStatus === "running" ? (
-                          <Badge variant="blue">进行中</Badge>
+                          <Badge variant="blue">进行中 / En cours</Badge>
                         ) : wsStatus === "void" ? (
-                          <Badge variant="red">已作废</Badge>
+                          <Badge variant="red">已作废 / Annulé</Badge>
                         ) : (
-                          <Badge variant="green">已完成</Badge>
+                          <Badge variant="green">已完成 / Terminé</Badge>
                         )}
                       </td>
                     </tr>
@@ -564,7 +564,7 @@ export default function OrderDetailPage() {
                 setVoidReason("");
               }}
             >
-              取消
+              取消 / Annuler
             </Button>
           </div>
         </div>
