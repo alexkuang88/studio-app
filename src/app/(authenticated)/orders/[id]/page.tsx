@@ -24,6 +24,11 @@ import {
   formatSalary,
   calcSalary,
 } from "@/lib/utils/calculations";
+
+/** Display amount with French unit explanation (display only, not for calc) */
+function formatAmt(amount: number): string {
+  return `${formatAmount(amount)} (10k)`;
+}
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
@@ -229,18 +234,18 @@ export default function OrderDetailPage() {
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <InfoBlock label="订单来源" value={ORDER_SOURCE_LABELS[order.order_source as keyof typeof ORDER_SOURCE_LABELS] || (order.order_source as string)} />
-          <InfoBlock label="初始余额 / Solde initial" value={formatAmount((order.initial_balance as number) || 0)} />
-          <InfoBlock label="订单金额 / Montant" value={formatAmount(orderAmountVal)} />
+          <InfoBlock label="初始余额 / Solde initial" value={formatAmt((order.initial_balance as number) || 0)} />
+          <InfoBlock label="订单金额 / Montant" value={formatAmt(orderAmountVal)} />
           {(order.unit_price as number || 0) > 0 && (
             <InfoBlock label="客单价" value={`¥ ${(order.unit_price as number || 0).toLocaleString("zh-CN")} / 100万`} />
           )}
           <InfoBlock label="订单收入" value={(order.order_revenue as number || 0) > 0 ? `¥ ${(order.order_revenue as number || 0).toLocaleString("zh-CN")}` : "—"} />
-          <InfoBlock label="手机目标余额 / Solde cible" value={formatAmount((order.target_amount as number) || 0)} />
+          <InfoBlock label="手机目标余额 / Solde cible" value={formatAmt((order.target_amount as number) || 0)} />
           {((order.total_client_amount as number) || 0) !== 0 && (
-            <InfoBlock label="客户盈亏 / Solde client" value={((order.total_client_amount as number) || 0) > 0 ? `+${formatAmount((order.total_client_amount as number) || 0)}` : formatAmount((order.total_client_amount as number) || 0)} />
+            <InfoBlock label="客户盈亏 / Solde client" value={((order.total_client_amount as number) || 0) > 0 ? `+${formatAmt((order.total_client_amount as number) || 0)}` : formatAmt((order.total_client_amount as number) || 0)} />
           )}
-          <InfoBlock label="已完成 / Complété" value={formatAmount(completedAmount)} highlight={completedAmount >= orderAmountVal} />
-          <InfoBlock label="未完成 / Restant" value={formatAmount(remainingAmount)} highlight={remainingAmount <= 0} />
+          <InfoBlock label="已完成 / Complété" value={formatAmt(completedAmount)} highlight={completedAmount >= orderAmountVal} />
+          <InfoBlock label="未完成 / Restant" value={formatAmt(remainingAmount)} highlight={remainingAmount <= 0} />
           <InfoBlock label="下单时间 / Réception" value={formatDateTime(order.order_received_at as string)} />
           <InfoBlock label="要求完成时间 / Échéance" value={formatDateTime(order.expected_completion_at as string)} />
           <InfoBlock label="实际完成时间 / Fini le" value={formatDateTime(order.actual_completed_at as string)} />
