@@ -35,6 +35,16 @@ export async function POST(request: NextRequest) {
   };
   if (new_expected_at) {
     updates.expected_completion_at = new Date(new_expected_at + "+03:00").toISOString();
+  } else {
+    // 没填新时间：按金额比例自动延长
+    const originalAmount = (order.order_amount as number) || ((order.target_amount as number) || 0) - ((order.initial_balance as number) || 0);
+    if (originalAmount > 0 && order.order_received_at && order.expected_completion_at) {
+      const ratio = extra / originalAmount;
+      const originalDuration = new Date(order.expected_completion_at as string).getTime() - new Date(order.order_received_at as string).getTime();
+      const extension = Math.round(originalDuration * ratio);
+      const expectedAt = new Date(order.expected_completion_at as string);
+      updates.expected_completion_at = new Date(expectedAt.getTime() + extension).toISOString();
+    }
   }
 
   const { data: updated, error } = await supabase
