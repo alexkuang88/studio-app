@@ -221,15 +221,15 @@ export default function EmployeeDetailPage() {
               <table className="w-full text-sm">
                 <thead className="bg-gray-50 border-b">
                   <tr>
-                    <th className="px-3 py-2 text-left">日期</th>
-                    <th className="px-3 py-2 text-left">订单号</th>
+                    <th className="px-3 py-2 text-left">日期 / Date</th>
+                    <th className="px-3 py-2 text-left">订单号 / N°</th>
                     <th className="px-3 py-2 text-left hidden sm:table-cell">来源</th>
-                    <th className="px-3 py-2 text-left hidden md:table-cell">设备</th>
-                    <th className="px-3 py-2 text-left">开始</th>
-                    <th className="px-3 py-2 text-left">结束</th>
-                    <th className="px-3 py-2 text-right">成绩(万)</th>
-                    <th className="px-3 py-2 text-right hidden sm:table-cell">工时</th>
-                    <th className="px-3 py-2 text-right hidden sm:table-cell">效率</th>
+                    <th className="px-3 py-2 text-left hidden md:table-cell">设备 / Machine</th>
+                    <th className="px-3 py-2 text-left">开始时间 / Début</th>
+                    <th className="px-3 py-2 text-left">结束时间 / Fin</th>
+                    <th className="px-3 py-2 text-right">成绩(万) / Résultat</th>
+                    <th className="px-3 py-2 text-right hidden sm:table-cell">工时 / Heures</th>
+                    <th className="px-3 py-2 text-right hidden sm:table-cell">游戏币/每小时 / Pièces/h</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y">

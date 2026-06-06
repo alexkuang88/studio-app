@@ -73,7 +73,7 @@ export default function SalaryPage() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">工资统计 / Statistiques salaire</h1>
           <p className="text-sm text-gray-500 mt-1">
-            工资单价: {salaryRate} Ar/100万{" "}
+            工资单价: {salaryRate} Ar/100万 / Taux{" "}
             {isLocked && <Badge variant="red">已锁定 / Verrouillé</Badge>}
           </p>
         </div>
@@ -85,12 +85,12 @@ export default function SalaryPage() {
           />
           {isAdmin && !isLocked && (
             <Button variant="outline" onClick={() => { setLockNote(""); handleLock(); }} loading={acting}>
-              <Lock size={16} /> 锁定
+              <Lock size={16} /> 锁定 / Verrouiller
             </Button>
           )}
           {isAdmin && isLocked && (
             <Button variant="danger" onClick={() => setShowUnlock(true)}>
-              <Unlock size={16} /> 解锁
+              <Unlock size={16} /> 解锁 / Déverrouiller
             </Button>
           )}
         </div>
@@ -100,14 +100,14 @@ export default function SalaryPage() {
       {isAdmin && !isLocked && lockNote !== undefined && (
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 flex gap-3 items-end">
           <Input
-            label="锁定备注（可选）"
+	            label="锁定备注（可选） / Note (optionnel)"
             value={lockNote}
             onChange={(e) => setLockNote(e.target.value)}
-            placeholder="备注..."
+            placeholder="备注... / Note..."
             className="flex-1"
           />
-          <Button variant="primary" onClick={handleLock} loading={acting}>确认锁定</Button>
-          <Button variant="ghost" onClick={() => setLockNote(undefined as unknown as string)}>取消</Button>
+          <Button variant="primary" onClick={handleLock} loading={acting}>确认锁定 / Confirmer</Button>
+          <Button variant="ghost" onClick={() => setLockNote(undefined as unknown as string)}>取消 / Annuler</Button>
         </div>
       )}
 
@@ -119,14 +119,14 @@ export default function SalaryPage() {
             label="解锁原因 / Raison *"
             value={unlockNote}
             onChange={(e) => setUnlockNote(e.target.value)}
-            placeholder="必须填写解锁原因..."
+            placeholder="必须填写解锁原因... / Raison obligatoire..."
           />
           <div className="flex gap-2">
             <Button variant="danger" onClick={handleUnlock} loading={acting} disabled={!unlockNote.trim()}>
-              确认解锁
+              确认解锁 / Confirmer
             </Button>
             <Button variant="ghost" onClick={() => { setShowUnlock(false); setUnlockNote(""); }}>
-              取消
+              取消 / Annuler
             </Button>
           </div>
         </div>
@@ -139,18 +139,18 @@ export default function SalaryPage() {
             <thead className="bg-gray-50 border-b">
               <tr>
                 <th className="px-3 py-3 text-left w-10">#</th>
-                <th className="px-3 py-3 text-left">员工</th>
-                <th className="px-3 py-3 text-right">总成绩(万)</th>
-                <th className="px-3 py-3 text-right hidden sm:table-cell">总工时(h)</th>
-                <th className="px-3 py-3 text-right hidden md:table-cell">平均效率</th>
-                <th className="px-3 py-3 text-right font-medium">应发工资</th>
+                <th className="px-3 py-3 text-left">员工 / Employé</th>
+                <th className="px-3 py-3 text-right">总成绩(万) / Total</th>
+                <th className="px-3 py-3 text-right hidden sm:table-cell">总工时(h) / Heures</th>
+                <th className="px-3 py-3 text-right hidden md:table-cell">平均效率 / Efficacité</th>
+                <th className="px-3 py-3 text-right font-medium">应发工资 / Salaire</th>
               </tr>
             </thead>
             <tbody className="divide-y">
               {loading ? (
-                <tr><td colSpan={6} className="px-4 py-6 text-center text-gray-500">加载中...</td></tr>
+                <tr><td colSpan={6} className="px-4 py-6 text-center text-gray-500">加载中... / Chargement...</td></tr>
               ) : employees.length === 0 ? (
-                <tr><td colSpan={6} className="px-4 py-6 text-center text-gray-500">该月暂无数据</td></tr>
+                <tr><td colSpan={6} className="px-4 py-6 text-center text-gray-500">该月暂无数据 / Aucune donnée ce mois</td></tr>
               ) : (
                 employees.map((row) => {
                   const emp = row.employee as Record<string, unknown>;
