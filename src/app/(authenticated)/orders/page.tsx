@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
+import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
@@ -26,29 +27,20 @@ import { Plus, Search } from "lucide-react";
 import Link from "next/link";
 
 export default function OrdersPage() {
+  const searchParams = useSearchParams();
+
   const [orders, setOrders] = useState<Array<Record<string, unknown>>>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState(
-    typeof window !== "undefined" ? (new URLSearchParams(window.location.search).get("status") || "") : ""
-  );
+  const [statusFilter, setStatusFilter] = useState(searchParams.get("status") || "");
   const [sourceFilter, setSourceFilter] = useState("");
-  const [todayOnly, setTodayOnly] = useState(false);
-  const [overdueOnly, setOverdueOnly] = useState(false);
-  const [nearingOnly, setNearingOnly] = useState(false);
+  const [todayOnly, setTodayOnly] = useState(searchParams.get("today") === "1");
+  const [overdueOnly, setOverdueOnly] = useState(searchParams.get("overdue") === "1");
+  const [nearingOnly, setNearingOnly] = useState(searchParams.get("nearing") === "1");
   const [label, setLabel] = useState("");
   const [dateFilter, setDateFilter] = useState(""); // 按日期筛选
 
   const supabase = createClient();
-
-  // 首次加载时读 URL 参数（today/overdue/nearing），statusFilter 已通过 useState 同步初始化
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const params = new URLSearchParams(window.location.search);
-    if (params.get("today") === "1") setTodayOnly(true);
-    if (params.get("overdue") === "1") setOverdueOnly(true);
-    if (params.get("nearing") === "1") setNearingOnly(true);
-  }, []);
 
   const fetchOrders = async () => {
     setLoading(true);
