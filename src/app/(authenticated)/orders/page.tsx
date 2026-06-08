@@ -94,7 +94,7 @@ export default function OrdersPage() {
     if (overdueOnly) {
       list = list.filter((o: any) => {
         const s = o.status;
-        if (s === "completed" || s === "cancelled" || s === "paused") return false;
+        if (s === "completed" || s === "cancelled" || s === "paused" || s === "not_started") return false;
         if (!o.expected_completion_at) return false;
         return new Date(o.expected_completion_at) < now;
       });
@@ -104,7 +104,7 @@ export default function OrdersPage() {
       const warningTime = new Date(now.getTime() + 2 * 60 * 60 * 1000);
       list = list.filter((o: any) => {
         const s = o.status;
-        if (s === "completed" || s === "cancelled" || s === "paused") return false;
+        if (s === "completed" || s === "cancelled" || s === "paused" || s === "not_started") return false;
         if (!o.expected_completion_at) return false;
         const exp = new Date(o.expected_completion_at);
         return exp >= now && exp <= warningTime;
@@ -250,6 +250,7 @@ export default function OrdersPage() {
                   const isOverdue =
                     status !== "completed" &&
                     status !== "cancelled" &&
+                    status !== "not_started" &&
                     isOrderOverdue(order.expected_completion_at as string);
                   const remaining = calcRemainingAmount(
                     targetAmount,

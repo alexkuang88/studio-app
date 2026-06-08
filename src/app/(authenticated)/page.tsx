@@ -93,7 +93,7 @@ export default function DashboardPage() {
       const { count: overdue } = await supabase
         .from("orders")
         .select("*", { count: "exact", head: true })
-        .in("status", ["in_progress", "not_started", "ready_to_complete"])
+        .in("status", ["in_progress", "ready_to_complete"])
         .lt("expected_completion_at", now);
 
       // 即将超时订单 (2小时内)
@@ -101,7 +101,7 @@ export default function DashboardPage() {
       const { count: nearingDue } = await supabase
         .from("orders")
         .select("*", { count: "exact", head: true })
-        .in("status", ["in_progress", "not_started", "ready_to_complete"])
+        .in("status", ["in_progress", "ready_to_complete"])
         .gte("expected_completion_at", now)
         .lte("expected_completion_at", warningTime);
 
