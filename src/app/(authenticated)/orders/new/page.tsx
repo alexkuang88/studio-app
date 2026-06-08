@@ -101,12 +101,13 @@ export default function NewOrderPage() {
     }
 
     // 快照当前值，防止渲染瞬间 showConfirm 导致的时序问题
+    // 全部 Math.round 防浮点偏差
     setSnapshot({
-      ib: parseFloat(order.initial_balance) || 0,
-      ta: parseFloat(order.target_amount) || 0,
-      fb: finalBalance,
-      up: parseFloat(order.unit_price) || 0,
-      rev: order.unit_price ? Math.round((parseFloat(order.target_amount) || 0) / 100 * (parseFloat(order.unit_price) || 0)) : 0,
+      ib: Math.round(parseFloat(order.initial_balance) || 0),
+      ta: Math.round(parseFloat(order.target_amount) || 0),
+      fb: Math.round(finalBalance),
+      up: Math.round(parseFloat(order.unit_price) || 0),
+      rev: order.unit_price ? Math.round(Math.round(parseFloat(order.target_amount) || 0) / 100 * Math.round(parseFloat(order.unit_price) || 0)) : 0,
     });
     setShowConfirm(true);
   };
@@ -199,6 +200,7 @@ export default function NewOrderPage() {
             <Input
               label="手机当前余额 / Solde actuel"
               type="number"
+              step="any"
               value={order.initial_balance}
               onChange={(e) => setOrder({ ...order, initial_balance: e.target.value })}
               placeholder="0"
@@ -206,6 +208,7 @@ export default function NewOrderPage() {
             <Input
               label="客户要打金额 / Montant à produire *"
               type="number"
+              step="any"
               value={order.target_amount}
               onChange={(e) => setOrder({ ...order, target_amount: e.target.value })}
               placeholder="5000"
@@ -250,6 +253,7 @@ export default function NewOrderPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">客单价（元/100万）</label>
                 <input
                   type="number"
+                  step="any"
                   value={order.unit_price}
                   onChange={(e) => setOrder({ ...order, unit_price: e.target.value })}
                   placeholder="例如: 20"
