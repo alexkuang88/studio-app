@@ -106,8 +106,8 @@ export default function NewOrderPage() {
       ib: Math.round(parseFloat(order.initial_balance) || 0),
       ta: Math.round(parseFloat(order.target_amount) || 0),
       fb: Math.round(finalBalance),
-      up: Math.round(parseFloat(order.unit_price) || 0),
-      rev: order.unit_price ? Math.round(Math.round(parseFloat(order.target_amount) || 0) / 100 * Math.round(parseFloat(order.unit_price) || 0)) : 0,
+      up: parseFloat(order.unit_price) || 0,
+      rev: order.unit_price ? Math.round((parseFloat(order.target_amount) || 0) / 100 * (parseFloat(order.unit_price) || 0)) : 0,
     });
     setShowConfirm(true);
   };
