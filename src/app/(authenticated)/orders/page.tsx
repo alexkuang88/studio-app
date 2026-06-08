@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -27,6 +27,14 @@ import { Plus, Search } from "lucide-react";
 import Link from "next/link";
 
 export default function OrdersPage() {
+  return (
+    <Suspense fallback={<div className="text-center py-12 text-gray-500">加载中... / Chargement...</div>}>
+      <OrdersContent />
+    </Suspense>
+  );
+}
+
+function OrdersContent() {
   const searchParams = useSearchParams();
 
   const [orders, setOrders] = useState<Array<Record<string, unknown>>>([]);
