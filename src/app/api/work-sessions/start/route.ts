@@ -168,15 +168,16 @@ export async function POST(request: NextRequest) {
     });
   }
 
-  // 重新计算要求完成时间：从现在开始 + 订单金额/100 小时
+  // 重新计算要求完成时间：从现在开始 + 剩余金额/100 小时
   const { data: currentOrder } = await supabase
     .from("orders")
-    .select("order_amount, target_amount, initial_balance")
+    .select("order_amount, target_amount, initial_balance, completed_amount")
     .eq("id", order_id)
     .single();
   const oa = (currentOrder?.order_amount as number) ??
     ((currentOrder?.target_amount || 0) - (currentOrder?.initial_balance || 0));
-  const budgetHours = oa > 0 ? Math.ceil(oa / 100) : 24;
+  const remaining = oa - ((currentOrder?.completed_amount as number) || 0);
+  const budgetHours = remaining > 0 ? Math.ceil(remaining / 100) : 1;
   const newCompletionTime = new Date(Date.now() + budgetHours * 3600000).toISOString();
 
   // 更新订单状态
