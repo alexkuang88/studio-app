@@ -168,17 +168,36 @@ export async function POST(request: NextRequest) {
     });
   }
 
-  // 重新计算要求完成时间：从现在开始 + 剩余金额/100 小时
+  // 重新计算要求完成时间：基于实际工作时间（排除暂停）
+  // 总预算 = order_amount / 100 小时，从第一次打单开始计时，暂停不计入
   const { data: currentOrder } = await supabase
     .from("orders")
-    .select("order_amount, target_amount, initial_balance, completed_amount")
+    .select("order_amount, target_amount, initial_balance, total_paused_seconds")
     .eq("id", order_id)
     .single();
   const oa = (currentOrder?.order_amount as number) ??
     ((currentOrder?.target_amount || 0) - (currentOrder?.initial_balance || 0));
-  const remaining = oa - ((currentOrder?.completed_amount as number) || 0);
-  const budgetHours = remaining > 0 ? Math.ceil(remaining / 100) : 1;
-  const newCompletionTime = new Date(Date.now() + budgetHours * 3600000).toISOString();
+  const totalBudgetSec = (oa > 0 ? Math.ceil(oa / 100) : 24) * 3600;
+
+  // 查找该订单最早的开始打单时间
+  const { data: firstSession } = await supabase
+    .from("work_sessions")
+    .select("start_time")
+    .eq("order_id", order_id)
+    .order("start_time", { ascending: true })
+    .limit(1)
+    .single();
+
+  let remainingSec: number;
+  if (firstSession) {
+    const firstStart = new Date(firstSession.start_time).getTime();
+    const pausedMs = ((currentOrder?.total_paused_seconds as number) || 0) * 1000;
+    const elapsedSec = (Date.now() - firstStart - pausedMs) / 1000;
+    remainingSec = Math.max(0, totalBudgetSec - elapsedSec);
+  } else {
+    remainingSec = totalBudgetSec;
+  }
+  const newCompletionTime = new Date(Date.now() + remainingSec * 1000).toISOString();
 
   // 更新订单状态
   const orderUpdate: Record<string, unknown> = {
