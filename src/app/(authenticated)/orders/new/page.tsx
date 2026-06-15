@@ -29,7 +29,7 @@ function defaultExpectedTime(): string {
 function calcExpectedTime(orderAmount: number): string {
   const pad = (n: number) => String(n).padStart(2, "0");
   const mg = new Date(Date.now() + 3 * 3600000);
-  const hours = orderAmount > 0 ? Math.ceil(orderAmount / 100) : 24;
+  const hours = orderAmount > 0 ? Math.ceil(orderAmount / 125) : 24;
   mg.setUTCHours(mg.getUTCHours() + hours);
   return `${mg.getUTCFullYear()}-${pad(mg.getUTCMonth()+1)}-${pad(mg.getUTCDate())}T${pad(mg.getUTCHours())}:${pad(mg.getUTCMinutes())}`;
 }
@@ -290,7 +290,7 @@ export default function NewOrderPage() {
             }
           />
           <Input
-            label={`要求完成时间 / Heure limite * (≈${Math.ceil((parseFloat(order.target_amount) || 0) / 100)}小时)`}
+            label={`要求完成时间 / Heure limite * (≈${Math.ceil((parseFloat(order.target_amount) || 0) / 125)}小时)`}
             type="datetime-local"
             value={expectedTime}
             onChange={(e) => {

@@ -169,7 +169,7 @@ export async function POST(request: NextRequest) {
   }
 
   // 重新计算要求完成时间：基于实际工作时间（排除暂停）
-  // 总预算 = order_amount / 100 小时，从第一次打单开始计时，暂停不计入
+  // 总预算 = order_amount / 125 小时（125万/h标准），从第一次打单开始计时，暂停不计入
   const { data: currentOrder } = await supabase
     .from("orders")
     .select("order_amount, target_amount, initial_balance, total_paused_seconds")
@@ -177,7 +177,7 @@ export async function POST(request: NextRequest) {
     .single();
   const oa = (currentOrder?.order_amount as number) ??
     ((currentOrder?.target_amount || 0) - (currentOrder?.initial_balance || 0));
-  const totalBudgetSec = (oa > 0 ? Math.ceil(oa / 100) : 24) * 3600;
+  const totalBudgetSec = (oa > 0 ? Math.ceil(oa / 125) : 24) * 3600;
 
   // 查找该订单最早的开始打单时间
   const { data: firstSession } = await supabase
