@@ -125,14 +125,18 @@ export async function POST(
 
   const actualCompletedAt = new Date().toISOString();
 
-  // 如果还有未结束的 running session（且未在前一步处理），关闭它
+  // 如果还有未结束的 running session（且未在前一步处理），强制关闭它
   if (runningSession && end_amount == null) {
+    // 没有提供end_amount时，把running分段作废而不是留成未计算状态
     await supabase
       .from("work_sessions")
       .update({
         end_time: actualCompletedAt,
-        status: "completed",
-        note: "订单完成时自动关闭（未填结束余额）",
+        result_amount: 0,
+        work_hours: 0,
+        efficiency: 0,
+        status: "void",
+        void_reason: "订单完成时自动关闭（未填结束余额）",
         updated_at: new Date().toISOString(),
       })
       .eq("id", runningSession.id);
