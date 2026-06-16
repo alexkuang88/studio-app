@@ -156,7 +156,6 @@ export async function POST(
       completed_amount: completedAmount,
       latest_balance: completedAmount,
       actual_completed_at: actualCompletedAt,
-      current_machine_id: null,
       completion_note: note || null,
       force_complete_reason: force_complete_reason || null,
       updated_at: new Date().toISOString(),
