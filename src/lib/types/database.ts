@@ -21,7 +21,12 @@ export type OrderSource =
   | "Old client"
   | "Agent order"
   | "Referral"
-  | "Other";
+  | "Other"
+  | "agent1"
+  | "agent2"
+  | "agent3"
+  | "agent4"
+  | "agent5";
 
 export type OrderStatus =
   | "not_started"
@@ -235,12 +240,17 @@ export interface LockSalaryInput {
 // ---------- 常量 ----------
 
 export const ORDER_SOURCE_LABELS: Record<OrderSource, string> = {
-  Douyin: "抖音客户 / Douyin",
-  WeChat: "微信客户 / WeChat",
-  "Old client": "老客户 / Old client",
-  "Agent order": "中介订单 / Agent order",
-  Referral: "朋友介绍 / Referral",
-  Other: "其他 / Other",
+  agent1: "中介客户1",
+  agent2: "中介客户2",
+  agent3: "中介客户3",
+  agent4: "中介客户4",
+  agent5: "中介客户5",
+  Douyin: "抖音客户",
+  WeChat: "微信客户",
+  "Old client": "老客户",
+  Referral: "朋友订单",
+  "Agent order": "中介订单(旧)",
+  Other: "其他",
 };
 
 export const EMPLOYEE_STATUS_LABELS: Record<EmployeeStatus, string> = {
