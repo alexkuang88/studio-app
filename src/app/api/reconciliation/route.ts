@@ -17,9 +17,9 @@ export async function GET(request: NextRequest) {
   let query = supabase
     .from("orders")
     .select("*")
-    .in("status", ["completed", "cancelled"])
+    .in("status", ["completed"])
     .order("actual_completed_at", { ascending: false })
-    .limit(300);
+    .limit(1000);
 
   if (source) query = query.eq("order_source", source);
   if (from) query = query.gte("actual_completed_at", `${from}T00:00:00+03:00`);
