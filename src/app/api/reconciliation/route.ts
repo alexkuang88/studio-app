@@ -56,24 +56,25 @@ export async function POST(request: NextRequest) {
   if (!userData.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = await request.json();
-  const { order_ids, note } = body; // order_ids: string[]
+  const { order_ids, note, settled_amounts } = body; // order_ids: string[], settled_amounts?: Record<string,string>
 
   if (!order_ids || !Array.isArray(order_ids) || order_ids.length === 0) {
     return NextResponse.json({ error: "请选择至少一个订单" }, { status: 400 });
   }
 
   const settledAt = new Date().toISOString();
-  const updates = order_ids.map((id: string) =>
-    supabase
+  const updates = order_ids.map((id: string) => {
+    const amt = settled_amounts?.[id] ? parseFloat(settled_amounts[id]) : null;
+    return supabase
       .from("orders")
       .update({
         is_settled: true,
-        settled_amount: body.settled_amounts?.[id] || undefined,
+        settled_amount: amt != null && !isNaN(amt) ? amt : null,
         settled_at: settledAt,
         settled_note: note || null,
       })
-      .eq("id", id)
-  );
+      .eq("id", id);
+  });
 
   await Promise.all(updates);
 

@@ -41,6 +41,7 @@ export default function ReconciliationPage() {
   const [settleNote, setSettleNote] = useState("");
   const [settling, setSettling] = useState(false);
   const [msg, setMsg] = useState("");
+  const [settledAmounts, setSettledAmounts] = useState<Record<string, string>>({});
 
   // 本周未结算统计
   const weekStart = (() => {
@@ -88,12 +89,13 @@ export default function ReconciliationPage() {
     const res = await fetch("/api/reconciliation", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ order_ids: Array.from(selected), note: settleNote || null }),
+      body: JSON.stringify({ order_ids: Array.from(selected), note: settleNote || null, settled_amounts: settledAmounts }),
     });
     if (res.ok) {
       setMsg(`✅ 已结算 ${selected.size} 个订单`);
       setSelected(new Set());
       setSettleNote("");
+      setSettledAmounts({});
       fetchData();
     } else {
       const r = await res.json();
@@ -215,6 +217,7 @@ export default function ReconciliationPage() {
                 <th className="px-3 py-2 text-left hidden sm:table-cell">来源</th>
                 <th className="px-3 py-2 text-right">金额(万)</th>
                 <th className="px-3 py-2 text-right hidden md:table-cell">系统收入</th>
+                <th className="px-3 py-2 text-right">实收金额</th>
                 <th className="px-3 py-2 text-left hidden lg:table-cell">完成时间</th>
                 <th className="px-3 py-2 text-center">结算状态</th>
               </tr>
@@ -223,7 +226,7 @@ export default function ReconciliationPage() {
               {loading ? (
                 <tr><td colSpan={7} className="px-4 py-8 text-center text-gray-500">加载中... / Chargement...</td></tr>
               ) : orders.length === 0 ? (
-                <tr><td colSpan={7} className="px-4 py-8 text-center text-gray-500">暂无数据 / Aucune donnée</td></tr>
+                <tr><td colSpan={8} className="px-4 py-8 text-center text-gray-500">暂无数据 / Aucune donnée</td></tr>
               ) : (
                 orders.map((o) => (
                   <tr key={o.id} className={`hover:bg-gray-50 ${o.is_settled ? "bg-gray-50/50" : "bg-red-50/30"}`}>
@@ -240,6 +243,24 @@ export default function ReconciliationPage() {
                     <td className="px-3 py-2 text-right font-mono text-xs">{(o.order_amount || 0).toLocaleString("zh-CN")}</td>
                     <td className="px-3 py-2 text-right font-mono text-xs text-green-600 hidden md:table-cell">
                       ¥ {(o.order_revenue || 0).toLocaleString("zh-CN")}
+                    </td>
+                    <td className="px-3 py-2 text-right">
+                      {o.is_settled ? (
+                        <span className="font-mono text-xs font-medium">
+                          ¥ {(o.settled_amount || o.order_revenue || 0).toLocaleString("zh-CN")}
+                        </span>
+                      ) : (
+                        <input type="number"
+                          value={settledAmounts[o.id] || ""}
+                          onChange={e => {
+                            const next = { ...settledAmounts };
+                            if (e.target.value) next[o.id] = e.target.value; else delete next[o.id];
+                            setSettledAmounts(next);
+                          }}
+                          onClick={() => toggleSelect(o.id)}
+                          placeholder={String(o.order_revenue || 0)}
+                          className="w-[80px] rounded border border-gray-300 px-1 py-0.5 text-xs text-right font-mono" />
+                      )}
                     </td>
                     <td className="px-3 py-2 text-xs text-gray-500 hidden lg:table-cell">
                       {formatDateTime(o.actual_completed_at || "")}
