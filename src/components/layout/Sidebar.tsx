@@ -20,6 +20,7 @@ import {
   UserCheck,
   CheckCircle,
   BarChart3,
+  ClipboardCheck,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -88,6 +89,12 @@ const menuItems = [
     href: "/revenue",
     label: "订单收入",
     icon: BarChart3,
+    roles: ["admin", "operator"],
+  },
+  {
+    href: "/reconciliation",
+    label: "对账核实 / Rapprochement",
+    icon: ClipboardCheck,
     roles: ["admin", "operator"],
   },
   {

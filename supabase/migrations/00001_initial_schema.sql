@@ -84,7 +84,12 @@ CREATE TABLE IF NOT EXISTS orders (
   paused_at TIMESTAMPTZ,
   total_paused_seconds DECIMAL(12,2) DEFAULT 0,
   latest_balance DECIMAL(12,2),
-  working_note TEXT
+  working_note TEXT,
+  -- 对账结算
+  is_settled BOOLEAN DEFAULT false,
+  settled_amount DECIMAL(12,2),
+  settled_at TIMESTAMPTZ,
+  settled_note TEXT
 );
 
 -- ============================================================
