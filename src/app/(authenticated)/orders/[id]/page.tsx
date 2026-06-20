@@ -50,6 +50,9 @@ export default function OrderDetailPage() {
   const [workingNote, setWorkingNote] = useState("");
   const [savingNote, setSavingNote] = useState(false);
   const [noteSaved, setNoteSaved] = useState(false);
+  const [adjustAmt, setAdjustAmt] = useState("");
+  const [adjustingAmt, setAdjustingAmt] = useState(false);
+  const [adjustAmtMsg, setAdjustAmtMsg] = useState("");
 
   const supabase = createClient();
 
@@ -365,6 +368,42 @@ export default function OrderDetailPage() {
                 </div>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* Admin: 调整订单金额（游戏币） */}
+        {isAdmin && (
+          <div className="mt-4 pt-4 border-t">
+            <div className="flex items-end gap-3">
+              <Input
+                label="调整订单金额（万）"
+                type="number"
+                value={adjustAmt}
+                onChange={(e) => setAdjustAmt(e.target.value)}
+                placeholder={String(orderAmountVal)}
+              />
+              <Button size="sm" variant="primary"
+                onClick={async () => {
+                  const newAmt = parseFloat(adjustAmt);
+                  if (!newAmt || newAmt <= 0) return;
+                  setAdjustingAmt(true);
+                  const newRev = Math.round(newAmt / 100 * ((order.unit_price as number) || 0));
+                  await supabase.from("orders").update({
+                    order_amount: newAmt,
+                    order_revenue: newRev,
+                  }).eq("id", id as string);
+                  setAdjustAmtMsg(`✅ 已调整为 ${newAmt.toLocaleString("zh-CN")} 万`);
+                  setAdjustingAmt(false);
+                  setAdjustAmt("");
+                  setOrder({ ...order, order_amount: newAmt, order_revenue: newRev } as any);
+                }}
+                loading={adjustingAmt}
+                disabled={!adjustAmt}
+              >确认调整 / Confirmer</Button>
+              <span className="pb-2 text-gray-400 text-xs">收入将自动重算</span>
+            </div>
+            {adjustAmtMsg && <p className="text-xs text-green-600 mt-1">{adjustAmtMsg}</p>}
+            <p className="text-xs text-gray-400 mt-1">老板跑路/未完成全额时使用，修改后收入按新金额计算</p>
           </div>
         )}
       </div>
