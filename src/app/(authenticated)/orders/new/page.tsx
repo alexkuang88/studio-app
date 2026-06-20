@@ -52,6 +52,7 @@ export default function NewOrderPage() {
   });
   const [saving, setSaving] = useState(false);
   const [manualTime, setManualTime] = useState(false);
+  const [isPrepaid, setIsPrepaid] = useState(false);
 
   // 自动计算结单时间（100万/小时），用户手动修改后不再自动覆盖
   const expectedTime = useMemo(() => {
@@ -129,6 +130,7 @@ export default function NewOrderPage() {
         expected_completion_at: mgDatetimeToUTC(expectedTime),
         responsible_user: order.responsible_user || null,
         note: order.note || null,
+        is_prepaid: isPrepaid,
       }),
     });
 
@@ -321,6 +323,15 @@ export default function NewOrderPage() {
             className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="订单备注信息..."
           />
+        </div>
+
+        <div className="flex items-center gap-3 py-2">
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" checked={isPrepaid} onChange={(e) => setIsPrepaid(e.target.checked)}
+              className="w-4 h-4 rounded border-gray-300 text-green-600 focus:ring-green-500" />
+            <span className="text-sm text-gray-700 font-medium">客户已付款 / Déjà payé</span>
+          </label>
+          <span className="text-xs text-gray-400">勾选后订单自动标记为已收款</span>
         </div>
 
         <div className="flex gap-3 pt-2">

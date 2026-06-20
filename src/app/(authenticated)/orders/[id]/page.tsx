@@ -278,6 +278,35 @@ export default function OrderDetailPage() {
           </div>
         )}
 
+        {/* 标记已收款 */}
+        {isCompletedOrCancelled && !(order.is_settled as boolean) && (
+          <div className="mt-4 pt-4 border-t">
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-gray-500">收款状态：</span>
+              <Badge variant="red">未收款</Badge>
+              <Button variant="outline" size="sm"
+                onClick={async () => {
+                  await supabase.from("orders").update({
+                    is_settled: true,
+                    settled_at: new Date().toISOString(),
+                    settled_note: "详情页手动标记",
+                  }).eq("id", id as string);
+                  setOrder({ ...order, is_settled: true } as any);
+                }}>
+                ✅ 标记已收款
+              </Button>
+            </div>
+          </div>
+        )}
+        {(order.is_settled as boolean) && (
+          <div className="mt-4 pt-4 border-t">
+            <div className="flex items-center gap-2 text-sm text-green-600">
+              <span>✅ 已收款</span>
+              <span className="text-xs text-gray-400">{order.settled_at ? new Date(order.settled_at as string).toLocaleString("zh-CN") : ""}</span>
+            </div>
+          </div>
+        )}
+
         {/* 现场备注 — 随时编辑 */}
         <div className="mt-4 pt-4 border-t">
           <div className="flex items-center gap-2 mb-2">

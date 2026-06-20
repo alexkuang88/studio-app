@@ -68,23 +68,31 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  const now = new Date().toISOString();
+  const insertData: Record<string, unknown> = {
+    order_code: body.order_code,
+    order_source: body.order_source,
+    client_note: body.client_note || null,
+    target_amount: Math.round(body.target_amount),
+    initial_balance: body.initial_balance || 0,
+    order_amount: Math.round(Math.max(0, body.target_amount - (body.initial_balance || 0))),
+    unit_price: body.unit_price || 0,
+    order_revenue: Math.round(Math.max(0, body.target_amount - (body.initial_balance || 0)) / 100 * (body.unit_price || 0)),
+    order_received_at: body.order_received_at,
+    expected_completion_at: body.expected_completion_at,
+    responsible_user: body.responsible_user || null,
+    note: body.note || null,
+    created_by: userData.user.id,
+  };
+  if (body.is_prepaid) {
+    insertData.is_settled = true;
+    insertData.settled_at = now;
+    insertData.settled_note = "新建时标记已收款";
+  }
+
   const { data, error } = await supabase
     .from("orders")
-    .insert({
-      order_code: body.order_code,
-      order_source: body.order_source,
-      client_note: body.client_note || null,
-      target_amount: Math.round(body.target_amount),
-      initial_balance: body.initial_balance || 0,
-      order_amount: Math.round(Math.max(0, body.target_amount - (body.initial_balance || 0))),
-      unit_price: body.unit_price || 0,
-      order_revenue: Math.round(Math.max(0, body.target_amount - (body.initial_balance || 0)) / 100 * (body.unit_price || 0)),
-      order_received_at: body.order_received_at,
-      expected_completion_at: body.expected_completion_at,
-      responsible_user: body.responsible_user || null,
-      note: body.note || null,
-      created_by: userData.user.id,
-    })
+    .insert(insertData)
     .select()
     .single();
 

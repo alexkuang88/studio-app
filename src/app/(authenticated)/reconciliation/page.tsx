@@ -42,6 +42,15 @@ export default function ReconciliationPage() {
   const [settling, setSettling] = useState(false);
   const [msg, setMsg] = useState("");
 
+  // 本周未结算统计
+  const weekStart = (() => {
+    const d = new Date();
+    d.setDate(d.getDate() - d.getDay() + 1); // Monday
+    return d.toISOString().slice(0, 10);
+  })();
+  const thisWeekUnsettled = orders.filter(o => !o.is_settled && (o.actual_completed_at || "").slice(0, 10) >= weekStart);
+  const thisWeekUnsettledAmt = thisWeekUnsettled.reduce((s, o) => s + (o.order_revenue || 0), 0);
+
   const fetchData = useCallback(async () => {
     setLoading(true);
     const params = new URLSearchParams();
@@ -91,6 +100,15 @@ export default function ReconciliationPage() {
       setMsg("❌ " + (r.error || "失败"));
     }
     setSettling(false);
+  };
+
+  const quickSettle = async (orderId: string) => {
+    const res = await fetch("/api/reconciliation", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ order_ids: [orderId], note: "快速标记已收款" }),
+    });
+    if (res.ok) fetchData();
   };
 
   const sourceOptions = [
@@ -145,6 +163,25 @@ export default function ReconciliationPage() {
           <div className="text-xs text-gray-400 mt-1">待对账金额</div>
         </div>
       </div>
+
+      {/* 本周提醒 */}
+      {thisWeekUnsettled.length > 0 && (
+        <div className="bg-yellow-50 border-2 border-yellow-400 rounded-xl p-4 flex items-center justify-between">
+          <div>
+            <span className="text-lg">⚠️</span>
+            <span className="ml-2 font-semibold text-yellow-800">
+              本周有 {thisWeekUnsettled.length} 单未结算 / {thisWeekUnsettled.length} commande(s) non réglée(s) cette semaine
+            </span>
+            <span className="ml-3 text-xl font-bold text-red-600">¥ {thisWeekUnsettledAmt.toLocaleString("zh-CN")}</span>
+          </div>
+          <Button variant="outline" size="sm" onClick={() => {
+            setSelected(new Set(thisWeekUnsettled.map(o => o.id)));
+            window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+          }}>
+            一键选中本周未结算
+          </Button>
+        </div>
+      )}
 
       {/* Batch settle bar */}
       {selected.size > 0 && (
@@ -211,7 +248,11 @@ export default function ReconciliationPage() {
                       {o.is_settled ? (
                         <Badge variant="green">已结算</Badge>
                       ) : (
-                        <Badge variant="red">未结算</Badge>
+                        <div className="flex items-center gap-1">
+                          <Badge variant="red">未结算</Badge>
+                          <button onClick={() => quickSettle(o.id)}
+                            className="text-xs text-blue-500 hover:text-blue-700 underline whitespace-nowrap">已收款</button>
+                        </div>
                       )}
                     </td>
                   </tr>
