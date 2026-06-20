@@ -75,8 +75,8 @@ export async function GET(request: NextRequest) {
     const s = employeeStats[emp.id];
     const totalResult = s?.totalResult || 0;
     const totalHours = s?.totalHours || 0;
-    const avgEfficiency = s?.efficiencies && s.efficiencies.length > 0
-      ? Math.round((s.efficiencies.reduce((a, b) => a + b, 0) / s.efficiencies.length) * 100) / 100
+    const avgEfficiency = totalHours > 0
+      ? Math.round((totalResult / totalHours) * 100) / 100
       : 0;
     const salary = Math.round((totalResult / 100) * salaryRate);
 
