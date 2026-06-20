@@ -53,6 +53,8 @@ export default function OrderDetailPage() {
   const [adjustAmt, setAdjustAmt] = useState("");
   const [adjustingAmt, setAdjustingAmt] = useState(false);
   const [adjustAmtMsg, setAdjustAmtMsg] = useState("");
+  const [settleAmount, setSettleAmount] = useState("");
+  const [settleSaving, setSettleSaving] = useState(false);
 
   const supabase = createClient();
 
@@ -281,27 +283,43 @@ export default function OrderDetailPage() {
         {/* 标记已收款 */}
         {isCompletedOrCancelled && !(order.is_settled as boolean) && (
           <div className="mt-4 pt-4 border-t">
-            <div className="flex items-center gap-3">
-              <span className="text-sm text-gray-500">收款状态：</span>
-              <Badge variant="red">未收款</Badge>
-              <Button variant="outline" size="sm"
+            <div className="flex items-end gap-3">
+              <div className="flex-1">
+                <label className="block text-xs text-gray-600 mb-1">结算金额 / Montant réglé</label>
+                <input type="number"
+                  value={settleAmount}
+                  onChange={e => setSettleAmount(e.target.value)}
+                  placeholder={(order.order_revenue as number) > 0 ? String(order.order_revenue) : "输入实际收款金额"}
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900" />
+              </div>
+              <Button variant="primary" size="sm"
+                loading={settleSaving}
                 onClick={async () => {
+                  setSettleSaving(true);
+                  const amt = parseFloat(settleAmount);
                   await supabase.from("orders").update({
                     is_settled: true,
+                    settled_amount: !isNaN(amt) && amt > 0 ? amt : (order.order_revenue as number) || null,
                     settled_at: new Date().toISOString(),
                     settled_note: "详情页手动标记",
                   }).eq("id", id as string);
-                  setOrder({ ...order, is_settled: true } as any);
+                  setOrder({ ...order, is_settled: true, settled_amount: !isNaN(amt) && amt > 0 ? amt : (order.order_revenue as number) } as any);
+                  setSettleSaving(false);
+                  setSettleAmount("");
                 }}>
                 ✅ 标记已收款
               </Button>
             </div>
+            <p className="text-xs text-gray-400 mt-1">输入实际到手金额，留空则默认使用系统收入</p>
           </div>
         )}
         {(order.is_settled as boolean) && (
           <div className="mt-4 pt-4 border-t">
             <div className="flex items-center gap-2 text-sm text-green-600">
               <span>✅ 已收款</span>
+              {(order.settled_amount as number) > 0 && (
+                <span className="font-bold">¥ {(order.settled_amount as number || order.order_revenue as number || 0).toLocaleString("zh-CN")}</span>
+              )}
               <span className="text-xs text-gray-400">{order.settled_at ? new Date(order.settled_at as string).toLocaleString("zh-CN") : ""}</span>
             </div>
           </div>
