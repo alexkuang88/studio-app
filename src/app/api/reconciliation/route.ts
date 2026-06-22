@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
     .from("orders")
     .select("*")
     .in("status", ["completed"])
-    .order("actual_completed_at", { ascending: false })
+    .order("order_code", { ascending: true })
     .limit(1000);
 
   if (source) query = query.eq("order_source", source);
