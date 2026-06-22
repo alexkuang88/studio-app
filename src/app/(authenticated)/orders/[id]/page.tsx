@@ -435,14 +435,16 @@ export default function OrderDetailPage() {
                   if (!newAmt || newAmt <= 0) return;
                   setAdjustingAmt(true);
                   const newRev = Math.round(newAmt / 100 * ((order.unit_price as number) || 0));
+                  const newTarget = ((order.initial_balance as number) || 0) + newAmt;
                   await supabase.from("orders").update({
                     order_amount: newAmt,
                     order_revenue: newRev,
+                    target_amount: newTarget,
                   }).eq("id", id as string);
                   setAdjustAmtMsg(`✅ 已调整为 ${newAmt.toLocaleString("zh-CN")} 万`);
                   setAdjustingAmt(false);
                   setAdjustAmt("");
-                  setOrder({ ...order, order_amount: newAmt, order_revenue: newRev } as any);
+                  setOrder({ ...order, order_amount: newAmt, order_revenue: newRev, target_amount: newTarget } as any);
                 }}
                 loading={adjustingAmt}
                 disabled={!adjustAmt}
