@@ -43,10 +43,10 @@ export default function ReconciliationPage() {
   const [msg, setMsg] = useState("");
   const [settledAmounts, setSettledAmounts] = useState<Record<string, string>>({});
 
-  // 本周未结算统计
+  // 过去7天未结算统计（用MG时间 UTC+3）
   const weekStart = (() => {
     const d = new Date();
-    d.setDate(d.getDate() - d.getDay() + 1); // Monday
+    d.setDate(d.getDate() - 7);
     return d.toISOString().slice(0, 10);
   })();
   const thisWeekUnsettled = orders.filter(o => !o.is_settled && (o.actual_completed_at || "").slice(0, 10) >= weekStart);
@@ -172,7 +172,7 @@ export default function ReconciliationPage() {
           <div>
             <span className="text-lg">⚠️</span>
             <span className="ml-2 font-semibold text-yellow-800">
-              本周有 {thisWeekUnsettled.length} 单未结算 / {thisWeekUnsettled.length} commande(s) non réglée(s) cette semaine
+              过去 7 天有 {thisWeekUnsettled.length} 单未结算 / {thisWeekUnsettled.length} non réglée(s) ces 7 jours
             </span>
             <span className="ml-3 text-xl font-bold text-red-600">¥ {thisWeekUnsettledAmt.toLocaleString("zh-CN")}</span>
           </div>
@@ -180,7 +180,7 @@ export default function ReconciliationPage() {
             setSelected(new Set(thisWeekUnsettled.map(o => o.id)));
             window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
           }}>
-            一键选中本周未结算
+            一键选中近 7 天未结算
           </Button>
         </div>
       )}
