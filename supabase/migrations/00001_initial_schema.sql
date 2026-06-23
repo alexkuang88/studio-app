@@ -56,7 +56,7 @@ CREATE TABLE IF NOT EXISTS machines (
 CREATE TABLE IF NOT EXISTS orders (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   order_code TEXT NOT NULL UNIQUE,
-  order_source TEXT NOT NULL CHECK (order_source IN ('Douyin','WeChat','Old client','Agent order','Referral','Other','agent1','agent2','agent3','agent4','agent5')),
+  order_source TEXT NOT NULL CHECK (order_source IN ('Douyin','WeChat','Old client','Agent order','Referral','Other','agent1','agent2','agent3','agent4','agent5','xianyu')),
   client_note TEXT,
   target_amount DECIMAL(12,2) NOT NULL,
   completed_amount DECIMAL(12,2) DEFAULT 0,

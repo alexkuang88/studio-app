@@ -26,7 +26,8 @@ export type OrderSource =
   | "agent2"
   | "agent3"
   | "agent4"
-  | "agent5";
+  | "agent5"
+  | "xianyu";
 
 export type OrderStatus =
   | "not_started"
@@ -249,6 +250,7 @@ export const ORDER_SOURCE_LABELS: Record<OrderSource, string> = {
   WeChat: "微信客户",
   "Old client": "老客户",
   Referral: "朋友订单",
+  xianyu: "咸鱼",
   "Agent order": "中介订单(旧)",
   Other: "其他",
 };
