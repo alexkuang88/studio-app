@@ -50,9 +50,6 @@ export default function OrderDetailPage() {
   const [workingNote, setWorkingNote] = useState("");
   const [savingNote, setSavingNote] = useState(false);
   const [noteSaved, setNoteSaved] = useState(false);
-  const [adjustAmt, setAdjustAmt] = useState("");
-  const [adjustingAmt, setAdjustingAmt] = useState(false);
-  const [adjustAmtMsg, setAdjustAmtMsg] = useState("");
   const [settleAmount, setSettleAmount] = useState("");
   const [settleSaving, setSettleSaving] = useState(false);
 
@@ -387,72 +384,50 @@ export default function OrderDetailPage() {
           </div>
         )}
 
-        {/* Admin: 设置客单价 */}
+        {/* Admin: 编辑订单数据 */}
         {isAdmin && (
           <div className="mt-4 pt-4 border-t">
-            <div className="flex items-end gap-3">
-              <Input
-                label="客单价（¥/100万）"
-                type="number"
-                value={String((order.unit_price as number) || "")}
-                onChange={async (e: React.ChangeEvent<HTMLInputElement>) => {
-                  const price = parseFloat(e.target.value) || 0;
-                  setOrder({ ...order, unit_price: price, order_revenue: Math.round(orderAmountVal / 100 * price) } as any);
-                  await supabase.from("orders").update({
-                    unit_price: price,
-                    order_revenue: Math.round(orderAmountVal / 100 * price),
-                  }).eq("id", id as string);
-                }}
-                placeholder="20"
-              />
-              <span className="pb-2 text-gray-500 text-sm">× {orderAmountVal.toLocaleString("zh-CN")}万/100</span>
-              <div className="pb-0">
-                <div className="text-xs text-gray-500 mb-1">= 收入</div>
-                <div className="text-lg font-bold text-green-600">
-                  ¥ {(order.unit_price as number || 0) > 0
-                    ? Math.round(orderAmountVal / 100 * (order.unit_price as number || 0)).toLocaleString("zh-CN")
-                    : "—"}
+            <h3 className="font-semibold text-gray-800 mb-3">编辑订单数据 / Modifier la commande</h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+              {[
+                { k: "order_amount", label: "订单金额(万)" },
+                { k: "target_amount", label: "目标余额(万)" },
+                { k: "completed_amount", label: "已完成(万)" },
+                { k: "initial_balance", label: "初始余额(万)" },
+                { k: "unit_price", label: "客单价" },
+                { k: "order_revenue", label: "收入" },
+                { k: "latest_balance", label: "最新余额(万)" },
+                { k: "total_client_amount", label: "客户盈亏(万)" },
+              ].map(({ k, label }) => (
+                <div key={k}>
+                  <label className="block text-xs text-gray-500 mb-0.5">{label}</label>
+                  <input
+                    type="number"
+                    step="any"
+                    defaultValue={String((order as any)[k] ?? "")}
+                    onBlur={async (e) => {
+                      const val = e.target.value;
+                      if (val === "" || val === String((order as any)[k] ?? "")) return;
+                      const num = parseFloat(val);
+                      if (isNaN(num)) { e.target.value = String((order as any)[k] ?? ""); return; }
+                      const updates: any = { [k]: num };
+                      if (k === "unit_price") {
+                        updates.order_revenue = Math.round(orderAmountVal / 100 * num);
+                      }
+                      if (k === "order_amount") {
+                        updates.order_revenue = Math.round(num / 100 * ((order.unit_price as number) || 0));
+                        updates.target_amount = ((order.initial_balance as number) || 0) + num;
+                      }
+                      await supabase.from("orders").update(updates).eq("id", id as string);
+                      e.target.value = String(num);
+                      setOrder({ ...order, ...updates } as any);
+                      if (k === "order_amount") window.location.reload();
+                    }}
+                    className="w-full rounded border border-gray-300 px-2 py-1 text-xs font-mono"
+                  />
                 </div>
-              </div>
+              ))}
             </div>
-          </div>
-        )}
-
-        {/* Admin: 调整订单金额（游戏币） */}
-        {isAdmin && (
-          <div className="mt-4 pt-4 border-t">
-            <div className="flex items-end gap-3">
-              <Input
-                label="调整订单金额（万）"
-                type="number"
-                value={adjustAmt}
-                onChange={(e) => setAdjustAmt(e.target.value)}
-                placeholder={String(orderAmountVal)}
-              />
-              <Button size="sm" variant="primary"
-                onClick={async () => {
-                  const newAmt = parseFloat(adjustAmt);
-                  if (!newAmt || newAmt <= 0) return;
-                  setAdjustingAmt(true);
-                  const newRev = Math.round(newAmt / 100 * ((order.unit_price as number) || 0));
-                  const newTarget = ((order.initial_balance as number) || 0) + newAmt;
-                  await supabase.from("orders").update({
-                    order_amount: newAmt,
-                    order_revenue: newRev,
-                    target_amount: newTarget,
-                  }).eq("id", id as string);
-                  setAdjustAmtMsg(`✅ 已调整为 ${newAmt.toLocaleString("zh-CN")} 万`);
-                  setAdjustingAmt(false);
-                  setAdjustAmt("");
-                  setOrder({ ...order, order_amount: newAmt, order_revenue: newRev, target_amount: newTarget } as any);
-                }}
-                loading={adjustingAmt}
-                disabled={!adjustAmt}
-              >确认调整 / Confirmer</Button>
-              <span className="pb-2 text-gray-400 text-xs">收入将自动重算</span>
-            </div>
-            {adjustAmtMsg && <p className="text-xs text-green-600 mt-1">{adjustAmtMsg}</p>}
-            <p className="text-xs text-gray-400 mt-1">老板跑路/未完成全额时使用，修改后收入按新金额计算</p>
           </div>
         )}
       </div>
