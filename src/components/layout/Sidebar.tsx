@@ -21,6 +21,7 @@ import {
   CheckCircle,
   BarChart3,
   ClipboardCheck,
+  Wrench,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -96,6 +97,12 @@ const menuItems = [
     label: "对账核实 / Rapprochement",
     icon: ClipboardCheck,
     roles: ["admin", "operator"],
+  },
+  {
+    href: "/admin-tools",
+    label: "管理工具 / Admin Tools",
+    icon: Wrench,
+    roles: ["admin"],
   },
   {
     href: "/audit-logs",
