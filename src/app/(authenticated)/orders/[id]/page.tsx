@@ -34,7 +34,8 @@ import Link from "next/link";
 
 export default function OrderDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const { isAdmin } = useAuth();
+  const { isAdmin, profile } = useAuth();
+  const canEdit = isAdmin || profile?.role === "operator";
   const [order, setOrder] = useState<Record<string, unknown> | null>(null);
   const [sessions, setSessions] = useState<Array<Record<string, unknown>>>([]);
   const [loading, setLoading] = useState(true);
@@ -384,8 +385,8 @@ export default function OrderDetailPage() {
           </div>
         )}
 
-        {/* Admin: 编辑订单数据 */}
-        {isAdmin && (
+        {/* 编辑订单数据 — Admin & Operator */}
+        {canEdit && (
           <div className="mt-4 pt-4 border-t">
             <h3 className="font-semibold text-gray-800 mb-3">编辑订单数据 / Modifier la commande</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
