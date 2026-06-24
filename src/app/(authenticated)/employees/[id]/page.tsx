@@ -10,8 +10,10 @@ import { createClient } from "@/lib/supabase/client";
 import { useAuth } from "@/lib/hooks/useAuth";
 import {
   EMPLOYEE_STATUS_LABELS,
+  ORDER_SOURCE_LABELS,
   type Employee,
   type EmployeeStatus,
+  type OrderSource,
 } from "@/lib/types/database";
 import {
   formatDateTime,
@@ -243,7 +245,7 @@ export default function EmployeeDetailPage() {
                         <tr key={ws.id as string} className="hover:bg-gray-50">
                           <td className="px-3 py-2 text-xs">{formatDateTime(ws.end_time as string).split(" ")[0]}</td>
                           <td className="px-3 py-2 font-mono text-xs">{orders?.order_code as string || "—"}</td>
-                          <td className="px-3 py-2 text-xs text-gray-500 hidden sm:table-cell">{orders?.order_source as string || "—"}</td>
+                          <td className="px-3 py-2 text-xs text-gray-500 hidden sm:table-cell">{orders?.order_source ? (ORDER_SOURCE_LABELS[orders.order_source as OrderSource] || orders.order_source as string) : "—"}</td>
                           <td className="px-3 py-2 text-xs hidden md:table-cell">{machines?.machine_code as string || "—"}</td>
                           <td className="px-3 py-2 text-xs">{formatDateTime(ws.start_time as string).split(" ")[1] || formatDateTime(ws.start_time as string)}</td>
                           <td className="px-3 py-2 text-xs">{formatDateTime(ws.end_time as string).split(" ")[1] || formatDateTime(ws.end_time as string)}</td>
