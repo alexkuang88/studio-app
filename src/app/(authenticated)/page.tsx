@@ -118,10 +118,12 @@ export default function DashboardPage() {
       // 今日订单总金额
       const { data: todayOrders } = await supabase
         .from("orders")
-        .select("order_amount, target_amount, initial_balance")
+        .select("order_amount, target_amount, initial_balance, status")
         .gte("created_at", todayISO);
 
-      const todayOrderAmount = (todayOrders || []).reduce(
+      const todayOrderAmount = (todayOrders || [])
+        .filter((o: any) => o.status !== "cancelled")
+        .reduce(
         (sum, o) => sum + ((o.order_amount as number) || ((o.target_amount as number) || 0) - ((o.initial_balance as number) || 0)),
         0
       );
