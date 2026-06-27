@@ -53,6 +53,8 @@ export default function OrderDetailPage() {
   const [noteSaved, setNoteSaved] = useState(false);
   const [settleAmount, setSettleAmount] = useState("");
   const [settleSaving, setSettleSaving] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
+  const [cancelReason, setCancelReason] = useState("");
 
   const supabase = createClient();
 
@@ -275,6 +277,43 @@ export default function OrderDetailPage() {
             {(order.responsible_user as string) && <p>负责人 / Responsable: {order.responsible_user as string}</p>}
             {(order.client_note as string) && <p>客户备注 / Note client: {order.client_note as string}</p>}
             {(order.note as string) && <p>备注 / Note: {order.note as string}</p>}
+          </div>
+        )}
+
+        {/* 取消订单 */}
+        {!isCompletedOrCancelled && (
+          <div className="mt-4 pt-4 border-t">
+            <div className="flex items-end gap-3">
+              <div className="flex-1">
+                <label className="block text-xs text-gray-600 mb-1">取消原因 / Raison d'annulation</label>
+                <input type="text" value={cancelReason} onChange={e => setCancelReason(e.target.value)}
+                  placeholder="客户取消 / Client a annulé"
+                  className="w-full rounded border border-gray-300 px-3 py-2 text-sm" />
+              </div>
+              <Button variant="danger" size="sm"
+                loading={cancelling}
+                onClick={async () => {
+                  if (!cancelReason.trim()) return;
+                  setCancelling(true);
+                  // 如果有running分段，先关闭
+                  await supabase.from("work_sessions").update({
+                    status: "void", void_reason: `订单取消: ${cancelReason}`
+                  }).eq("order_id", id as string).eq("status", "running");
+                  // 释放设备
+                  if (order.current_machine_id) {
+                    await supabase.from("machines").update({ status: "available" }).eq("id", order.current_machine_id as string);
+                  }
+                  // 取消订单
+                  await supabase.from("orders").update({
+                    status: "cancelled", current_employee_id: null, current_machine_id: null,
+                    completion_note: `取消: ${cancelReason}`, updated_at: new Date().toISOString()
+                  }).eq("id", id as string);
+                  setCancelling(false);
+                  window.location.reload();
+                }}>
+                取消订单 / Annuler
+              </Button>
+            </div>
           </div>
         )}
 
