@@ -327,3 +327,8 @@ DROP POLICY IF EXISTS "audit_logs_select" ON audit_logs;
 DROP POLICY IF EXISTS "audit_logs_insert" ON audit_logs;
 CREATE POLICY "audit_logs_select" ON audit_logs FOR SELECT USING (true);
 CREATE POLICY "audit_logs_insert" ON audit_logs FOR INSERT WITH CHECK (true);
+
+-- salary_advances
+ALTER TABLE salary_advances ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "salary_advances_select" ON salary_advances FOR SELECT USING (true);
+CREATE POLICY "salary_advances_insert" ON salary_advances FOR INSERT WITH CHECK (true);
