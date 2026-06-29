@@ -59,6 +59,7 @@ export default function EmployeeDetailPage() {
   const [advAmount, setAdvAmount] = useState("");
   const [advNote, setAdvNote] = useState("");
   const [advSaving, setAdvSaving] = useState(false);
+  const [advMsg, setAdvMsg] = useState("");
 
   const supabase = createClient();
 
@@ -127,6 +128,7 @@ export default function EmployeeDetailPage() {
   const handleSaveAdvance = async () => {
     if (!advAmount || parseFloat(advAmount) <= 0) return;
     setAdvSaving(true);
+    setAdvMsg("");
     const res = await fetch(`/api/employees/${id}/advances`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -135,13 +137,17 @@ export default function EmployeeDetailPage() {
     if (res.ok) {
       setAdvAmount("");
       setAdvNote("");
-      // Refresh advances
+      setAdvMsg(`✅ 已记录`);
       const advRes = await fetch(`/api/employees/${id}/advances?month=${selectedMonth}`);
       const d = await advRes.json();
       setAdvances(d.advances || []);
       setAdvTotal(d.total || 0);
+    } else {
+      const d = await res.json().catch(() => ({ error: "请求失败" }));
+      setAdvMsg("❌ " + (d.error || "失败"));
     }
     setAdvSaving(false);
+    setTimeout(() => setAdvMsg(""), 3000);
   };
 
   const handleSave = async () => {
@@ -344,6 +350,7 @@ export default function EmployeeDetailPage() {
                   记录预支
                 </Button>
               </div>
+              {advMsg && <p className={`text-xs ${advMsg.startsWith("✅") ? "text-green-600" : "text-red-600"}`}>{advMsg}</p>}
             </div>
           </div>
         </>
