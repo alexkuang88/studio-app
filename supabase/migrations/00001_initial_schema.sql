@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS employees (
   local_name TEXT,
   phone TEXT,
   facebook TEXT,
-  status TEXT NOT NULL DEFAULT 'training' CHECK (status IN ('training', 'official', 'advanced', 'suspended', 'left')),
+  status TEXT NOT NULL DEFAULT 'training' CHECK (status IN ('training', 'official', 'advanced', 'suspended', 'left', 'manager')),
   can_take_order BOOLEAN DEFAULT false,
   note TEXT,
   is_active BOOLEAN DEFAULT true,

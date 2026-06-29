@@ -11,7 +11,8 @@ export type EmployeeStatus =
   | "official"
   | "advanced"
   | "suspended"
-  | "left";
+  | "left"
+  | "manager";
 
 export type MachineStatus = "available" | "in_use" | "repair" | "disabled";
 
@@ -261,6 +262,7 @@ export const EMPLOYEE_STATUS_LABELS: Record<EmployeeStatus, string> = {
   advanced: "高级 / Avancé",
   suspended: "暂停 / Suspendu",
   left: "离职 / Parti",
+  manager: "管理 / Manager",
 };
 
 export const MACHINE_STATUS_LABELS: Record<MachineStatus, string> = {

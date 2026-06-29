@@ -26,11 +26,12 @@ export async function GET(request: NextRequest) {
   const nextYear = monthNum === "12" ? String(parseInt(year) + 1) : year;
   const nextMonth = `${nextYear}-${String(nextMonthNum).padStart(2, "0")}-01T00:00:00+03:00`;
 
-  // Get all employees
+  // Get all employees (排除管理类)
   const { data: employees } = await supabase
     .from("employees")
     .select("*")
     .eq("is_active", true)
+    .neq("status", "manager")
     .order("employee_code");
 
   // Get salary rate
