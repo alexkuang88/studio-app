@@ -54,6 +54,11 @@ export default function EmployeeDetailPage() {
     avgEfficiency: 0,
     salary: 0,
   });
+  const [advances, setAdvances] = useState<Array<Record<string, any>>>([]);
+  const [advTotal, setAdvTotal] = useState(0);
+  const [advAmount, setAdvAmount] = useState("");
+  const [advNote, setAdvNote] = useState("");
+  const [advSaving, setAdvSaving] = useState(false);
 
   const supabase = createClient();
 
@@ -110,7 +115,34 @@ export default function EmployeeDetailPage() {
           salary: calcSalary(totalResult, salaryRate),
         });
       });
+
+      fetch(`/api/employees/${id}/advances?month=${selectedMonth}`)
+        .then(r => r.json())
+        .then(d => {
+          setAdvances(d.advances || []);
+          setAdvTotal(d.total || 0);
+        });
   }, [id, selectedMonth, isNew, salaryRate]);
+
+  const handleSaveAdvance = async () => {
+    if (!advAmount || parseFloat(advAmount) <= 0) return;
+    setAdvSaving(true);
+    const res = await fetch(`/api/employees/${id}/advances`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ amount: parseInt(advAmount), month: selectedMonth, note: advNote || null }),
+    });
+    if (res.ok) {
+      setAdvAmount("");
+      setAdvNote("");
+      // Refresh advances
+      const advRes = await fetch(`/api/employees/${id}/advances?month=${selectedMonth}`);
+      const d = await advRes.json();
+      setAdvances(d.advances || []);
+      setAdvTotal(d.total || 0);
+    }
+    setAdvSaving(false);
+  };
 
   const handleSave = async () => {
     setError("");
@@ -258,6 +290,60 @@ export default function EmployeeDetailPage() {
                   )}
                 </tbody>
               </table>
+            </div>
+          </div>
+
+          {/* 预支工资 */}
+          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden mt-4">
+            <div className="px-6 py-4 border-b bg-yellow-50">
+              <h3 className="font-semibold text-yellow-800">预支工资 / Avance sur salaire</h3>
+            </div>
+            <div className="p-4 space-y-3">
+              <div className="grid grid-cols-3 gap-4 text-center">
+                <div className="bg-green-50 rounded-lg p-3">
+                  <div className="text-xs text-gray-500">应发工资</div>
+                  <div className="text-xl font-bold text-green-700">{monthStats.salary.toLocaleString("zh-CN")} Ar</div>
+                </div>
+                <div className="bg-orange-50 rounded-lg p-3">
+                  <div className="text-xs text-gray-500">已预支</div>
+                  <div className="text-xl font-bold text-orange-700">{advTotal.toLocaleString("zh-CN")} Ar</div>
+                </div>
+                <div className={`rounded-lg p-3 ${advTotal >= monthStats.salary ? 'bg-red-50' : 'bg-blue-50'}`}>
+                  <div className="text-xs text-gray-500">还需发</div>
+                  <div className={`text-xl font-bold ${advTotal >= monthStats.salary ? 'text-red-700' : 'text-blue-700'}`}>
+                    {Math.max(0, monthStats.salary - advTotal).toLocaleString("zh-CN")} Ar
+                  </div>
+                </div>
+              </div>
+
+              {advances.length > 0 && (
+                <div className="max-h-40 overflow-y-auto text-xs">
+                  <table className="w-full">
+                    <thead><tr className="text-gray-500"><th className="text-left py-1">日期</th><th className="text-right py-1">金额 Ar</th><th className="text-left py-1">备注</th></tr></thead>
+                    <tbody className="divide-y">
+                      {advances.map((a: any) => (
+                        <tr key={a.id}>
+                          <td className="py-1">{new Date(a.created_at).toLocaleDateString("zh-CN")}</td>
+                          <td className="text-right font-mono">{a.amount.toLocaleString("zh-CN")}</td>
+                          <td>{a.note || "—"}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
+              <div className="flex items-end gap-2">
+                <input type="number" value={advAmount} onChange={e => setAdvAmount(e.target.value)}
+                  placeholder="预支金额 (Ar)"
+                  className="flex-1 rounded border border-gray-300 px-3 py-2 text-sm" />
+                <input value={advNote} onChange={e => setAdvNote(e.target.value)}
+                  placeholder="备注（可选）"
+                  className="w-40 rounded border border-gray-300 px-2 py-2 text-sm" />
+                <Button variant="primary" size="sm" onClick={handleSaveAdvance} loading={advSaving} disabled={!advAmount}>
+                  记录预支
+                </Button>
+              </div>
             </div>
           </div>
         </>

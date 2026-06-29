@@ -123,7 +123,22 @@ CREATE TABLE IF NOT EXISTS work_sessions (
 );
 
 -- ============================================================
--- 6. salary_locks
+-- 6. salary_advances — 工资预支
+-- ============================================================
+CREATE TABLE IF NOT EXISTS salary_advances (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  employee_id UUID NOT NULL REFERENCES employees(id),
+  amount DECIMAL(12,2) NOT NULL,
+  month TEXT NOT NULL,
+  note TEXT,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_salary_advances_employee ON salary_advances(employee_id);
+CREATE INDEX IF NOT EXISTS idx_salary_advances_month ON salary_advances(month);
+
+-- ============================================================
+-- 7. salary_locks
 -- ============================================================
 CREATE TABLE IF NOT EXISTS salary_locks (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
