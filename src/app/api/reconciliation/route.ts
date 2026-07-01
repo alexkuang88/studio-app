@@ -34,6 +34,12 @@ export async function GET(request: NextRequest) {
     order_revenue: o.order_revenue || 0,
   })).filter((o: any) => (o.order_amount || 0) > 0);
 
+  // 未结算的排前面，已结算的排后面
+  orders.sort((a: any, b: any) => {
+    if (a.is_settled !== b.is_settled) return a.is_settled ? 1 : -1;
+    return (a.order_code || "").localeCompare(b.order_code || "");
+  });
+
   const settled = orders.filter((o: any) => o.is_settled);
   const unsettled = orders.filter((o: any) => !o.is_settled);
 
