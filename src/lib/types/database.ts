@@ -23,11 +23,13 @@ export type OrderSource =
   | "Agent order"
   | "Referral"
   | "Other"
-  | "agent1"
-  | "agent2"
-  | "agent3"
-  | "agent4"
-  | "agent5"
+  | "享享"
+  | "畅游星"
+  | "hertz"
+  | "晴野"
+  | "钟哥"
+  | "福州陪玩"
+  | "钱哆哆"
   | "xianyu";
 
 export type OrderStatus =
@@ -242,11 +244,13 @@ export interface LockSalaryInput {
 // ---------- 常量 ----------
 
 export const ORDER_SOURCE_LABELS: Record<OrderSource, string> = {
-  agent1: "中介客户1",
-  agent2: "中介客户2",
-  agent3: "中介客户3",
-  agent4: "中介客户4",
-  agent5: "中介客户5",
+  享享: "享享",
+  畅游星: "畅游星",
+  hertz: "Hertz",
+  晴野: "晴野",
+  钟哥: "钟哥",
+  福州陪玩: "福州陪玩",
+  钱哆哆: "钱哆哆",
   Douyin: "抖音客户",
   WeChat: "微信客户",
   "Old client": "老客户",
