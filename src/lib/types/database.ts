@@ -30,6 +30,7 @@ export type OrderSource =
   | "钟哥"
   | "福州陪玩"
   | "钱哆哆"
+  | "晟航传媒"
   | "xianyu";
 
 export type OrderStatus =
@@ -251,6 +252,7 @@ export const ORDER_SOURCE_LABELS: Record<OrderSource, string> = {
   钟哥: "钟哥",
   福州陪玩: "福州陪玩",
   钱哆哆: "钱哆哆",
+  晟航传媒: "晟航传媒",
   Douyin: "抖音客户",
   WeChat: "微信客户",
   "Old client": "老客户",
