@@ -10,17 +10,19 @@ export default function RevenuePage() {
   const [groupBy, setGroupBy] = useState<"month" | "day">("day");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
+  const [splitDate, setSplitDate] = useState(""); // "before" | "after" | ""
 
   const fetchData = useCallback(async () => {
     setLoading(true);
     const params = new URLSearchParams({ group: groupBy });
     if (dateFrom) params.set("from", dateFrom);
     if (dateTo) params.set("to", dateTo);
+    if (splitDate) params.set("split", splitDate);
     const res = await fetch(`/api/revenue?${params.toString()}`);
     const result = await res.json();
     setData(result);
     setLoading(false);
-  }, [groupBy, dateFrom, dateTo]);
+  }, [groupBy, dateFrom, dateTo, splitDate]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
@@ -41,6 +43,9 @@ export default function RevenuePage() {
           <span className="text-gray-400 text-sm">—</span>
           <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)}
             className="rounded-lg border border-gray-300 px-2 py-1.5 text-sm bg-white w-[130px]" />
+          <Button variant={splitDate === "" ? "primary" : "outline"} size="sm" onClick={() => setSplitDate("")}>全部</Button>
+          <Button variant={splitDate === "before" ? "primary" : "outline"} size="sm" onClick={() => setSplitDate("before")}>合并前</Button>
+          <Button variant={splitDate === "after" ? "primary" : "outline"} size="sm" onClick={() => setSplitDate("after")}>合并后</Button>
           <Button variant={groupBy === "day" ? "primary" : "outline"} size="sm" onClick={() => setGroupBy("day")}>按日</Button>
           <Button variant={groupBy === "month" ? "primary" : "outline"} size="sm" onClick={() => setGroupBy("month")}>按月</Button>
           <Button variant="outline" size="sm" onClick={fetchData}><RefreshCw size={16} /></Button>

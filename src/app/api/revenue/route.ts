@@ -1,4 +1,4 @@
-// GET /api/revenue — 订单收入统计（按日/月，支持日期范围）
+// GET /api/revenue — 订单收入统计（按日/月，支持日期范围 + 合并前后拆分）
 import { createServerSupabase } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -11,18 +11,29 @@ export async function GET(request: NextRequest) {
   const groupBy = searchParams.get("group") || "day";
   const dateFrom = searchParams.get("from");
   const dateTo = searchParams.get("to");
+  const split = searchParams.get("split"); // "before" | "after" | null
+
+  // 合并分界日期
+  const MERGE_DATE = "2026-07-06";
 
   const { data: all } = await supabase
     .from("orders")
     .select("*")
     .order("created_at", { ascending: false });
 
-  const list = (all || []).map((o: any) => ({
+  let list = (all || []).map((o: any) => ({
     ...o,
     order_amount: o.order_amount ?? ((o.target_amount || 0) - (o.initial_balance || 0)),
     order_revenue: o.order_revenue || 0,
     unit_price: o.unit_price || 0,
   })).filter((o: any) => o.status !== "cancelled" && (o.order_amount || 0) > 0);
+
+  // 合并前/后 拆分（基于接单日期）
+  if (split === "before") {
+    list = list.filter((o: any) => o.order_received_at && o.order_received_at < `${MERGE_DATE}T00:00:00+03:00`);
+  } else if (split === "after") {
+    list = list.filter((o: any) => o.order_received_at && o.order_received_at >= `${MERGE_DATE}T00:00:00+03:00`);
+  }
 
   // 日期范围筛选
   const filtered = dateFrom || dateTo ? list.filter((o: any) => {
