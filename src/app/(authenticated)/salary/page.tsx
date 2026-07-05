@@ -66,6 +66,11 @@ export default function SalaryPage() {
   const employees = (data?.employees as Array<Record<string, unknown>>) || [];
   const isLocked = data?.is_locked as boolean;
   const salaryRate = data?.salary_rate as number || 700;
+  const isTiered = data?.is_tiered as boolean || false;
+  const baseRate = data?.salary_rate_base as number || 700;
+  const premiumRate = data?.salary_rate_premium as number || 800;
+  const dailyThreshold = data?.daily_threshold as number || 2200;
+  const startDate = data?.tiered_salary_start_date as string || "2026-07-06";
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -73,7 +78,11 @@ export default function SalaryPage() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">工资统计 / Statistiques salaire</h1>
           <p className="text-sm text-gray-500 mt-1">
-            工资单价: {salaryRate} Ar/100万 / Taux{" "}
+            {isTiered ? (
+              <>基础 {baseRate} / 高级 {premiumRate} Ar/100万（日产量≥{dailyThreshold}万触发，{startDate}起）</>
+            ) : (
+              <>工资单价: {salaryRate} Ar/100万 / Taux </>
+            )}
             {isLocked && <Badge variant="red">已锁定 / Verrouillé</Badge>}
           </p>
         </div>

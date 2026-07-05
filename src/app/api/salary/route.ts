@@ -3,6 +3,7 @@
 
 import { createServerSupabase } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
+import { calcDailyTieredSalary } from "@/lib/utils/calculations";
 
 export async function GET(request: NextRequest) {
   const supabase = await createServerSupabase();
@@ -34,13 +35,25 @@ export async function GET(request: NextRequest) {
     .neq("status", "manager")
     .order("employee_code");
 
-  // Get salary rate
-  const { data: rateData } = await supabase
+  // Get salary settings (v1 flat rate + v2 tiered)
+  const { data: settingsRows } = await supabase
     .from("settings")
-    .select("value")
-    .eq("key", "salary_rate")
-    .single();
-  const salaryRate = rateData ? parseFloat(rateData.value as string) : 700;
+    .select("key, value")
+    .in("key", ["salary_rate", "salary_rate_base", "salary_rate_premium", "daily_threshold", "tiered_salary_start_date"]);
+
+  const settingsMap: Record<string, string> = {};
+  for (const row of settingsRows || []) {
+    settingsMap[row.key as string] = row.value as string;
+  }
+
+  const salaryRate = settingsMap["salary_rate"] ? parseFloat(settingsMap["salary_rate"]) : 700;
+  const baseRate = settingsMap["salary_rate_base"] ? parseFloat(settingsMap["salary_rate_base"]) : 700;
+  const premiumRate = settingsMap["salary_rate_premium"] ? parseFloat(settingsMap["salary_rate_premium"]) : 800;
+  const dailyThreshold = settingsMap["daily_threshold"] ? parseFloat(settingsMap["daily_threshold"]) : 2200;
+  const startDate = settingsMap["tiered_salary_start_date"] || "2026-07-06";
+  const isTiered = settingsMap["salary_rate_base"] !== undefined
+    && settingsMap["salary_rate_premium"] !== undefined
+    && settingsMap["daily_threshold"] !== undefined;
 
   // Get lock status
   const { data: lockData } = await supabase
@@ -52,7 +65,7 @@ export async function GET(request: NextRequest) {
   // Get work_sessions for each employee in the month
   const { data: sessions } = await supabase
     .from("work_sessions")
-    .select("employee_id, result_amount, work_hours, efficiency")
+    .select("employee_id, result_amount, work_hours, efficiency, end_time")
     .eq("status", "completed")
     .gte("end_time", monthStart)
     .lt("end_time", nextMonth);
@@ -71,6 +84,19 @@ export async function GET(request: NextRequest) {
     }
   }
 
+  // Build per-day tiered salary if configured
+  let tieredSalaryMap: Map<string, number> = new Map();
+  if (isTiered && (sessions || []).length > 0) {
+    tieredSalaryMap = calcDailyTieredSalary(
+      sessions as Array<{ employee_id: string; result_amount: number | null; end_time: string | null }>,
+      baseRate,
+      premiumRate,
+      dailyThreshold,
+      startDate,
+      salaryRate  // legacy rate for dates before startDate
+    );
+  }
+
   // Build stats with salary
   const stats = (employees || []).map((emp) => {
     const s = employeeStats[emp.id];
@@ -79,7 +105,9 @@ export async function GET(request: NextRequest) {
     const avgEfficiency = totalHours > 0
       ? Math.round((totalResult / totalHours) * 100) / 100
       : 0;
-    const salary = Math.round((totalResult / 100) * salaryRate);
+    const salary = isTiered
+      ? (tieredSalaryMap.get(emp.id) || 0)
+      : Math.round((totalResult / 100) * salaryRate);
 
     return {
       employee: emp,
@@ -100,6 +128,11 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({
     month,
     salary_rate: salaryRate,
+    salary_rate_base: baseRate,
+    salary_rate_premium: premiumRate,
+    daily_threshold: dailyThreshold,
+    tiered_salary_start_date: startDate,
+    is_tiered: isTiered,
     is_locked: !!lockData,
     lock_info: lockData || null,
     employees: ranked,

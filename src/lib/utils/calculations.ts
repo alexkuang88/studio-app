@@ -159,3 +159,66 @@ export function formatHours(hours: number): string {
 export function formatSalary(salary: number): string {
   return `${salary.toLocaleString("zh-CN")} Ar`;
 }
+
+// =====================================================
+// 阶梯日工资 (v2, 生效日期 2026-07-06)
+// =====================================================
+
+/**
+ * 返回马达加斯加 (UTC+3) 日期字符串 "YYYY-MM-DD"
+ */
+export function getMGDay(date: string | Date): string {
+  const d = typeof date === "string" ? new Date(date) : date;
+  const mg = new Date(d.getTime() + 3 * 3600000);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${mg.getUTCFullYear()}-${pad(mg.getUTCMonth() + 1)}-${pad(mg.getUTCDate())}`;
+}
+
+/**
+ * 阶梯日工资计算
+ *
+ * 按员工+马达加斯加日期分组，逐日判断：
+ * - 日产量 >= threshold → premiumRate
+ * - 日产量 <  threshold → baseRate
+ * - 日期 < startDate（如2026-07-06之前）→ 走 legacyRate（旧单价）
+ *
+ * @returns Map<employeeId, totalSalary>
+ */
+export function calcDailyTieredSalary(
+  sessions: Array<{
+    employee_id: string;
+    result_amount: number | null;
+    end_time: string | null;
+  }>,
+  baseRate: number,
+  premiumRate: number,
+  threshold: number,
+  startDate: string,    // "2026-07-06" — 阶梯制度生效日期
+  legacyRate: number    // 旧单价，生效日期之前的日期使用
+): Map<string, number> {
+  // employee_id → MG_day → sum
+  const dailyTotals: Record<string, Record<string, number>> = {};
+
+  for (const s of sessions) {
+    if (!s.end_time || s.result_amount == null) continue;
+    const eid = s.employee_id;
+    const day = getMGDay(s.end_time);
+
+    if (!dailyTotals[eid]) dailyTotals[eid] = {};
+    dailyTotals[eid][day] = (dailyTotals[eid][day] || 0) + s.result_amount;
+  }
+
+  const result = new Map<string, number>();
+  for (const [eid, days] of Object.entries(dailyTotals)) {
+    let totalSalary = 0;
+    for (const [day, dailyResult] of Object.entries(days)) {
+      const rate = day < startDate ? legacyRate
+        : dailyResult >= threshold ? premiumRate
+        : baseRate;
+      totalSalary += Math.round((dailyResult / 100) * rate);
+    }
+    result.set(eid, totalSalary);
+  }
+
+  return result;
+}

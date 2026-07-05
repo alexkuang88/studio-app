@@ -23,7 +23,7 @@ import {
   getRecentMonths,
   getMonthLabel,
 } from "@/lib/utils/time-utils";
-import { calcSalary } from "@/lib/utils/calculations";
+import { calcSalary, calcDailyTieredSalary, getMGDay } from "@/lib/utils/calculations";
 import { ArrowLeft, Save } from "lucide-react";
 import Link from "next/link";
 
@@ -48,6 +48,12 @@ export default function EmployeeDetailPage() {
   const [sessions, setSessions] = useState<Array<Record<string, unknown>>>([]);
   const [selectedMonth, setSelectedMonth] = useState(getCurrentMonth());
   const [salaryRate, setSalaryRate] = useState(700);
+  const [salaryRateBase, setSalaryRateBase] = useState(700);
+  const [salaryRatePremium, setSalaryRatePremium] = useState(800);
+  const [dailyThreshold, setDailyThreshold] = useState(2200);
+  const [tieredStartDate, setTieredStartDate] = useState("2026-07-06");
+  const [isTiered, setIsTiered] = useState(false);
+  const [dailyBreakdown, setDailyBreakdown] = useState<Array<{day: string; total: number; rate: number; salary: number}>>([]);
   const [monthStats, setMonthStats] = useState({
     totalResult: 0,
     totalHours: 0,
@@ -75,11 +81,22 @@ export default function EmployeeDetailPage() {
       });
     supabase
       .from("settings")
-      .select("*")
-      .eq("key", "salary_rate")
-      .single()
+      .select("key, value")
+      .in("key", ["salary_rate", "salary_rate_base", "salary_rate_premium", "daily_threshold", "tiered_salary_start_date"])
       .then(({ data }) => {
-        if (data) setSalaryRate(parseFloat(data.value));
+        const map: Record<string, string> = {};
+        for (const row of (data as Array<{ key: string; value: string }>) || []) {
+          map[row.key] = row.value;
+        }
+        setSalaryRate(parseFloat(map["salary_rate"] || "700"));
+        setSalaryRateBase(parseFloat(map["salary_rate_base"] || "700"));
+        setSalaryRatePremium(parseFloat(map["salary_rate_premium"] || "800"));
+        setDailyThreshold(parseFloat(map["daily_threshold"] || "2200"));
+        setTieredStartDate(map["tiered_salary_start_date"] || "2026-07-06");
+        const hasTiered = map["salary_rate_base"] !== undefined
+          && map["salary_rate_premium"] !== undefined
+          && map["daily_threshold"] !== undefined;
+        setIsTiered(hasTiered);
       });
   }, [id, isNew]);
 
@@ -109,11 +126,43 @@ export default function EmployeeDetailPage() {
         const totalHours = s.reduce(
           (sum, ws) => sum + ((ws.work_hours as number) || 0), 0
         );
+
+        // Daily breakdown for tiered salary
+        const dailyTotals: Record<string, number> = {};
+        for (const ws of s) {
+          const day = getMGDay(ws.end_time as string);
+          dailyTotals[day] = (dailyTotals[day] || 0) + ((ws.result_amount as number) || 0);
+        }
+        const breakdown: Array<{day: string; total: number; rate: number; salary: number}> = [];
+        for (const [day, dt] of Object.entries(dailyTotals).sort()) {
+          const rate = day >= tieredStartDate
+            ? (dt >= dailyThreshold ? salaryRatePremium : salaryRateBase)
+            : salaryRate;
+          breakdown.push({ day, total: dt, rate, salary: Math.round((dt / 100) * rate) });
+        }
+        setDailyBreakdown(breakdown);
+
+        // Calculate salary
+        let salary: number;
+        if (isTiered) {
+          const salaryMap = calcDailyTieredSalary(
+            s.map(ws => ({
+              employee_id: id,
+              result_amount: ws.result_amount as number | null,
+              end_time: ws.end_time as string | null,
+            })),
+            salaryRateBase, salaryRatePremium, dailyThreshold, tieredStartDate, salaryRate
+          );
+          salary = salaryMap.get(id) || 0;
+        } else {
+          salary = calcSalary(totalResult, salaryRate);
+        }
+
         setMonthStats({
           totalResult,
           totalHours,
           avgEfficiency: totalHours > 0 ? Math.round((totalResult / totalHours) * 100) / 100 : 0,
-          salary: calcSalary(totalResult, salaryRate),
+          salary,
         });
       });
 
@@ -123,7 +172,7 @@ export default function EmployeeDetailPage() {
           setAdvances(d.advances || []);
           setAdvTotal(d.total || 0);
         });
-  }, [id, selectedMonth, isNew, salaryRate]);
+  }, [id, selectedMonth, isNew, salaryRate, salaryRateBase, salaryRatePremium, dailyThreshold, tieredStartDate, isTiered]);
 
   const handleSaveAdvance = async () => {
     if (!advAmount || parseFloat(advAmount) <= 0) return;
@@ -252,9 +301,60 @@ export default function EmployeeDetailPage() {
             <StatBox label="总成绩 / Total" value={formatAmount(monthStats.totalResult)} />
             <StatBox label="总工时 / Heures" value={formatHours(monthStats.totalHours)} />
             <StatBox label="平均效率 / Efficacité" value={`${monthStats.avgEfficiency.toLocaleString("zh-CN")} 万/h`} />
-            <StatBox label="工资单价 / Taux" value={`${salaryRate} Ar/100万`} />
+            <StatBox label="工资单价 / Taux" value={isTiered ? `基础 ${salaryRateBase} / 高级 ${salaryRatePremium}` : `${salaryRate} Ar/100万`} />
             <StatBox label="应发工资 / Salaire" value={`${monthStats.salary.toLocaleString("zh-CN")} Ar`} highlight />
           </div>
+
+          {/* 每日明细 / Détail quotidien */}
+          {isTiered && dailyBreakdown.length > 0 && (
+            <div className="bg-white rounded-xl border border-blue-200 overflow-hidden">
+              <div className="px-6 py-4 border-b bg-blue-50">
+                <h3 className="font-semibold text-blue-800">每日薪资明细 / Détail quotidien</h3>
+                <p className="text-xs text-blue-600 mt-0.5">
+                  阈值 {dailyThreshold}万 · 基础 {salaryRateBase} Ar · 高级 {salaryRatePremium} Ar · {tieredStartDate} 起
+                </p>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead className="bg-blue-50/50 border-b">
+                    <tr>
+                      <th className="px-4 py-2 text-left">日期</th>
+                      <th className="px-4 py-2 text-right">日产量(万)</th>
+                      <th className="px-4 py-2 text-center">单价(Ar/100万)</th>
+                      <th className="px-4 py-2 text-right">当日工资(Ar)</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y">
+                    {dailyBreakdown.map((d) => (
+                      <tr key={d.day} className={d.rate > salaryRateBase ? "bg-green-50/50" : ""}>
+                        <td className="px-4 py-2 font-mono text-xs">{d.day}</td>
+                        <td className="px-4 py-2 text-right font-mono font-medium">
+                          {d.day >= tieredStartDate && (
+                            <span className={d.total >= dailyThreshold ? "text-green-600" : "text-gray-400"}>
+                              {d.total >= dailyThreshold ? "✓ " : ""}
+                            </span>
+                          )}
+                          {d.total.toLocaleString("zh-CN")}
+                        </td>
+                        <td className={`px-4 py-2 text-center font-bold ${d.rate > salaryRateBase ? "text-green-600" : "text-gray-500"}`}>
+                          {d.rate}
+                        </td>
+                        <td className="px-4 py-2 text-right font-mono font-medium">
+                          {d.salary.toLocaleString("zh-CN")}
+                        </td>
+                      </tr>
+                    ))}
+                    <tr className="bg-blue-50 font-bold">
+                      <td className="px-4 py-2 text-xs">合计</td>
+                      <td className="px-4 py-2 text-right font-mono">{dailyBreakdown.reduce((s,d) => s+d.total, 0).toLocaleString("zh-CN")}</td>
+                      <td className="px-4 py-2 text-center">—</td>
+                      <td className="px-4 py-2 text-right font-mono">{dailyBreakdown.reduce((s,d) => s+d.salary, 0).toLocaleString("zh-CN")}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
 
           <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
             <div className="overflow-x-auto">

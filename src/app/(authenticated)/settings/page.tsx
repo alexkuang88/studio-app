@@ -45,7 +45,11 @@ export default function SettingsPage() {
   }
 
   const settingDescriptions: Record<string, string> = {
-    salary_rate: "工资单价 (Ar / 100万)",
+    salary_rate: "工资单价 (Ar / 100万) [旧]",
+    salary_rate_base: "基础工资单价（日产量<阈值）Ar/100万",
+    salary_rate_premium: "高级工资单价（日产量>=阈值）Ar/100万",
+    daily_threshold: "日产量阈值（万）",
+    tiered_salary_start_date: "阶梯工资生效日期（YYYY-MM-DD）",
     minimum_efficiency: "最低达标效率 (万/小时)",
     advanced_efficiency: "高级效率 (万/小时)",
     warning_hours_before_overdue: "订单超时前提醒时间 (小时)",

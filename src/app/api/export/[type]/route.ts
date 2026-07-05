@@ -3,6 +3,7 @@
 import { createServerSupabase } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 import ExcelJS from "exceljs";
+import { calcDailyTieredSalary } from "@/lib/utils/calculations";
 
 const EXPORT_TYPES = [
   "orders",
@@ -75,7 +76,6 @@ export async function GET(
 
       case "salary": {
         filename = `工资统计${month ? `_${month}` : ""}.xlsx`;
-        // Reuse salary API logic
         if (!month) {
           return NextResponse.json(
             { error: "month parameter required for salary export" },
@@ -84,26 +84,39 @@ export async function GET(
         }
 
         const [year, monthNum] = month.split("-");
-        const monthStart = `${year}-${monthNum}-01`;
-        const nextMonth = monthNum === "12"
-          ? `${parseInt(year) + 1}-01-01`
-          : `${year}-${String(Number(monthNum) + 1).padStart(2, "0")}-01`;
+        const monthStart = `${year}-${monthNum}-01T00:00:00+03:00`;
+        const nextMonthNum = monthNum === "12" ? 1 : Number(monthNum) + 1;
+        const nextYear = monthNum === "12" ? String(parseInt(year) + 1) : year;
+        const nextMonth = `${nextYear}-${String(nextMonthNum).padStart(2, "0")}-01T00:00:00+03:00`;
 
         const { data: employees } = await supabase
           .from("employees")
           .select("*")
           .eq("is_active", true);
 
-        const { data: rateData } = await supabase
+        // Fetch all salary settings
+        const { data: settingsRows } = await supabase
           .from("settings")
-          .select("value")
-          .eq("key", "salary_rate")
-          .single();
-        const salaryRate = rateData ? parseFloat(rateData.value as string) : 700;
+          .select("key, value")
+          .in("key", ["salary_rate", "salary_rate_base", "salary_rate_premium", "daily_threshold", "tiered_salary_start_date"]);
+
+        const settingsMap: Record<string, string> = {};
+        for (const row of settingsRows || []) {
+          settingsMap[row.key as string] = row.value as string;
+        }
+
+        const salaryRate = settingsMap["salary_rate"] ? parseFloat(settingsMap["salary_rate"]) : 700;
+        const baseRate = settingsMap["salary_rate_base"] ? parseFloat(settingsMap["salary_rate_base"]) : 700;
+        const premiumRate = settingsMap["salary_rate_premium"] ? parseFloat(settingsMap["salary_rate_premium"]) : 800;
+        const dailyThreshold = settingsMap["daily_threshold"] ? parseFloat(settingsMap["daily_threshold"]) : 2200;
+        const startDate = settingsMap["tiered_salary_start_date"] || "2026-07-06";
+        const isTiered = settingsMap["salary_rate_base"] !== undefined
+          && settingsMap["salary_rate_premium"] !== undefined
+          && settingsMap["daily_threshold"] !== undefined;
 
         const { data: sessions } = await supabase
           .from("work_sessions")
-          .select("employee_id, result_amount, work_hours, efficiency")
+          .select("employee_id, result_amount, work_hours, efficiency, end_time")
           .eq("status", "completed")
           .gte("end_time", monthStart)
           .lt("end_time", nextMonth);
@@ -114,6 +127,19 @@ export async function GET(
           if (!stats[eid]) stats[eid] = { totalResult: 0, totalHours: 0 };
           stats[eid].totalResult += (s.result_amount as number) || 0;
           stats[eid].totalHours += (s.work_hours as number) || 0;
+        }
+
+        // Tiered salary
+        let tieredSalaryMap: Map<string, number> = new Map();
+        if (isTiered && (sessions || []).length > 0) {
+          tieredSalaryMap = calcDailyTieredSalary(
+            sessions as Array<{ employee_id: string; result_amount: number | null; end_time: string | null }>,
+            baseRate,
+            premiumRate,
+            dailyThreshold,
+            startDate,
+            salaryRate
+          );
         }
 
         const ws = workbook.addWorksheet("工资统计");
@@ -131,12 +157,15 @@ export async function GET(
             const s = stats[emp.id];
             const total = s?.totalResult || 0;
             const hours = s?.totalHours || 0;
+            const salary = isTiered
+              ? (tieredSalaryMap.get(emp.id) || 0)
+              : Math.round((total / 100) * salaryRate);
             return {
               code: emp.employee_code,
               name: emp.chinese_name,
               total,
               hours,
-              salary: Math.round((total / 100) * salaryRate),
+              salary,
             };
           })
           .sort((a, b) => b.total - a.total);

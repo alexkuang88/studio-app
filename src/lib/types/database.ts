@@ -289,3 +289,9 @@ export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
 };
 
 export const DEFAULT_SALARY_RATE = 700; // Ar / 100万
+
+// 阶梯日工资 v2 (2026-07-06 起)
+export const DEFAULT_SALARY_RATE_BASE = 700;
+export const DEFAULT_SALARY_RATE_PREMIUM = 800;
+export const DEFAULT_DAILY_THRESHOLD = 2200;
+export const TIERED_SALARY_START_DATE = "2026-07-06";
