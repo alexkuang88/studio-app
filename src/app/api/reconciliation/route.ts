@@ -13,6 +13,8 @@ export async function GET(request: NextRequest) {
   const from = searchParams.get("from");
   const to = searchParams.get("to");
   const source = searchParams.get("source");
+  const split = searchParams.get("split"); // "before" | "after" | null
+  const MERGE_DATE = "2026-07-06";
 
   let query = supabase
     .from("orders")
@@ -28,11 +30,18 @@ export async function GET(request: NextRequest) {
   const { data, error } = await query;
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  const orders = (data || []).map((o: any) => ({
+  let orders = (data || []).map((o: any) => ({
     ...o,
     order_amount: o.order_amount ?? ((o.target_amount || 0) - (o.initial_balance || 0)),
     order_revenue: o.order_revenue || 0,
   })).filter((o: any) => (o.order_amount || 0) > 0);
+
+  // 合并前/后 拆分
+  if (split === "before") {
+    orders = orders.filter((o: any) => o.order_received_at && o.order_received_at < `${MERGE_DATE}T00:00:00+03:00`);
+  } else if (split === "after") {
+    orders = orders.filter((o: any) => o.order_received_at && o.order_received_at >= `${MERGE_DATE}T00:00:00+03:00`);
+  }
 
   // 未结算的排前面，已结算的排后面
   orders.sort((a: any, b: any) => {

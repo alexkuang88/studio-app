@@ -37,6 +37,7 @@ export default function ReconciliationPage() {
   const [sourceFilter, setSourceFilter] = useState("");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
+  const [split, setSplit] = useState(""); // "before" | "after" | ""
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [settleNote, setSettleNote] = useState("");
   const [settling, setSettling] = useState(false);
@@ -58,6 +59,7 @@ export default function ReconciliationPage() {
     if (sourceFilter) params.set("source", sourceFilter);
     if (dateFrom) params.set("from", dateFrom);
     if (dateTo) params.set("to", dateTo);
+    if (split) params.set("split", split);
     const res = await fetch(`/api/reconciliation?${params.toString()}`);
     const result = await res.json();
     if (res.ok) {
@@ -65,7 +67,7 @@ export default function ReconciliationPage() {
       setSummary(result.summary);
     }
     setLoading(false);
-  }, [sourceFilter, dateFrom, dateTo]);
+  }, [sourceFilter, dateFrom, dateTo, split]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
@@ -138,6 +140,9 @@ export default function ReconciliationPage() {
           <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)}
             className="rounded-lg border border-gray-300 px-2 py-1.5 text-sm bg-white w-[130px]" />
           <Select value={sourceFilter} onChange={(e) => setSourceFilter(e.target.value)} options={sourceOptions} />
+          <Button variant={split === "" ? "primary" : "outline"} size="sm" onClick={() => setSplit("")}>全部</Button>
+          <Button variant={split === "before" ? "primary" : "outline"} size="sm" onClick={() => setSplit("before")}>合并前</Button>
+          <Button variant={split === "after" ? "primary" : "outline"} size="sm" onClick={() => setSplit("after")}>合并后</Button>
           <Button variant="outline" size="sm" onClick={fetchData}>刷新</Button>
         </div>
       </div>
