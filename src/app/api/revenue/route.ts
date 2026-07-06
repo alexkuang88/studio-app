@@ -13,8 +13,7 @@ export async function GET(request: NextRequest) {
   const dateTo = searchParams.get("to");
   const split = searchParams.get("split"); // "before" | "after" | null
 
-  // 合并分界日期
-  const MERGE_DATE = "2026-07-06";
+  // 合并分界：P639起为合并后
 
   const { data: all } = await supabase
     .from("orders")
@@ -28,11 +27,12 @@ export async function GET(request: NextRequest) {
     unit_price: o.unit_price || 0,
   })).filter((o: any) => o.status !== "cancelled" && (o.order_amount || 0) > 0);
 
-  // 合并前/后 拆分（基于接单日期）
+  // 合并前/后 拆分（P639起算合并后）
+  const MERGE_ORDER = "P639";
   if (split === "before") {
-    list = list.filter((o: any) => o.order_received_at && o.order_received_at < `${MERGE_DATE}T00:00:00+03:00`);
+    list = list.filter((o: any) => o.order_code && o.order_code < MERGE_ORDER);
   } else if (split === "after") {
-    list = list.filter((o: any) => o.order_received_at && o.order_received_at >= `${MERGE_DATE}T00:00:00+03:00`);
+    list = list.filter((o: any) => o.order_code && o.order_code >= MERGE_ORDER);
   }
 
   // 日期范围筛选
