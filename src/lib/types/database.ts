@@ -31,6 +31,13 @@ export type OrderSource =
   | "福州陪玩"
   | "钱哆哆"
   | "晟航传媒"
+  | "黑鼠电竞"
+  | "匀桧速跑"
+  | "有禾电竞"
+  | "muki"
+  | "撒哈拉"
+  | "cui"
+  | "Alex"
   | "xianyu";
 
 export type OrderStatus =
@@ -253,6 +260,13 @@ export const ORDER_SOURCE_LABELS: Record<OrderSource, string> = {
   福州陪玩: "福州陪玩",
   钱哆哆: "钱哆哆",
   晟航传媒: "晟航传媒",
+  黑鼠电竞: "黑鼠电竞",
+  匀桧速跑: "匀桧速跑",
+  有禾电竞: "有禾电竞",
+  muki: "muki",
+  撒哈拉: "撒哈拉",
+  cui: "cui",
+  Alex: "Alex",
   Douyin: "抖音客户",
   WeChat: "微信客户",
   "Old client": "老客户",
