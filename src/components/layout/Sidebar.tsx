@@ -21,6 +21,7 @@ import {
   CheckCircle,
   BarChart3,
   ClipboardCheck,
+  Clock,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -48,6 +49,12 @@ const menuItems = [
     href: "/machines/dashboard",
     label: "设备现场看板 / Tableau machines",
     icon: MonitorCheck,
+    roles: ["admin", "operator"],
+  },
+  {
+    href: "/attendance",
+    label: "每日考勤 / Présence",
+    icon: Clock,
     roles: ["admin", "operator"],
   },
   {
