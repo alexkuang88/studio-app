@@ -22,6 +22,20 @@ function generateNextCode(latest: string | null): string {
   return "P" + String(num).padStart(3, "0");
 }
 
+// 从历史订单中找到最大的P编号
+function findMaxPCode(codes: string[]): string | null {
+  let max = 0;
+  let maxCode = null;
+  for (const c of codes) {
+    const m = c.match(/^P(\d+)$/);
+    if (m) {
+      const n = parseInt(m[1]);
+      if (n > max) { max = n; maxCode = c; }
+    }
+  }
+  return maxCode;
+}
+
 function defaultExpectedTime(): string {
   return calcExpectedTime(0);
 }
@@ -70,12 +84,11 @@ export default function NewOrderPage() {
       .from("orders")
       .select("order_code")
       .order("created_at", { ascending: false })
-      .limit(1)
+      .limit(20)
       .then(({ data }) => {
-        const latest = (data && data.length > 0)
-          ? (data[0] as { order_code: string }).order_code
-          : null;
-        const next = generateNextCode(latest);
+        const codes = (data || []).map(d => (d as { order_code: string }).order_code);
+        const maxP = findMaxPCode(codes);
+        const next = generateNextCode(maxP);
         setAutoCode(next);
         setOrder((prev) => ({ ...prev, order_code: next }));
       });
