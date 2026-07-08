@@ -235,6 +235,12 @@ const zh = {
   "dash.last_refresh": "最后刷新",
   "dash.auto_refresh": "每30秒自动刷新",
   "dash.resume_hint": "⚠️ 恢复时去「添加打手」",
+  "ss.auto_fill_hint": "💡 已自动填充，请核实手机实际余额后修改",
+  "ss.error_select": "请选择订单、打手和设备",
+  "ss.no_employees": "暂无打手 / Aucun employé",
+  "ss.order_placeholder": "请选择订单...",
+  "ss.machine_placeholder": "请选择设备...",
+  "error": "错误",
 } as const;
 
 const fr: Record<TranslationKey, string> = {
@@ -459,6 +465,12 @@ const fr: Record<TranslationKey, string> = {
   "co.force": "Clôturer en avance",
 
   // 订单详情
+  "order.detail.title": "Détail commande",
+  "order.detail.source": "Source",
+  "order.detail.cancel": "Annuler la commande",
+  "order.detail.cancel_reason": "Raison d'annulation",
+
+  // 看板补充
   "dash.current_balance": "Solde actuel",
   "dash.earned": "Effectué",
   "dash.overdue_warn": "En retard",

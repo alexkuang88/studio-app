@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useLocale } from "@/lib/i18n/LocaleContext";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { Input } from "@/components/ui/Input";
@@ -11,6 +12,7 @@ import { ArrowLeft, Play } from "lucide-react";
 import Link from "next/link";
 
 export default function StartSessionPage() {
+  const { t } = useLocale();
   const router = useRouter();
   const supabase = createClient();
 
@@ -130,7 +132,7 @@ export default function StartSessionPage() {
     }
 
     if (!selectedOrder || !selectedEmployee || !selectedMachine) {
-      setError("{t("ss.order_placeholder")}和设备");
+      setError("请选择订单、打手和设备");
       return;
     }
 
@@ -299,7 +301,7 @@ export default function StartSessionPage() {
         </div>
 
         <Input
-          label=t("ss.start_time") + " *"
+          label={t("ss.start_time") + " *"}
           type="datetime-local"
           value={startTime}
           onChange={(e) => setStartTime(e.target.value)}

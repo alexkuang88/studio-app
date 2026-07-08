@@ -78,7 +78,7 @@ export default function MachineDashboardPage() {
       body: JSON.stringify({ session_id: e.sessionId, current_balance: parseFloat(updateAmt) }),
     });
     const r = await res.json();
-    setUpdateMsg(res.ok ? `✅ 已打 ${r.earned_so_far?.toLocaleString() || "?"} 万，效率 ${r.current_efficiency || "?"} 万/h` : {t("error")}:  + (r.error || "失败"));
+    setUpdateMsg(res.ok ? `✅ 已打 ${r.earned_so_far?.toLocaleString() || "?"} 万，效率 ${r.current_efficiency || "?"} 万/h` : "❌ " + (r.error || "失败"));
     if (res.ok) fetchData();
     setUpdating(false);
   };
@@ -177,7 +177,7 @@ export default function MachineDashboardPage() {
                   <div className="flex justify-between">
                     <span className="text-gray-500 text-xs">{t("dash.time_remaining")}:</span>
                     <span className={`text-xs ${overdue ? "text-red-600 font-bold" : remainHrs <= 2 && remainHrs > 0 ? "text-orange-600 font-bold" : ""}`}>
-                      {remainHrs > 0 ? formatHoursText(remainHrs) : overdue ? "{t("dash.overdue_warn")}" : "—"}
+                      {remainHrs > 0 ? formatHoursText(remainHrs) : overdue ? t("dash.overdue_warn") : "—"}
                     </span>
                   </div>
 
@@ -222,7 +222,7 @@ export default function MachineDashboardPage() {
                 </div>
               ) : (
                 <div className="text-center py-4 font-medium">
-                  {m.status === "available" && "✅ {t("machine.available")}"}
+                  {m.status === "available" && (<>✅ {t("machine.available")}</>)}
                   {m.status === "repair" && "🔧 维修中 / En réparation"}
                   {m.status === "disabled" && "🚫 已停用 / Désactivé"}
                 </div>

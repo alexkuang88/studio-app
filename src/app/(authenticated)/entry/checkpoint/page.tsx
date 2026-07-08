@@ -43,7 +43,7 @@ export default function CheckpointPage() {
     });
 
     if (res.ok) {
-      setMsgMap(m => ({ ...m, [sessionId]: "✅ {t("cp.done")}" }));
+      setMsgMap(m => ({ ...m, [sessionId]: "✅ " + t("cp.done") }));
       setAmounts(a => { const n = { ...a }; delete n[sessionId]; return n; });
       fetchSessions();
     } else {
