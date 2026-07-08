@@ -1,5 +1,6 @@
 "use client";
 
+import { useLocale } from "@/lib/i18n/LocaleContext";
 import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
@@ -50,6 +51,7 @@ function calcExpectedTime(orderAmount: number): string {
 }
 
 export default function NewOrderPage() {
+  const { t } = useLocale();
   const router = useRouter();
   const supabase = createClient();
   const { profile } = useAuth();

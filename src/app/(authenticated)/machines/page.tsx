@@ -5,12 +5,14 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { Badge } from "@/components/ui/Badge";
+import { useLocale } from "@/lib/i18n/LocaleContext";
 import { createClient } from "@/lib/supabase/client";
 import { MACHINE_STATUS_LABELS, type Machine, type MachineStatus } from "@/lib/types/database";
 import { Plus, Pencil, MonitorCheck, X } from "lucide-react";
 import Link from "next/link";
 
 export default function MachinesPage() {
+  const { t } = useLocale();
   const [machines, setMachines] = useState<Machine[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);

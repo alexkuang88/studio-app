@@ -1,5 +1,6 @@
 "use client";
 
+import { useLocale } from "@/lib/i18n/LocaleContext";
 import Link from "next/link";
 import { ShoppingCart, PlaySquare, UserCheck, CheckCircle, MonitorCheck, DollarSign, Clock } from "lucide-react";
 
@@ -56,6 +57,7 @@ const entryActions = [
 ];
 
 export default function EntryPage() {
+  const { t } = useLocale();
   return (
     <div className="space-y-6 animate-fade-in">
       <div>

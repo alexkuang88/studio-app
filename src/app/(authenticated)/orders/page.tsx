@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { Badge } from "@/components/ui/Badge";
+import { useLocale } from "@/lib/i18n/LocaleContext";
 import { createClient } from "@/lib/supabase/client";
 import {
   ORDER_SOURCE_LABELS,
@@ -35,6 +36,7 @@ export default function OrdersPage() {
 }
 
 function OrdersContent() {
+  const { t } = useLocale();
   const searchParams = useSearchParams();
 
   const [orders, setOrders] = useState<Array<Record<string, unknown>>>([]);

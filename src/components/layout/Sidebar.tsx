@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/lib/hooks/useAuth";
+import { useLocale } from "@/lib/i18n/LocaleContext";
 import {
   LayoutDashboard,
   Users,
@@ -25,107 +26,33 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 
-// 菜单项定义
+// 菜单项定义 - label is a translation key resolved at render time
 const menuItems = [
-  {
-    href: "/",
-    label: "首页 / Accueil",
-    icon: LayoutDashboard,
-    roles: ["admin", "operator", "recorder"],
-  },
-  {
-    href: "/employees",
-    label: "员工管理 / Employés",
-    icon: Users,
-    roles: ["admin", "operator", "recorder"],
-  },
-  {
-    href: "/machines",
-    label: "设备管理 / Machines",
-    icon: Monitor,
-    roles: ["admin", "operator", "recorder"],
-  },
-  {
-    href: "/machines/dashboard",
-    label: "设备现场看板 / Tableau machines",
-    icon: MonitorCheck,
-    roles: ["admin", "operator", "recorder"],
-  },
-  {
-    href: "/attendance",
-    label: "每日考勤 / Présence",
-    icon: Clock,
-    roles: ["admin", "operator", "recorder"],
-  },
-  {
-    href: "/orders",
-    label: "订单管理 / Commandes",
-    icon: ShoppingCart,
-    roles: ["admin", "operator", "recorder"],
-  },
-  {
-    href: "/entry",
-    label: "现场录入 / Saisie",
-    icon: ClipboardList,
-    roles: ["admin", "operator", "recorder"],
+  { href: "/", label: "nav.home", icon: LayoutDashboard, roles: ["admin", "operator", "recorder"] },
+  { href: "/employees", label: "nav.employees", icon: Users, roles: ["admin", "operator", "recorder"] },
+  { href: "/machines", label: "nav.machines", icon: Monitor, roles: ["admin", "operator", "recorder"] },
+  { href: "/machines/dashboard", label: "nav.dashboard", icon: MonitorCheck, roles: ["admin", "operator", "recorder"] },
+  { href: "/attendance", label: "nav.attendance", icon: Clock, roles: ["admin", "operator", "recorder"] },
+  { href: "/orders", label: "nav.orders", icon: ShoppingCart, roles: ["admin", "operator", "recorder"] },
+  { href: "/entry", label: "nav.entry", icon: ClipboardList, roles: ["admin", "operator", "recorder"],
     subItems: [
-      {
-        href: "/entry/start-session",
-        label: "开始打单 / Démarrer",
-        icon: PlaySquare,
-      },
-      {
-        href: "/entry/handover",
-        label: "换人交接 / Relève",
-        icon: UserCheck,
-      },
-      {
-        href: "/entry/complete-order",
-        label: "完成订单 / Terminer",
-        icon: CheckCircle,
-      },
-      {
-        href: "/entry/checkpoint",
-        label: "每日打卡 / Checkpoint",
-        icon: Clock,
-      },
+      { href: "/entry/start-session", label: "nav.start_session", icon: PlaySquare },
+      { href: "/entry/handover", label: "nav.handover", icon: UserCheck },
+      { href: "/entry/complete-order", label: "nav.complete_order", icon: CheckCircle },
+      { href: "/entry/checkpoint", label: "nav.checkpoint", icon: Clock },
     ],
   },
-  {
-    href: "/salary",
-    label: "工资统计 / Salaire",
-    icon: DollarSign,
-    roles: ["admin", "operator"],
-  },
-  {
-    href: "/revenue",
-    label: "订单收入",
-    icon: BarChart3,
-    roles: ["admin", "operator"],
-  },
-  {
-    href: "/reconciliation",
-    label: "对账核实 / Rapprochement",
-    icon: ClipboardCheck,
-    roles: ["admin", "operator"],
-  },
-  {
-    href: "/audit-logs",
-    label: "操作日志 / Journal",
-    icon: FileText,
-    roles: ["admin"],
-  },
-  {
-    href: "/settings",
-    label: "系统设置 / Paramètres",
-    icon: Settings,
-    roles: ["admin"],
-  },
+  { href: "/salary", label: "nav.salary", icon: DollarSign, roles: ["admin", "operator"] },
+  { href: "/revenue", label: "nav.revenue", icon: BarChart3, roles: ["admin", "operator"] },
+  { href: "/reconciliation", label: "nav.reconciliation", icon: ClipboardCheck, roles: ["admin", "operator"] },
+  { href: "/audit-logs", label: "操作日志 / Journal", icon: FileText, roles: ["admin"] },
+  { href: "/settings", label: "系统设置 / Paramètres", icon: Settings, roles: ["admin"] },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
   const { profile, signOut } = useAuth();
+  const { t } = useLocale();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const role = profile?.role || "operator";
@@ -184,7 +111,7 @@ export function Sidebar() {
                   `}
                 >
                   <Icon size={20} />
-                  <span className="text-sm font-medium">{item.label}</span>
+                  <span className="text-sm font-medium">{t(item.label)}</span>
                 </Link>
 
                 {/* Sub-items (for Entry menu) */}
@@ -205,7 +132,7 @@ export function Sidebar() {
                           `}
                         >
                           <SubIcon size={16} />
-                          {sub.label}
+                          {t(sub.label)}
                         </Link>
                       );
                     })}
@@ -221,7 +148,7 @@ export function Sidebar() {
             className="flex items-center gap-3 px-3 py-2.5 rounded-lg mt-auto text-gray-400 hover:bg-red-900/50 hover:text-red-400 transition-colors duration-150"
           >
             <LogOut size={20} />
-            <span className="text-sm font-medium">退出 / Déconnexion</span>
+            <span className="text-sm font-medium">{t("nav.logout")}</span>
           </button>
         </nav>
       </aside>

@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
+import { useLocale } from "@/lib/i18n/LocaleContext";
 import { createClient } from "@/lib/supabase/client";
 import { MACHINE_STATUS_LABELS, type Machine } from "@/lib/types/database";
 import { formatDateTime, calcRemainingHours, formatHours as formatHoursText } from "@/lib/utils/time-utils";
@@ -10,6 +11,7 @@ import { calcRemainingAmount, calcElapsedHours, formatAmount, isOrderOverdue } f
 import { RefreshCw, TrendingUp, Pause } from "lucide-react";
 
 export default function MachineDashboardPage() {
+  const { t } = useLocale();
   const [entries, setEntries] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [lastRefresh, setLastRefresh] = useState(new Date());

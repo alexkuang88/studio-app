@@ -1,5 +1,6 @@
 "use client";
 
+import { useLocale } from "@/lib/i18n/LocaleContext";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
@@ -8,6 +9,7 @@ import { Clock, CheckCircle, RefreshCw } from "lucide-react";
 import Link from "next/link";
 
 export default function CheckpointPage() {
+  const { t } = useLocale();
   const [sessions, setSessions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [amounts, setAmounts] = useState<Record<string, string>>({});

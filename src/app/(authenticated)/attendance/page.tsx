@@ -1,5 +1,6 @@
 "use client";
 
+import { useLocale } from "@/lib/i18n/LocaleContext";
 import { useEffect, useState, useCallback } from "react";
 import { Badge } from "@/components/ui/Badge";
 import { formatHours } from "@/lib/utils/time-utils";
@@ -16,6 +17,7 @@ interface EmpRow {
 }
 
 export default function AttendancePage() {
+  const { t } = useLocale();
   const [date, setDate] = useState("");
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(false);
