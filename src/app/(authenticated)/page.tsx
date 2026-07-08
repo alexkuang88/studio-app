@@ -35,6 +35,7 @@ interface DashboardStats {
 
 export default function DashboardPage() {
   const { profile } = useAuth();
+  const isRecorder = profile?.role === "recorder";
   const [stats, setStats] = useState<DashboardStats>({
     todayNewOrders: 0,
     todayCompletedOrders: 0,
@@ -190,12 +191,12 @@ export default function DashboardPage() {
       icon: MonitorCheck,
       color: "bg-teal-500 hover:bg-teal-600",
     },
-    {
+    ...(isRecorder ? [] : [{
       href: "/salary",
       label: "工资统计 / Salaire",
       icon: DollarSign,
       color: "bg-indigo-500 hover:bg-indigo-600",
-    },
+    }]),
   ];
 
   return (

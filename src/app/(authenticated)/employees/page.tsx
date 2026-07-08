@@ -18,7 +18,8 @@ import Link from "next/link";
 
 export default function EmployeesPage() {
   const { t } = useLocale();
-  const { isAdmin } = useAuth();
+  const { isAdmin, profile } = useAuth();
+  const isRecorder = profile?.role === "recorder";
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -159,12 +160,16 @@ export default function EmployeesPage() {
                       {emp.employee_code}
                     </td>
                     <td className="px-4 py-3">
-                      <Link
-                        href={`/employees/${emp.id}`}
-                        className="text-blue-600 hover:underline"
-                      >
-                        {emp.chinese_name}
-                      </Link>
+                      {isRecorder ? (
+                        <span>{emp.chinese_name}</span>
+                      ) : (
+                        <Link
+                          href={`/employees/${emp.id}`}
+                          className="text-blue-600 hover:underline"
+                        >
+                          {emp.chinese_name}
+                        </Link>
+                      )}
                       {emp.local_name && (
                         <span className="text-gray-400 text-xs ml-1">
                           ({emp.local_name})
@@ -189,12 +194,14 @@ export default function EmployeesPage() {
                       )}
                     </td>
                     <td className="px-4 py-3 text-right">
+                      {!isRecorder && (
                       <Link href={`/employees/${emp.id}`}>
                         <Button variant="ghost" size="sm">
                           <Pencil size={16} />
                           <span className="hidden sm:inline ml-1">详情</span>
                         </Button>
                       </Link>
+                      )}
                     </td>
                   </tr>
                 ))

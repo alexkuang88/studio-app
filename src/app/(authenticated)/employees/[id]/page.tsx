@@ -29,9 +29,15 @@ import Link from "next/link";
 
 export default function EmployeeDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const { isAdmin } = useAuth();
+  const { isAdmin, profile } = useAuth();
+  const isRecorder = profile?.role === "recorder";
   const router = useRouter();
   const isNew = id === "new";
+
+  // 录单员禁止进入员工详情
+  useEffect(() => {
+    if (isRecorder) router.replace("/employees");
+  }, [isRecorder]);
 
   const [employee, setEmployee] = useState<Partial<Employee>>({
     employee_code: "",
