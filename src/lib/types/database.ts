@@ -70,6 +70,7 @@ export interface Profile {
   name: string;
   role: UserRole;
   is_active: boolean;
+  language?: string;
   created_at: string;
   updated_at: string;
 }
@@ -85,6 +86,7 @@ export interface Employee {
   can_take_order: boolean;
   note: string | null;
   is_active: boolean;
+  language?: string;
   created_at: string;
   updated_at: string;
 }
@@ -96,6 +98,7 @@ export interface Machine {
   status: MachineStatus;
   note: string | null;
   is_active: boolean;
+  language?: string;
   created_at: string;
   updated_at: string;
 }
