@@ -11,7 +11,11 @@ import { calcRemainingAmount, calcElapsedHours, formatAmount, isOrderOverdue } f
 import { RefreshCw, TrendingUp, Pause } from "lucide-react";
 
 export default function MachineDashboardPage() {
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
+  const fmtWan = (n: number) => `${n.toLocaleString(locale === "fr" ? "fr-FR" : "zh-CN")} ${locale === "fr" ? "10k" : "万"}`;
+  const wanLabel = locale === "fr" ? "10k" : "万";
+  const fmtHrs = (h: number) => formatHoursText(h, locale);
+  const fmtAmt = (a: number) => formatAmount(a, locale);
   const [entries, setEntries] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [lastRefresh, setLastRefresh] = useState(new Date());
@@ -78,7 +82,7 @@ export default function MachineDashboardPage() {
       body: JSON.stringify({ session_id: e.sessionId, current_balance: parseFloat(updateAmt) }),
     });
     const r = await res.json();
-    setUpdateMsg(res.ok ? `✅ 已打 ${r.earned_so_far?.toLocaleString() || "?"} 万，效率 ${r.current_efficiency || "?"} 万/h` : "❌ " + (r.error || "失败"));
+    setUpdateMsg(res.ok ? `✅ 已打 ${fmtWan(r.earned_so_far || 0)}，效率 ${r.current_efficiency || "?"} ${wanLabel}/h` : "❌ " + (r.error || "失败"));
     if (res.ok) fetchData();
     setUpdating(false);
   };
@@ -91,7 +95,7 @@ export default function MachineDashboardPage() {
       body: JSON.stringify({ session_id: e.sessionId, end_amount: parseFloat(pauseAmt), reason: "客户上号" }),
     });
     const r = await res.json();
-    setPauseMsg(res.ok ? `✅ 已暂停！成绩 ${r.result_amount?.toLocaleString() || "?"} 万` : "❌ " + (r.error || "失败"));
+    setPauseMsg(res.ok ? `✅ 已暂停！成绩 ${fmtWan(r.result_amount || 0)}` : "❌ " + (r.error || "失败"));
     if (res.ok) fetchData();
     setPausing(false);
   };
@@ -147,22 +151,22 @@ export default function MachineDashboardPage() {
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between"><span className="text-gray-500 text-xs">{t("dash.operator")}:</span><span className="text-xs font-medium">{e.empName ? `${e.empCode} ${e.empName}` : "—"}</span></div>
                   <div className="flex justify-between"><span className="text-gray-500 text-xs">{t("dash.order")}:</span><span className="text-xs">{e.orderCode} | {e.orderSource}</span></div>
-                  <div className="flex justify-between"><span className="text-gray-500 text-xs">{t("dash.order_amount")}:</span><span className="text-xs">{orderAmt.toLocaleString()} 万</span></div>
-                  <div className="flex justify-between"><span className="text-gray-500 text-xs">{t("dash.target_balance")}:</span><span className="text-xs font-mono font-bold">{((e.targetAmt || 0)).toLocaleString()} 万</span></div>
+                  <div className="flex justify-between"><span className="text-gray-500 text-xs">{t("dash.order_amount")}:</span><span className="text-xs">{fmtWan(orderAmt)}</span></div>
+                  <div className="flex justify-between"><span className="text-gray-500 text-xs">{t("dash.target_balance")}:</span><span className="text-xs font-mono font-bold">{fmtWan((e.targetAmt || 0))}</span></div>
                   {(e.clientAmt || 0) !== 0 && (
-                    <div className="flex justify-between"><span className="text-gray-500 text-xs">{t("dash.client_balance")}:</span><span className="text-xs">{(e.clientAmt || 0) > 0 ? `+${e.clientAmt}` : e.clientAmt} 万</span></div>
+                    <div className="flex justify-between"><span className="text-gray-500 text-xs">{t("dash.client_balance")}:</span><span className="text-xs">{(e.clientAmt || 0) > 0 ? `+${e.clientAmt}` : e.clientAmt} {wanLabel}</span></div>
                   )}
-                  <div className="flex justify-between"><span className="text-gray-500 text-xs">{t("dash.completed")}:</span><span className="text-xs">{formatAmount(e.completedAmt || 0)}</span></div>
-                  <div className="flex justify-between"><span className="text-gray-500 text-xs">{t("dash.remaining")}:</span><span className={`text-xs font-bold ${remainAmt <= 0 ? "text-green-600" : "text-red-600"}`}>{formatAmount(remainAmt)}</span></div>
-                  <div className="flex justify-between"><span className="text-gray-500 text-xs">{t("dash.start_balance")}:</span><span className="text-xs">{(e.startAmt || 0).toLocaleString()} 万</span></div>
+                  <div className="flex justify-between"><span className="text-gray-500 text-xs">{t("dash.completed")}:</span><span className="text-xs">{fmtAmt(e.completedAmt || 0)}</span></div>
+                  <div className="flex justify-between"><span className="text-gray-500 text-xs">{t("dash.remaining")}:</span><span className={`text-xs font-bold ${remainAmt <= 0 ? "text-green-600" : "text-red-600"}`}>{fmtAmt(remainAmt)}</span></div>
+                  <div className="flex justify-between"><span className="text-gray-500 text-xs">{t("dash.start_balance")}:</span><span className="text-xs">{fmtWan((e.startAmt || 0))}</span></div>
 
                   {earned != null ? (
                     <div className="bg-white rounded-lg p-3 border-2 border-blue-300 mt-2">
                       <div className="flex justify-between"><span className="text-xs text-gray-500">{t("dash.current_balance")}</span><span className="text-xs text-gray-400">{e.checkpointAt ? formatDateTime(e.checkpointAt) : "—"}</span></div>
-                      <div className="text-2xl font-mono font-bold text-blue-700 mt-1">{(e.curBalance || 0).toLocaleString()} 万</div>
+                      <div className="text-2xl font-mono font-bold text-blue-700 mt-1">{fmtWan((e.curBalance || 0))}</div>
                       <div className="flex justify-between mt-2 text-xs">
-                        <span className="text-green-600 font-semibold">{"📈 " + t("dash.earned") + " " + earned.toLocaleString() + " 万"}</span>
-                        {eff != null && <span className="text-gray-500">⚡ {eff.toLocaleString()} 万/h</span>}
+                        <span className="text-green-600 font-semibold">{"📈 " + t("dash.earned") + " " + fmtWan(earned || 0)}</span>
+                        {eff != null && <span className="text-gray-500">⚡ {eff.toLocaleString()} {wanLabel}/h</span>}
                       </div>
                     </div>
                   ) : (
@@ -170,12 +174,12 @@ export default function MachineDashboardPage() {
                   )}
 
                   <div className="flex justify-between"><span className="text-gray-500 text-xs">{t("dash.start_time")}:</span><span className="text-xs">{e.startTime ? formatDateTime(e.startTime) : "—"}</span></div>
-                  <div className="flex justify-between"><span className="text-gray-500 text-xs">{t("dash.worked")}:</span><span className="text-xs">{formatHoursText(elapsed)}</span></div>
+                  <div className="flex justify-between"><span className="text-gray-500 text-xs">{t("dash.worked")}:</span><span className="text-xs">{fmtHrs(elapsed)}</span></div>
                   <div className="flex justify-between"><span className="text-gray-500 text-xs">{t("dash.expected")}:</span><span className="text-xs">{e.expectedAt ? formatDateTime(e.expectedAt) : "—"}</span></div>
                   <div className="flex justify-between">
                     <span className="text-gray-500 text-xs">{t("dash.time_remaining")}:</span>
                     <span className={`text-xs ${overdue ? "text-red-600 font-bold" : remainHrs <= 2 && remainHrs > 0 ? "text-orange-600 font-bold" : ""}`}>
-                      {remainHrs > 0 ? formatHoursText(remainHrs) : overdue ? t("dash.overdue_warn") : "—"}
+                      {remainHrs > 0 ? fmtHrs(remainHrs) : overdue ? t("dash.overdue_warn") : "—"}
                     </span>
                   </div>
 

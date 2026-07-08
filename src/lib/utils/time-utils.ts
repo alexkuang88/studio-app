@@ -151,21 +151,24 @@ export function mgDatetimeToUTC(mgDatetime: string): string {
 /**
  * 格式化小时数为可读文本
  */
-export function formatHours(hours: number): string {
-  if (hours < 0) return `-${formatHours(Math.abs(hours))}`;
+export function formatHours(hours: number, locale?: string): string {
+  if (hours < 0) return `-${formatHours(Math.abs(hours), locale)}`;
   const h = Math.floor(hours);
   const m = Math.round((hours - h) * 60);
-  if (m === 60) return `${h + 1} 小时`;
-  if (h === 0) return `${m} 分钟`;
-  if (m === 0) return `${h} 小时`;
-  return `${h} 小时 ${m} 分钟`;
+  const hLabel = locale === "fr" ? "h" : "小时";
+  const mLabel = locale === "fr" ? "min" : "分钟";
+  if (m === 60) return `${h + 1}${hLabel}`;
+  if (h === 0) return `${m}${mLabel}`;
+  if (m === 0) return `${h}${hLabel}`;
+  return `${h}${hLabel}${m}${mLabel}`;
 }
 
 /**
  * 格式化金额为万
  */
-export function formatAmount(amount: number): string {
-  return `${amount.toLocaleString("zh-CN")} 万`;
+export function formatAmount(amount: number, locale?: string): string {
+  const label = locale === "fr" ? "10k" : "万";
+  return `${amount.toLocaleString(locale === "fr" ? "fr-FR" : "zh-CN")} ${label}`;
 }
 
 /**
