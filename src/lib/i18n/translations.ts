@@ -227,6 +227,14 @@ const zh = {
   "order.detail.source": "订单来源",
   "order.detail.cancel": "取消订单 / Annuler",
   "order.detail.cancel_reason": "取消原因 / Raison d'annulation",
+  "ss.subtitle": "选择订单、设备、空闲打手",
+  "dash.current_balance": "当前余额",
+  "dash.earned": "已打",
+  "dash.overdue_warn": "已超时 / En retard",
+  "dash.client_balance": "客户盈亏",
+  "dash.last_refresh": "最后刷新",
+  "dash.auto_refresh": "每30秒自动刷新",
+  "dash.resume_hint": "⚠️ 恢复时去「添加打手」",
 } as const;
 
 const fr: Record<TranslationKey, string> = {
@@ -451,10 +459,20 @@ const fr: Record<TranslationKey, string> = {
   "co.force": "Clôturer en avance",
 
   // 订单详情
-  "order.detail.title": "Détail commande",
-  "order.detail.source": "Source",
-  "order.detail.cancel": "Annuler la commande",
-  "order.detail.cancel_reason": "Raison d'annulation",
+  "dash.current_balance": "Solde actuel",
+  "dash.earned": "Effectué",
+  "dash.overdue_warn": "En retard",
+  "dash.client_balance": "Profit du client",
+  "dash.last_refresh": "Dernière actu.",
+  "dash.auto_refresh": "Actualisation auto 30s",
+  "dash.resume_hint": "⚠️ Reprendre via «Ajouter un opérateur»",
+  "ss.subtitle": "Choisir commande, appareil, opérateur",
+  "ss.auto_fill_hint": "💡 Rempli automatiquement, vérifier le solde réel",
+  "ss.error_select": "Veuillez choisir commande, opérateur, appareil",
+  "ss.no_employees": "Aucun employé",
+  "ss.order_placeholder": "Veuillez choisir une commande",
+  "ss.machine_placeholder": "Veuillez choisir une machine",
+  "error": "Erreur",
 } as const;
 
 export const translations: Record<Locale, Record<TranslationKey, string>> = { zh, fr };

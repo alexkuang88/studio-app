@@ -78,7 +78,7 @@ export default function MachineDashboardPage() {
       body: JSON.stringify({ session_id: e.sessionId, current_balance: parseFloat(updateAmt) }),
     });
     const r = await res.json();
-    setUpdateMsg(res.ok ? `✅ 已打 ${r.earned_so_far?.toLocaleString() || "?"} 万，效率 ${r.current_efficiency || "?"} 万/h` : "❌ " + (r.error || "失败"));
+    setUpdateMsg(res.ok ? `✅ 已打 ${r.earned_so_far?.toLocaleString() || "?"} 万，效率 ${r.current_efficiency || "?"} 万/h` : {t("error")}:  + (r.error || "失败"));
     if (res.ok) fetchData();
     setUpdating(false);
   };
@@ -102,7 +102,7 @@ export default function MachineDashboardPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">设备现场看板 / Tableau de bord machines</h1>
+          <h1 className="text-2xl font-bold text-gray-900">{t("dash.title")}</h1>
           <p className="text-sm text-gray-500 mt-1">最后刷新: {lastRefresh.toLocaleTimeString("zh-CN")} | 每30秒自动刷新 | 点「更新进度」录入最新余额 | 点「暂停」释放打手</p>
         </div>
         <Button variant="outline" onClick={fetchData}><RefreshCw size={18} className="mr-1" />刷新</Button>
@@ -147,37 +147,37 @@ export default function MachineDashboardPage() {
 
               {e.isRunning ? (
                 <div className="space-y-2 text-sm">
-                  <div className="flex justify-between"><span className="text-gray-500 text-xs">打手:</span><span className="text-xs font-medium">{e.empName ? `${e.empCode} ${e.empName}` : "—"}</span></div>
-                  <div className="flex justify-between"><span className="text-gray-500 text-xs">订单:</span><span className="text-xs">{e.orderCode} | {e.orderSource}</span></div>
-                  <div className="flex justify-between"><span className="text-gray-500 text-xs">订单金额:</span><span className="text-xs">{orderAmt.toLocaleString()} 万</span></div>
-                  <div className="flex justify-between"><span className="text-gray-500 text-xs">目标余额:</span><span className="text-xs font-mono font-bold">{((e.targetAmt || 0)).toLocaleString()} 万</span></div>
+                  <div className="flex justify-between"><span className="text-gray-500 text-xs">{t("dash.operator")}:</span><span className="text-xs font-medium">{e.empName ? `${e.empCode} ${e.empName}` : "—"}</span></div>
+                  <div className="flex justify-between"><span className="text-gray-500 text-xs">{t("dash.order")}:</span><span className="text-xs">{e.orderCode} | {e.orderSource}</span></div>
+                  <div className="flex justify-between"><span className="text-gray-500 text-xs">{t("dash.order_amount")}:</span><span className="text-xs">{orderAmt.toLocaleString()} 万</span></div>
+                  <div className="flex justify-between"><span className="text-gray-500 text-xs">{t("dash.target_balance")}:</span><span className="text-xs font-mono font-bold">{((e.targetAmt || 0)).toLocaleString()} 万</span></div>
                   {(e.clientAmt || 0) !== 0 && (
-                    <div className="flex justify-between"><span className="text-gray-500 text-xs">客户盈亏:</span><span className="text-xs">{(e.clientAmt || 0) > 0 ? `+${e.clientAmt}` : e.clientAmt} 万</span></div>
+                    <div className="flex justify-between"><span className="text-gray-500 text-xs">{t("dash.client_balance")}:</span><span className="text-xs">{(e.clientAmt || 0) > 0 ? `+${e.clientAmt}` : e.clientAmt} 万</span></div>
                   )}
-                  <div className="flex justify-between"><span className="text-gray-500 text-xs">已完成:</span><span className="text-xs">{formatAmount(e.completedAmt || 0)}</span></div>
-                  <div className="flex justify-between"><span className="text-gray-500 text-xs">仍需打:</span><span className={`text-xs font-bold ${remainAmt <= 0 ? "text-green-600" : "text-red-600"}`}>{formatAmount(remainAmt)}</span></div>
-                  <div className="flex justify-between"><span className="text-gray-500 text-xs">开始余额:</span><span className="text-xs">{(e.startAmt || 0).toLocaleString()} 万</span></div>
+                  <div className="flex justify-between"><span className="text-gray-500 text-xs">{t("dash.completed")}:</span><span className="text-xs">{formatAmount(e.completedAmt || 0)}</span></div>
+                  <div className="flex justify-between"><span className="text-gray-500 text-xs">{t("dash.remaining")}:</span><span className={`text-xs font-bold ${remainAmt <= 0 ? "text-green-600" : "text-red-600"}`}>{formatAmount(remainAmt)}</span></div>
+                  <div className="flex justify-between"><span className="text-gray-500 text-xs">{t("dash.start_balance")}:</span><span className="text-xs">{(e.startAmt || 0).toLocaleString()} 万</span></div>
 
                   {earned != null ? (
                     <div className="bg-white rounded-lg p-3 border-2 border-blue-300 mt-2">
-                      <div className="flex justify-between"><span className="text-xs text-gray-500">当前余额</span><span className="text-xs text-gray-400">{e.checkpointAt ? formatDateTime(e.checkpointAt) : "—"}</span></div>
+                      <div className="flex justify-between"><span className="text-xs text-gray-500">{t("dash.current_balance")}</span><span className="text-xs text-gray-400">{e.checkpointAt ? formatDateTime(e.checkpointAt) : "—"}</span></div>
                       <div className="text-2xl font-mono font-bold text-blue-700 mt-1">{(e.curBalance || 0).toLocaleString()} 万</div>
                       <div className="flex justify-between mt-2 text-xs">
-                        <span className="text-green-600 font-semibold">📈 已打 {earned.toLocaleString()} 万</span>
+                        <span className="text-green-600 font-semibold">{"📈 " + t("dash.earned") + " " + earned.toLocaleString() + " 万"}</span>
                         {eff != null && <span className="text-gray-500">⚡ {eff.toLocaleString()} 万/h</span>}
                       </div>
                     </div>
                   ) : (
-                    <div className="bg-gray-100 rounded-lg p-3 text-xs text-gray-400 text-center">尚未更新进度</div>
+                    <div className="bg-gray-100 rounded-lg p-3 text-xs text-gray-400 text-center">{t("dash.no_progress")}</div>
                   )}
 
-                  <div className="flex justify-between"><span className="text-gray-500 text-xs">开始时间:</span><span className="text-xs">{e.startTime ? formatDateTime(e.startTime) : "—"}</span></div>
-                  <div className="flex justify-between"><span className="text-gray-500 text-xs">已工作:</span><span className="text-xs">{formatHoursText(elapsed)}</span></div>
-                  <div className="flex justify-between"><span className="text-gray-500 text-xs">要求完成:</span><span className="text-xs">{e.expectedAt ? formatDateTime(e.expectedAt) : "—"}</span></div>
+                  <div className="flex justify-between"><span className="text-gray-500 text-xs">{t("dash.start_time")}:</span><span className="text-xs">{e.startTime ? formatDateTime(e.startTime) : "—"}</span></div>
+                  <div className="flex justify-between"><span className="text-gray-500 text-xs">{t("dash.worked")}:</span><span className="text-xs">{formatHoursText(elapsed)}</span></div>
+                  <div className="flex justify-between"><span className="text-gray-500 text-xs">{t("dash.expected")}:</span><span className="text-xs">{e.expectedAt ? formatDateTime(e.expectedAt) : "—"}</span></div>
                   <div className="flex justify-between">
-                    <span className="text-gray-500 text-xs">剩余时间:</span>
+                    <span className="text-gray-500 text-xs">{t("dash.time_remaining")}:</span>
                     <span className={`text-xs ${overdue ? "text-red-600 font-bold" : remainHrs <= 2 && remainHrs > 0 ? "text-orange-600 font-bold" : ""}`}>
-                      {remainHrs > 0 ? formatHoursText(remainHrs) : overdue ? "已超时" : "—"}
+                      {remainHrs > 0 ? formatHoursText(remainHrs) : overdue ? "{t("dash.overdue_warn")}" : "—"}
                     </span>
                   </div>
 
@@ -194,15 +194,15 @@ export default function MachineDashboardPage() {
                     </div>
                   ) : pauseId === e.sessionId ? (
                     <div className="bg-white rounded-lg border-2 border-orange-400 p-3 space-y-2">
-                      <p className="text-sm font-semibold text-orange-800">⏸️ 暂停订单</p>
-                      <p className="text-xs text-gray-600">输入当前余额，暂停后释放打手和设备</p>
+                      <p className="text-sm font-semibold text-orange-800">{t("dash.pause_title")}</p>
+                      <p className="text-xs text-gray-600">{t("dash.pause_desc")}</p>
                       <div className="flex gap-2">
                         <input type="number" value={pauseAmt} onChange={(ev) => setPauseAmt(ev.target.value)} placeholder={`≥ ${e.startAmt || 0}`} className="flex-1 rounded border border-gray-300 px-2 py-1 text-sm" autoFocus />
                         <Button size="sm" onClick={() => handlePauseAction(e)} loading={pausing}>确认</Button>
                         <Button size="sm" variant="ghost" onClick={() => { setPauseId(null); setPauseMsg(""); }}>取消</Button>
                       </div>
                       {pauseMsg && <p className={`text-xs ${pauseMsg.startsWith("✅") ? "text-green-600" : "text-red-600"}`}>{pauseMsg}</p>}
-                      <p className="text-xs text-orange-600">⚠️ 恢复时去「添加打手」</p>
+                      <p className="text-xs text-orange-600">{t("dash.resume_hint")}</p>
                     </div>
                   ) : (
                     <div className="flex gap-2 mt-1">
@@ -217,12 +217,12 @@ export default function MachineDashboardPage() {
                     </div>
                   )}
 
-                  {overdue && <div className="mt-2 bg-red-100 text-red-700 rounded-lg px-3 py-1.5 text-xs font-bold text-center">⚠️ 已超时 / En retard</div>}
-                  {!overdue && remainHrs > 0 && remainHrs <= 2 && <div className="mt-2 bg-orange-100 text-orange-700 rounded-lg px-3 py-1.5 text-xs font-bold text-center">⚡ 即将超时</div>}
+                  {overdue && <div className="mt-2 bg-red-100 text-red-700 rounded-lg px-3 py-1.5 text-xs font-bold text-center">{t("dash.overdue_warn")}</div>}
+                  {!overdue && remainHrs > 0 && remainHrs <= 2 && <div className="mt-2 bg-orange-100 text-orange-700 rounded-lg px-3 py-1.5 text-xs font-bold text-center">⚡ {t("home.nearing")}</div>}
                 </div>
               ) : (
                 <div className="text-center py-4 font-medium">
-                  {m.status === "available" && "✅ 空闲 / Disponible"}
+                  {m.status === "available" && "✅ {t("machine.available")}"}
                   {m.status === "repair" && "🔧 维修中 / En réparation"}
                   {m.status === "disabled" && "🚫 已停用 / Désactivé"}
                 </div>

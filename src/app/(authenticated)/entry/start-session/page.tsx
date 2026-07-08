@@ -130,7 +130,7 @@ export default function StartSessionPage() {
     }
 
     if (!selectedOrder || !selectedEmployee || !selectedMachine) {
-      setError("请选择订单、打手和设备");
+      setError("{t("ss.order_placeholder")}和设备");
       return;
     }
 
@@ -205,8 +205,8 @@ export default function StartSessionPage() {
           <Button variant="ghost" size="sm"><ArrowLeft size={18} /></Button>
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">添加打手 / Démarrer une session</h1>
-          <p className="text-sm text-gray-500 mt-1">选择订单、设备、空闲打手</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t("ss.title")}</h1>
+          <p className="text-sm text-gray-500 mt-1">{t("ss.subtitle")}</p>
         </div>
       </div>
 
@@ -215,13 +215,13 @@ export default function StartSessionPage() {
         {success && <div className="bg-green-50 text-green-700 px-4 py-3 rounded-lg text-sm font-medium">{success}</div>}
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">选择订单 / Choisir commande *</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">{t("ss.order")} *</label>
           <select
             value={selectedOrder}
             onChange={(e) => setSelectedOrder(e.target.value)}
             className="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            <option value="">请选择订单...</option>
+            <option value="">{t("ss.order_placeholder")}</option>
             {orders.map((o) => (
               <option key={o.id} value={o.id}>
                 {o.order_code} — {((o.order_amount as number) || o.target_amount - (o.initial_balance || 0)).toLocaleString("zh-CN")}万 [{o.status}]
@@ -231,13 +231,13 @@ export default function StartSessionPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">选择设备 / Choisir machine *</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">{t("ss.machine")} *</label>
           <select
             value={selectedMachine}
             onChange={(e) => setSelectedMachine(e.target.value)}
             className="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            <option value="">请选择设备...</option>
+            <option value="">{t("ss.machine_placeholder")}</option>
             {machines.map((m) => {
               const isBusy = m.status === "in_use";
               const isDisabled = m.status === "repair" || m.status === "disabled";
@@ -253,10 +253,10 @@ export default function StartSessionPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">选择打手 / Choisir employé *</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">{t("ss.employee")} *</label>
           <div className="grid grid-cols-1 gap-2 mb-2">
             {employees.length === 0 && (
-              <p className="text-sm text-gray-400 py-2">暂无打手 / Aucun employé</p>
+              <p className="text-sm text-gray-400 py-2">{t("ss.no_employees")}</p>
             )}
             {employees
               .filter((e) => e.status !== "training")
@@ -299,7 +299,7 @@ export default function StartSessionPage() {
         </div>
 
         <Input
-          label="上号时间 / Heure de début *"
+          label=t("ss.start_time") + " *"
           type="datetime-local"
           value={startTime}
           onChange={(e) => setStartTime(e.target.value)}
@@ -307,7 +307,7 @@ export default function StartSessionPage() {
 
         <div className="bg-gray-50 border border-gray-200 rounded-lg px-4 py-3">
           <label className="block text-sm font-medium text-gray-600 mb-1">
-            手机初始余额 / Solde initial *
+            {t("ss.start_amount")} *
           </label>
           <input
             type="number"
@@ -317,7 +317,7 @@ export default function StartSessionPage() {
             placeholder="0"
           />
           <p className="text-xs text-blue-600 mt-1">
-            💡 已自动填充（上一位结束余额或订单初始余额），请核实手机实际余额后修改
+            💡 {t("ss.auto_fill_hint")}
           </p>
         </div>
 

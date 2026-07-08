@@ -43,7 +43,7 @@ export default function CheckpointPage() {
     });
 
     if (res.ok) {
-      setMsgMap(m => ({ ...m, [sessionId]: "✅ 已打卡" }));
+      setMsgMap(m => ({ ...m, [sessionId]: "✅ {t("cp.done")}" }));
       setAmounts(a => { const n = { ...a }; delete n[sessionId]; return n; });
       fetchSessions();
     } else {
@@ -56,17 +56,17 @@ export default function CheckpointPage() {
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">每日打卡 / Checkpoint</h1>
-          <p className="text-sm text-gray-500 mt-1">定时打卡，只分段不换人。填入当前实际余额 → 打卡</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t("cp.title")}</h1>
+          <p className="text-sm text-gray-500 mt-1">{t("cp.desc")}</p>
         </div>
-        <Button variant="outline" size="sm" onClick={fetchSessions}><RefreshCw size={16} className="mr-1" />刷新</Button>
+        <Button variant="outline" size="sm" onClick={fetchSessions}><RefreshCw size={16} className="mr-1" />{t("refresh")}</Button>
       </div>
 
       {loading ? (
-        <div className="text-center py-12 text-gray-500">加载中...</div>
+        <div className="text-center py-12 text-gray-500">{t("loading")}</div>
       ) : sessions.length === 0 ? (
         <div className="bg-green-50 border border-green-200 rounded-xl p-8 text-center text-green-700 text-lg font-medium">
-          ✅ 没有进行中的打单，全部已完成
+          ✅ {t("cp.all_done")}
         </div>
       ) : (
         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
@@ -74,13 +74,13 @@ export default function CheckpointPage() {
             <table className="w-full text-sm">
               <thead className="bg-gray-50 border-b">
                 <tr>
-                  <th className="px-3 py-3 text-left">打手</th>
-                  <th className="px-3 py-3 text-left">设备</th>
-                  <th className="px-3 py-3 text-left">订单</th>
-                  <th className="px-3 py-3 text-right">开始余额(万)</th>
-                  <th className="px-3 py-3 text-right">当前余额(万)</th>
-                  <th className="px-3 py-3 text-center">已打</th>
-                  <th className="px-3 py-3 text-center">打卡</th>
+                  <th className="px-3 py-3 text-left">{t("cp.col_operator")}</th>
+                  <th className="px-3 py-3 text-left">{t("cp.col_device")}</th>
+                  <th className="px-3 py-3 text-left">{t("cp.col_order")}</th>
+                  <th className="px-3 py-3 text-right">{t("cp.col_start_amt")}</th>
+                  <th className="px-3 py-3 text-right">{t("cp.col_current_amt")}</th>
+                  <th className="px-3 py-3 text-center">{t("cp.col_elapsed")}</th>
+                  <th className="px-3 py-3 text-center">{t("cp.col_action")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y">
@@ -119,7 +119,7 @@ export default function CheckpointPage() {
                       </td>
                       <td className="px-3 py-2 text-center">
                         {msg?.startsWith("✅") ? (
-                          <span className="text-green-600 text-xs font-medium"><CheckCircle size={14} className="inline mr-1" />已打卡</span>
+                          <span className="text-green-600 text-xs font-medium"><CheckCircle size={14} className="inline mr-1" />{t("cp.done")}</span>
                         ) : (
                           <Button size="sm" variant="primary"
                             onClick={() => doCheckpoint(s.id)}
