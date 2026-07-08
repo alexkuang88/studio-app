@@ -168,25 +168,25 @@ export default function DashboardPage() {
     },
     {
       href: "/entry/start-session",
-      label: "添加打手 / Démarrer",
+      label: "添加打手 / Changer d'opérateur",
       icon: PlaySquare,
       color: "bg-green-500 hover:bg-green-600",
     },
     {
       href: "/entry/handover",
-      label: "换人交接 / Relève",
+      label: "换人交接 / Changer d'opérateur",
       icon: UserCheck,
       color: "bg-orange-500 hover:bg-orange-600",
     },
     {
       href: "/entry/complete-order",
-      label: "完成订单 / Terminer",
+      label: "完成订单 / Clôturer la commande",
       icon: CheckCircle,
       color: "bg-purple-500 hover:bg-purple-600",
     },
     {
       href: "/machines/dashboard",
-      label: "设备看板 / Machines",
+      label: "设备看板 / Tableau des appareils",
       icon: MonitorCheck,
       color: "bg-teal-500 hover:bg-teal-600",
     },
@@ -271,7 +271,7 @@ export default function DashboardPage() {
           href="/orders?overdue=1"
         />
         <StatCard
-          title="今日完成金额"
+          title="今日完成金额 / Valeur réalisée aujourd'hui"
           value={stats.todayCompletedAmount}
           unit="万"
           icon={CheckCircle}
@@ -280,7 +280,7 @@ export default function DashboardPage() {
           href="/orders?status=completed&today=1"
         />
         <StatCard
-          title="今日接单总额"
+          title="今日接单总额 / Total des commandes du jour"
           value={stats.todayOrderAmount}
           unit="万"
           icon={DollarSign}
@@ -292,7 +292,7 @@ export default function DashboardPage() {
 
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         <StatCard
-          title="今日完成订单"
+          title="今日完成订单 / Commandes terminées aujourd'hui"
           value={stats.todayCompletedOrders}
           unit="单"
           icon={CheckCircle}
