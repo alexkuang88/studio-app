@@ -168,7 +168,7 @@ export default function DashboardPage() {
     },
     {
       href: "/entry/start-session",
-      label: "添加打手 / Changer d'opérateur",
+      label: "添加打手 / Ajouter un opérateur",
       icon: PlaySquare,
       color: "bg-green-500 hover:bg-green-600",
     },
