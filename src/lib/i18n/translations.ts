@@ -55,7 +55,7 @@ const zh = {
   "emp.code": "员工编号 / Code",
   "emp.name": "姓名 / Nom",
   "emp.status": "状态 / Statut",
-  "emp.all_status": "全部状态 / Tous",
+  "emp.all_status": "全部状态 / Tous les statuts",
   "emp.can_take": "可接单",
   "emp.note": "备注 / Note",
   "emp.phone": "电话 / Téléphone",
@@ -65,12 +65,12 @@ const zh = {
   "emp.detail": "员工详情",
 
   // 员工状态
-  "status.training": "培训中 / Formation",
-  "status.official": "正式 / Officiel",
-  "status.advanced": "高级 / Avancé",
+  "status.training": "培训中 / En formation",
+  "status.official": "正式员工 / Employé permanent",
+  "status.advanced": "高级员工 / Employé expérimenté",
   "status.suspended": "暂停 / Suspendu",
   "status.left": "离职 / Parti",
-  "status.manager": "管理 / Manager",
+  "status.manager": "管理员 / Manager",
 
   // 订单状态
   "order.status.not_started": "未开始 / Non commencé",
@@ -108,16 +108,16 @@ const zh = {
   "dash.expected": "要求完成:",
   "dash.time_remaining": "剩余时间:",
   "dash.no_progress": "尚未更新进度",
-  "dash.update_btn": "更新进度",
-  "dash.pause_btn": "暂停",
-  "dash.pause_title": "暂停订单",
-  "dash.pause_desc": "输入当前余额，暂停后释放打手和设备",
+  "dash.update_btn": "更新进度 / Mettre à jour",
+  "dash.pause_btn": "暂停 / Pause",
+  "dash.pause_title": "暂停订单 / Suspendre",
+  "dash.pause_desc": "输入当前余额，暂停后释放打手和设备 / Saisir le solde",
 
   // 订单管理
   "orders.title": "订单管理 / Commandes",
   "orders.new": "新建订单 / Nouvelle commande",
   "orders.search": "搜索订单号...",
-  "orders.all_status": "全部状态 / Tous",
+  "orders.all_status": "全部状态 / Tous les statuts",
   "orders.all_source": "全部来源 / Toutes",
   "orders.code": "订单号 / N°",
   "orders.source": "来源 / Source",
@@ -128,7 +128,7 @@ const zh = {
   "orders.target_balance": "完成余额(万) / Objectif",
   "orders.latest_balance": "最新余额(万) / Actuel",
   "orders.revenue": "收入",
-  "orders.operator_device": "打手/设备 / Employé/Machine",
+  "orders.operator_device": "打手/设备 / Opérateur / Machine",
   "orders.expected": "要求完成 / Échéance",
   "orders.completed_at": "完成时间 / Fini le",
   "orders.time_remaining": "剩余时间 / Restant",
@@ -308,11 +308,11 @@ const fr: Record<TranslationKey, string> = {
 
   // 员工状态
   "status.training": "En formation",
-  "status.official": "Employé actif",
-  "status.advanced": "Senior",
+  "status.official": "Employé permanent",
+  "status.advanced": "Employé expérimenté",
   "status.suspended": "Suspendu",
-  "status.left": "Démissionné",
-  "status.manager": "Administrateur",
+  "status.left": "Parti",
+  "status.manager": "Manager",
 
   // 订单状态
   "order.status.not_started": "Non commencée",
@@ -350,10 +350,10 @@ const fr: Record<TranslationKey, string> = {
   "dash.expected": "À terminer avant :",
   "dash.time_remaining": "Temps restant :",
   "dash.no_progress": "Pas encore mis à jour",
-  "dash.update_btn": "Mettre à jour la progression",
-  "dash.pause_btn": "Suspendre",
+  "dash.update_btn": "Mettre à jour",
+  "dash.pause_btn": "Pause",
   "dash.pause_title": "Suspendre",
-  "dash.pause_desc": "Saisir le solde actuel. Suspendre libère l'opérateur et l'appareil",
+  "dash.pause_desc": "Saisir le solde actuel",
 
   // 订单管理
   "orders.title": "Commandes",

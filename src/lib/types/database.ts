@@ -282,9 +282,9 @@ export const ORDER_SOURCE_LABELS: Record<OrderSource, string> = {
 };
 
 export const EMPLOYEE_STATUS_LABELS: Record<EmployeeStatus, string> = {
-  training: "培训中 / Formation",
-  official: "正式 / Officiel",
-  advanced: "高级 / Avancé",
+  training: "培训中 / En formation",
+  official: "正式员工 / Employé permanent",
+  advanced: "高级员工 / Employé expérimenté",
   suspended: "暂停 / Suspendu",
   left: "离职 / Parti",
   manager: "管理 / Manager",
@@ -298,9 +298,9 @@ export const MACHINE_STATUS_LABELS: Record<MachineStatus, string> = {
 };
 
 export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
-  not_started: "未开始 / Non commencé",
+  not_started: "未开始 / Non commencée",
   in_progress: "进行中 / En cours",
-  ready_to_complete: "可完成 / Prêt à terminer",
+  ready_to_complete: "可完成 / Prêt à clôturer",
   completed: "已完成 / Terminé",
   overdue: "超时 / En retard",
   cancelled: "已取消 / Annulé",

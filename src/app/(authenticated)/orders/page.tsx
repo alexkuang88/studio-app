@@ -183,7 +183,7 @@ function OrdersContent() {
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
           options={[
-            { value: "", label: "全部状态 / Tous" },
+            { value: "", label: "全部状态 / Tous les statuts" },
             ...Object.entries(ORDER_STATUS_LABELS).map(([v, l]) => ({
               value: v,
               label: l,
@@ -194,7 +194,7 @@ function OrdersContent() {
           value={sourceFilter}
           onChange={(e) => setSourceFilter(e.target.value)}
           options={[
-            { value: "", label: "全部来源 / Toutes" },
+            { value: "", label: "全部来源 / Toutes les sources" },
             ...Object.entries(ORDER_SOURCE_LABELS).map(([v, l]) => ({
               value: v,
               label: l,
@@ -313,7 +313,7 @@ function OrdersContent() {
                         {emp
                           ? `${String(emp.employee_code).replace(/^N0*/, "")}号${emp.chinese_name}`
                           : "—"}
-                        {machine ? ` / ${String(machine.machine_code).replace(/^M0*/, "")}号机` : ""}
+                        {machine ? ` / ${machine.machine_code} / Machine ${String(machine.machine_code).replace(/^M0*/, "")}` : ""}
                       </td>
                       <td className="px-3 py-3 text-xs hidden md:table-cell">
                         {formatDateTime(order.expected_completion_at as string)}

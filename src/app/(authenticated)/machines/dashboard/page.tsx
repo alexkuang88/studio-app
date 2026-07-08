@@ -136,9 +136,7 @@ export default function MachineDashboardPage() {
             <div key={m.id} className={`rounded-xl border-2 ${bc} p-4`}>
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
-                  <span className="font-mono text-xl font-bold">{m.machine_code}</span>
-                  <span className="text-gray-500">/</span>
-                  <span className="text-gray-700">{m.machine_name}</span>
+                  <span className="font-mono text-xl font-bold">{m.machine_code} / Machine {m.machine_code.replace(/^M0*/, "")}</span>
                 </div>
                 <Badge variant={m.status === "in_use" ? "blue" : m.status === "available" ? "green" : m.status === "repair" ? "orange" : "red"}>
                   {MACHINE_STATUS_LABELS[m.status]}

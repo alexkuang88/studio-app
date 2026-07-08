@@ -99,7 +99,7 @@ export default function EmployeesPage() {
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
           options={[
-            { value: "", label: "全部状态 / Tous" },
+            { value: "", label: "全部状态 / Tous les statuts" },
             ...Object.entries(EMPLOYEE_STATUS_LABELS).map(([v, l]) => ({
               value: v,
               label: l,

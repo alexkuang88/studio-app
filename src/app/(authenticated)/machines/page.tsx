@@ -138,7 +138,7 @@ export default function MachinesPage() {
                       {MACHINE_STATUS_LABELS[machine.status]}
                     </Badge>
                   </div>
-                  <p className="text-gray-500 text-sm mt-0.5">{machine.machine_name}</p>
+                  <p className="text-gray-500 text-sm mt-0.5">{machine.machine_code} / Machine {machine.machine_code.replace(/^M0*/, "")}</p>
                 </div>
                 <Button variant="ghost" size="sm" onClick={() => openEdit(machine)}>
                   <Pencil size={16} />
