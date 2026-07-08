@@ -116,7 +116,7 @@ export async function GET(
 
         const { data: sessions } = await supabase
           .from("work_sessions")
-          .select("employee_id, result_amount, work_hours, efficiency, end_time")
+          .select("employee_id, result_amount, work_hours, efficiency, start_time, end_time")
           .eq("status", "completed")
           .gte("end_time", monthStart)
           .lt("end_time", nextMonth);
@@ -133,7 +133,7 @@ export async function GET(
         let tieredSalaryMap: Map<string, number> = new Map();
         if (isTiered && (sessions || []).length > 0) {
           tieredSalaryMap = calcDailyTieredSalary(
-            sessions as Array<{ employee_id: string; result_amount: number | null; end_time: string | null }>,
+            sessions as Array<{ employee_id: string; result_amount: number | null; start_time: string | null; end_time: string | null; work_hours: number | null }>,
             baseRate,
             premiumRate,
             dailyThreshold,

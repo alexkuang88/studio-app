@@ -178,6 +178,7 @@ export function getMGDay(date: string | Date): string {
  * 阶梯日工资计算
  *
  * 按员工+马达加斯加日期分组，逐日判断：
+ * - 跨天分段按每天工时比例拆分产量
  * - 日产量 >= threshold → premiumRate
  * - 日产量 <  threshold → baseRate
  * - 日期 < startDate（如2026-07-06之前）→ 走 legacyRate（旧单价）
@@ -188,24 +189,82 @@ export function calcDailyTieredSalary(
   sessions: Array<{
     employee_id: string;
     result_amount: number | null;
+    start_time: string | null;
     end_time: string | null;
+    work_hours: number | null;
   }>,
   baseRate: number,
   premiumRate: number,
   threshold: number,
-  startDate: string,    // "2026-07-06" — 阶梯制度生效日期
-  legacyRate: number    // 旧单价，生效日期之前的日期使用
+  startDate: string,
+  legacyRate: number
 ): Map<string, number> {
   // employee_id → MG_day → sum
   const dailyTotals: Record<string, Record<string, number>> = {};
 
   for (const s of sessions) {
-    if (!s.end_time || s.result_amount == null) continue;
+    if (!s.end_time || !s.start_time || s.result_amount == null) continue;
     const eid = s.employee_id;
-    const day = getMGDay(s.end_time);
+    const result = s.result_amount;
+    const start = new Date(s.start_time);
+    const end = new Date(s.end_time);
+    const totalMs = end.getTime() - start.getTime();
+    if (totalMs <= 0) continue;
 
     if (!dailyTotals[eid]) dailyTotals[eid] = {};
-    dailyTotals[eid][day] = (dailyTotals[eid][day] || 0) + s.result_amount;
+
+    const startDay = getMGDay(s.start_time);
+    const endDay = getMGDay(s.end_time);
+
+    if (startDay === endDay) {
+      dailyTotals[eid][startDay] = (dailyTotals[eid][startDay] || 0) + result;
+      continue;
+    }
+
+    // 跨天：按每天工时比例拆分
+    // 马达加斯加午夜 = UTC 21:00
+    const portions: Array<{ day: string; ms: number }> = [];
+    let cursor = start.getTime();
+
+    // 第1段：从 start 到当日 MG 午夜
+    let midnight = new Date(start);
+    midnight.setUTCHours(21, 0, 0, 0);
+    if (midnight.getTime() <= cursor) {
+      midnight.setUTCDate(midnight.getUTCDate() + 1);
+      midnight.setUTCHours(21, 0, 0, 0);
+    }
+    if (midnight.getTime() < end.getTime()) {
+      portions.push({ day: startDay, ms: midnight.getTime() - cursor });
+      cursor = midnight.getTime();
+    } else {
+      portions.push({ day: startDay, ms: totalMs });
+    }
+
+    // 中间完整天（每天从 MG午夜 到下一个 MG午夜）
+    while (cursor < end.getTime() - 60000) {
+      const nextMidnight = new Date(cursor);
+      nextMidnight.setUTCDate(nextMidnight.getUTCDate() + 1);
+      nextMidnight.setUTCHours(21, 0, 0, 0);
+      const dayMs = Math.min(nextMidnight.getTime(), end.getTime()) - cursor;
+      if (dayMs <= 0) break;
+      const dayLabel = getMGDay(new Date(cursor));
+      portions.push({ day: dayLabel, ms: dayMs });
+      cursor += dayMs;
+    }
+
+    // 按比例分配
+    let allocated = 0;
+    for (let i = 0; i < portions.length; i++) {
+      const p = portions[i];
+      let share: number;
+      if (i === portions.length - 1) {
+        share = result - allocated; // 最后一段用余数，避免舍入误差
+      } else {
+        share = Math.round(result * (p.ms / totalMs));
+      }
+      allocated += share;
+      dailyTotals[eid][p.day] = (dailyTotals[eid][p.day] || 0) + share;
+    }
   }
 
   const result = new Map<string, number>();

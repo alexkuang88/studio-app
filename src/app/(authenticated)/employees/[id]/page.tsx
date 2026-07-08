@@ -149,7 +149,9 @@ export default function EmployeeDetailPage() {
             s.map(ws => ({
               employee_id: id,
               result_amount: ws.result_amount as number | null,
+              start_time: ws.start_time as string | null,
               end_time: ws.end_time as string | null,
+              work_hours: ws.work_hours as number | null,
             })),
             salaryRateBase, salaryRatePremium, dailyThreshold, tieredStartDate, salaryRate
           );
