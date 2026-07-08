@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { createClient } from "@/lib/supabase/client";
+import { useAuth } from "@/lib/hooks/useAuth";
 import {
   ORDER_SOURCE_LABELS,
   type OrderSource,
@@ -51,6 +52,8 @@ function calcExpectedTime(orderAmount: number): string {
 export default function NewOrderPage() {
   const router = useRouter();
   const supabase = createClient();
+  const { profile } = useAuth();
+  const isRecorder = profile?.role === "recorder";
   const [autoCode, setAutoCode] = useState("P001");
   const [order, setOrder] = useState({
     order_code: "",
@@ -260,7 +263,8 @@ export default function NewOrderPage() {
             </p>
           </div>
 
-          {/* 订单收入 */}
+          {/* 订单收入 — 录单员不可见 */}
+          {!isRecorder && (
           <div className="border-t pt-3">
             <h3 className="font-semibold text-gray-800 mb-2">订单收入</h3>
             <div className="flex items-end gap-3">
@@ -293,6 +297,7 @@ export default function NewOrderPage() {
               </div>
             </div>
           </div>
+          )}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

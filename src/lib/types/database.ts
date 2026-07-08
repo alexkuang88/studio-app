@@ -4,7 +4,7 @@
 
 // ---------- 枚举类型 ----------
 
-export type UserRole = "admin" | "operator";
+export type UserRole = "admin" | "operator" | "recorder";
 
 export type EmployeeStatus =
   | "training"
