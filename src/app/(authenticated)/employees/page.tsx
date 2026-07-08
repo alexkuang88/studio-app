@@ -81,7 +81,7 @@ export default function EmployeesPage() {
         <Link href={`/employees/${"new"}`}>
           <Button variant="primary">
             <Plus size={18} className="mr-1" />
-            新增员工 / Ajouter
+            新增员工 / Ajouter un employé
           </Button>
         </Link>
       </div>

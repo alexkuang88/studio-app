@@ -167,7 +167,7 @@ function OrdersContent() {
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-2">
         <Input
-          placeholder="搜索订单号..."
+          placeholder="搜索订单号... / Rechercher..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="flex-1 min-w-[160px]"

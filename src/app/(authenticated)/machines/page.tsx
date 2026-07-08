@@ -86,7 +86,7 @@ export default function MachinesPage() {
             <Button variant="outline"><MonitorCheck size={18} className="mr-1" />现场看板</Button>
           </Link>
           <Button variant="primary" onClick={() => { setShowForm(true); setEditingId(null); setEditMachine({ machine_code: "", machine_name: "", status: "available", note: "" }); setError(""); }}>
-            <Plus size={18} className="mr-1" />新增设备
+            <Plus size={18} className="mr-1" />新增设备 / Nouvel appareil
           </Button>
         </div>
       </div>
@@ -146,10 +146,10 @@ export default function MachinesPage() {
               </div>
               {machine.status === "in_use" && running && (
                 <div className="bg-blue-50 rounded-lg p-3 space-y-1 text-sm">
-                  <div className="flex justify-between"><span className="text-gray-500">打手:</span>
+                  <div className="flex justify-between"><span className="text-gray-500">打手 / Opérateur:</span>
                     <span className="font-medium">{running.employees ? `${(running.employees as Record<string, unknown>).employee_code} ${(running.employees as Record<string, unknown>).chinese_name}` : "—"}</span>
                   </div>
-                  <div className="flex justify-between"><span className="text-gray-500">订单:</span>
+                  <div className="flex justify-between"><span className="text-gray-500">订单 / Commande:</span>
                     <span className="font-mono font-medium">{running.orders ? (running.orders as Record<string, unknown>).order_code as string : "—"}</span>
                   </div>
                 </div>

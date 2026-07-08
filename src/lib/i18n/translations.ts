@@ -95,7 +95,7 @@ const zh = {
   "machine.edit": "编辑设备",
 
   // 设备看板
-  "dash.title": "设备现场看板 / Tableau de bord machines",
+  "dash.title": "设备现场看板 / Tableau des appareils",
   "dash.operator": "打手:",
   "dash.order": "订单:",
   "dash.order_amount": "订单金额:",

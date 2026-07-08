@@ -103,9 +103,9 @@ export default function MachineDashboardPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">{t("dash.title")}</h1>
-          <p className="text-sm text-gray-500 mt-1">最后刷新: {lastRefresh.toLocaleTimeString("zh-CN")} | 每30秒自动刷新 | 点「更新进度」录入最新余额 | 点「暂停」释放打手</p>
+          <p className="text-sm text-gray-500 mt-1">{t("dash.last_refresh")}: {lastRefresh.toLocaleTimeString("zh-CN")} | {t("dash.auto_refresh")} | {t("dash.update_btn")} | {t("dash.pause_btn")}</p>
         </div>
-        <Button variant="outline" onClick={fetchData}><RefreshCw size={18} className="mr-1" />刷新</Button>
+        <Button variant="outline" onClick={fetchData}><RefreshCw size={18} className="mr-1" />{t("refresh")}</Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -196,8 +196,8 @@ export default function MachineDashboardPage() {
                       <p className="text-xs text-gray-600">{t("dash.pause_desc")}</p>
                       <div className="flex gap-2">
                         <input type="number" value={pauseAmt} onChange={(ev) => setPauseAmt(ev.target.value)} placeholder={`≥ ${e.startAmt || 0}`} className="flex-1 rounded border border-gray-300 px-2 py-1 text-sm" autoFocus />
-                        <Button size="sm" onClick={() => handlePauseAction(e)} loading={pausing}>确认</Button>
-                        <Button size="sm" variant="ghost" onClick={() => { setPauseId(null); setPauseMsg(""); }}>取消</Button>
+                        <Button size="sm" onClick={() => handlePauseAction(e)} loading={pausing}>确认 / Confirmer</Button>
+                        <Button size="sm" variant="ghost" onClick={() => { setPauseId(null); setPauseMsg(""); }}>取消 / Annuler</Button>
                       </div>
                       {pauseMsg && <p className={`text-xs ${pauseMsg.startsWith("✅") ? "text-green-600" : "text-red-600"}`}>{pauseMsg}</p>}
                       <p className="text-xs text-orange-600">{t("dash.resume_hint")}</p>
@@ -206,11 +206,11 @@ export default function MachineDashboardPage() {
                     <div className="flex gap-2 mt-1">
                       <button onClick={() => { setUpdateId(e.sessionId); setPauseId(null); setUpdateAmt(e.curBalance != null ? String(e.curBalance) : ""); setUpdateMsg(""); }}
                         className="flex-1 py-2 rounded-lg bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium flex items-center justify-center gap-1">
-                        <TrendingUp size={16} />更新进度
+                        <TrendingUp size={16} />{t("dash.update_btn")}
                       </button>
                       <button onClick={() => { setPauseId(e.sessionId); setUpdateId(null); setPauseAmt(e.curBalance != null ? String(e.curBalance) : ""); setPauseMsg(""); }}
                         className="flex-1 py-2 rounded-lg bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium flex items-center justify-center gap-1">
-                        <Pause size={16} />暂停
+                        <Pause size={16} />{t("dash.pause_btn")}
                       </button>
                     </div>
                   )}
