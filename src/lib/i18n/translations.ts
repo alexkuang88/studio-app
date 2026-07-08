@@ -37,7 +37,7 @@ const zh = {
   "home.complete_order": "完成订单 / Clôturer la commande",
   "home.dashboard": "设备看板 / Tableau des appareils",
   "home.salary": "工资统计 / Salaire",
-  "home.today_new": "今日新增订单",
+  "home.today_new": "今日新增订单 / Nouvelles commandes aujourd'hui",
   "home.in_progress": "进行中 / En cours",
   "home.paused": "暂停中 / En pause",
   "home.overdue": "已超时 / En retard",
@@ -46,8 +46,8 @@ const zh = {
   "home.today_completed": "今日完成订单 / Commandes terminées aujourd'hui",
   "home.in_use": "使用中设备 / En utilisation",
   "home.available": "空闲设备 / Disponible",
-  "home.nearing": "即将超时 / Bientôt retard",
-  "home.not_started": "未开始订单",
+  "home.nearing": "即将超时 / Bientôt en retard",
+  "home.not_started": "未开始订单 / Commandes non commencées",
 
   // 员工管理
   "emp.title": "员工管理 / Employés",
@@ -279,7 +279,7 @@ const fr: Record<TranslationKey, string> = {
   "home.complete_order": "Clôturer la commande",
   "home.dashboard": "Tableau des appareils",
   "home.salary": "Salaire",
-  "home.today_new": "Tableau des appareils",
+  "home.today_new": "Nouvelles commandes aujourd'hui",
   "home.in_progress": "En cours",
   "home.paused": "En pause",
   "home.overdue": "Commandes en retard",

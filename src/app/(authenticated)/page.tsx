@@ -236,7 +236,7 @@ export default function DashboardPage() {
       {/* Statistics cards */}
       <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
         <StatCard
-          title="今日新增订单"
+          title="今日新增订单 / Nouvelles commandes aujourd'hui"
           value={stats.todayNewOrders}
           unit="单"
           icon={ShoppingCart}
@@ -319,7 +319,7 @@ export default function DashboardPage() {
           href="/machines/dashboard?status=available"
         />
         <StatCard
-          title="即将超时 / Bientôt retard"
+          title="即将超时 / Bientôt en retard"
           value={stats.nearingDueOrders}
           unit="单"
           icon={AlertTriangle}
@@ -328,7 +328,7 @@ export default function DashboardPage() {
           href="/orders?nearing=1"
         />
         <StatCard
-          title="未开始订单"
+          title="未开始订单 / Commandes non commencées"
           value={stats.notStartedOrders}
           unit="单"
           icon={ShoppingCart}
