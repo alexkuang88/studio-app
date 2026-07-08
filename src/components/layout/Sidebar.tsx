@@ -84,6 +84,11 @@ const menuItems = [
         label: "完成订单 / Terminer",
         icon: CheckCircle,
       },
+      {
+        href: "/entry/checkpoint",
+        label: "每日打卡 / Checkpoint",
+        icon: Clock,
+      },
     ],
   },
   {

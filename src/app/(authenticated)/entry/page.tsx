@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ShoppingCart, PlaySquare, UserCheck, CheckCircle, MonitorCheck, DollarSign } from "lucide-react";
+import { ShoppingCart, PlaySquare, UserCheck, CheckCircle, MonitorCheck, DollarSign, Clock } from "lucide-react";
 
 const entryActions = [
   {
@@ -38,6 +38,13 @@ const entryActions = [
     desc: "查看每台设备是谁在打、对应哪个订单",
     icon: MonitorCheck,
     color: "bg-teal-500 hover:bg-teal-600",
+  },
+  {
+    href: "/entry/checkpoint",
+    label: "每日打卡 / Checkpoint",
+    desc: "定时打卡，只分段不换人，填入当前余额即可",
+    icon: Clock,
+    color: "bg-cyan-500 hover:bg-cyan-600",
   },
   {
     href: "/salary",

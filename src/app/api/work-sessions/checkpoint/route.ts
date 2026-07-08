@@ -1,4 +1,4 @@
-// POST /api/work-sessions/checkpoint — 更新打单进度 / 同打手恢复
+// POST /api/work-sessions/checkpoint — 每日打卡（同人交接，只分段不换人）
 import { createServerSupabase } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -8,68 +8,58 @@ export async function POST(request: NextRequest) {
   if (!userData.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = await request.json();
-  const { session_id, current_balance, order_id, employee_id, balance_gap, gap_reason } = body;
+  const { running_session_id, end_amount } = body;
 
-  if (current_balance == null) {
-    return NextResponse.json({ error: "缺少参数 / Paramètres manquants" }, { status: 400 });
+  if (!running_session_id || end_amount == null) {
+    return NextResponse.json({ error: "缺少参数" }, { status: 400 });
   }
 
-  // Resolve session: by session_id or by order_id+employee_id
-  let session;
-  if (session_id) {
-    const { data } = await supabase.from("work_sessions").select("*").eq("id", session_id).eq("status", "running").single();
-    session = data;
-  } else if (order_id && employee_id) {
-    const { data } = await supabase.from("work_sessions").select("*").eq("order_id", order_id).eq("employee_id", employee_id).eq("status", "running").single();
-    session = data;
+  const { data: running, error: err } = await supabase
+    .from("work_sessions").select("*")
+    .eq("id", running_session_id).eq("status", "running").single();
+
+  if (err || !running) {
+    return NextResponse.json({ error: "未找到进行中的分段" }, { status: 404 });
   }
 
-  if (!session) {
-    return NextResponse.json({ error: "未找到进行中的记录 / Session introuvable" }, { status: 404 });
+  if (end_amount < running.start_amount) {
+    return NextResponse.json({ error: "结束余额不能小于开始余额" }, { status: 400 });
   }
 
-  const balance = parseFloat(String(current_balance));
-  if (balance < (session.start_amount as number)) {
-    return NextResponse.json({ error: "当前余额不能小于开始余额" }, { status: 400 });
-  }
+  const endTime = new Date();
+  const startTime = new Date(running.start_time);
+  const workHours = Math.round(((endTime.getTime() - startTime.getTime()) / 3600000) * 100) / 100;
+  const resultAmount = Math.max(0, end_amount - running.start_amount);
+  const efficiency = workHours > 0 ? Math.round((resultAmount / workHours) * 100) / 100 : 0;
 
-  const now = new Date();
-  const hoursSinceStart = (now.getTime() - new Date(session.start_time).getTime()) / (1000 * 60 * 60);
-  const earnedSoFar = balance - (session.start_amount as number);
-  const currentEfficiency = hoursSinceStart > 0 ? Math.round((earnedSoFar / hoursSinceStart) * 100) / 100 : 0;
+  const { error: closeErr } = await supabase.from("work_sessions").update({
+    end_time: endTime.toISOString(), end_amount,
+    result_amount: resultAmount, work_hours: workHours, efficiency,
+    status: "completed", updated_at: new Date().toISOString(),
+  }).eq("id", running_session_id).eq("status", "running");
 
-  // Handle balance gap (client play while disconnected)
-  if (balance_gap && balance_gap !== 0) {
-    const { data: ord } = await supabase.from("orders")
-      .select("target_amount, initial_balance, completed_amount, order_amount, total_client_amount")
-      .eq("id", session.order_id).single();
-    if (ord) {
-      const pureOrder = (ord.order_amount as number) ?? ((ord.target_amount as number) || 0) - ((ord.initial_balance as number) || 0);
-      const newTarget = balance + pureOrder - ((ord.completed_amount as number) || 0);
-      await supabase.from("orders").update({
-        target_amount: newTarget,
-        latest_balance: balance,
-        total_client_amount: ((ord.total_client_amount as number) || 0) + balance_gap,
-        updated_at: now.toISOString(),
-      }).eq("id", session.order_id);
+  if (closeErr) return NextResponse.json({ error: closeErr.message }, { status: 500 });
 
-      await supabase.from("audit_logs").insert({
-        user_id: userData.user.id, action: "update", table_name: "orders", record_id: session.order_id,
-        after_data: { type: "client_play", balance_gap, gap_reason: gap_reason || null, new_target: newTarget } as any,
-      });
-    }
-  }
+  const { data: order } = await supabase.from("orders")
+    .select("completed_amount, target_amount, initial_balance, order_amount")
+    .eq("id", running.order_id).single();
 
-  // 同步订单 latest_balance
-  await supabase.from("orders")
-    .update({ latest_balance: balance, updated_at: now.toISOString() })
-    .eq("id", session.order_id);
+  const newCompleted = (order?.completed_amount || 0) + resultAmount;
+  const orderAmount = order?.order_amount ?? ((order?.target_amount || 0) - (order?.initial_balance || 0));
+  const newStatus = newCompleted >= orderAmount ? "ready_to_complete" : "in_progress";
 
-  const { data: updated, error } = await supabase.from("work_sessions")
-    .update({ current_balance: balance, balance_gap: balance_gap || 0, gap_reason: gap_reason || null, last_checkpoint_at: now.toISOString(), updated_at: now.toISOString() })
-    .eq("id", session.id).select().single();
+  await supabase.from("orders").update({
+    completed_amount: newCompleted, status: newStatus,
+    latest_balance: end_amount, updated_at: new Date().toISOString(),
+  }).eq("id", running.order_id);
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  const { data: newSession, error: newErr } = await supabase.from("work_sessions").insert({
+    order_id: running.order_id, employee_id: running.employee_id,
+    machine_id: running.machine_id, start_time: endTime.toISOString(),
+    start_amount: end_amount, status: "running", created_by: userData.user.id,
+  }).select("*, employees(employee_code, chinese_name), machines(machine_code)").single();
 
-  return NextResponse.json({ ...updated, earned_so_far: earnedSoFar, hours_so_far: Math.round(hoursSinceStart * 10) / 10, current_efficiency: currentEfficiency });
+  if (newErr) return NextResponse.json({ error: newErr.message }, { status: 500 });
+
+  return NextResponse.json({ ok: true, closed: { id: running.id, result_amount: resultAmount, work_hours: workHours }, new_session: newSession });
 }
