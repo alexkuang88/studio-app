@@ -146,20 +146,20 @@ function OrdersContent() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">
-            订单管理 / Commandes
+            {t("orders.title")}
           </h1>
           <p className="text-gray-500 mt-1">
-            共 {orders.length} 个订单 / {orders.length} commande(s)
+            {t("orders.total")}: {orders.length}
             {dateFilter && <span className="ml-2 text-blue-600 font-medium">· {dateFilter}</span>}
-            {todayOnly && <span className="ml-2 text-blue-600 font-medium">· 今日 / Aujourd'hui</span>}
-            {overdueOnly && <span className="ml-2 text-red-600 font-medium">· 已超时 / En retard</span>}
-            {nearingOnly && <span className="ml-2 text-orange-600 font-medium">· 即将超时 / Bientôt</span>}
+            {todayOnly && <span className="ml-2 text-blue-600 font-medium">· {t("orders.today")}</span>}
+            {overdueOnly && <span className="ml-2 text-red-600 font-medium">· {t("orders.overdue_label")}</span>}
+            {nearingOnly && <span className="ml-2 text-orange-600 font-medium">· {t("orders.nearing_label")}</span>}
           </p>
         </div>
         <Link href="/orders/new">
           <Button variant="primary">
             <Plus size={18} className="mr-1" />
-            新建订单 / Nouvelle commande
+            {t("orders.new")}
           </Button>
         </Link>
       </div>
@@ -183,7 +183,7 @@ function OrdersContent() {
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
           options={[
-            { value: "", label: "全部状态 / Tous les statuts" },
+            { value: "", label: t("orders.all_status") },
             ...Object.entries(ORDER_STATUS_LABELS).map(([v, l]) => ({
               value: v,
               label: l,
@@ -194,7 +194,7 @@ function OrdersContent() {
           value={sourceFilter}
           onChange={(e) => setSourceFilter(e.target.value)}
           options={[
-            { value: "", label: "全部来源 / Toutes les sources" },
+            { value: "", label: t("orders.all_source") },
             ...Object.entries(ORDER_SOURCE_LABELS).map(([v, l]) => ({
               value: v,
               label: l,
@@ -212,20 +212,20 @@ function OrdersContent() {
           <table className="w-full text-sm">
             <thead className="bg-gray-50 border-b">
               <tr>
-                <th className="px-3 py-3 text-left">订单号 / N°</th>
-                <th className="px-3 py-3 text-left hidden lg:table-cell max-w-[120px]">客户备注 / Note client</th>
-                <th className="px-3 py-3 text-left hidden sm:table-cell">来源 / Source</th>
-                <th className="px-3 py-3 text-left hidden lg:table-cell">接单时间 / Réception</th>
-                <th className="px-3 py-3 text-right">订单金额(万) / Montant</th>
-                <th className="px-3 py-3 text-right">初始余额(万) / Solde initial</th>
-                <th className="px-3 py-3 text-right">完成余额(万) / Objectif</th>
-                <th className="px-3 py-3 text-right">最新余额(万) / Actuel</th>
-                <th className="px-3 py-3 text-right hidden md:table-cell">收入</th>
-                <th className="px-3 py-3 text-left">状态 / Statut</th>
-                <th className="px-3 py-3 text-left hidden lg:table-cell">打手/设备 / Employé/Machine</th>
-                <th className="px-3 py-3 text-left hidden md:table-cell">要求完成 / Échéance</th>
-                <th className="px-3 py-3 text-left hidden md:table-cell">完成时间 / Fini le</th>
-                <th className="px-3 py-3 text-left hidden lg:table-cell">剩余时间 / Restant</th>
+                <th className="px-3 py-3 text-left">{t("orders.code")}</th>
+                <th className="px-3 py-3 text-left hidden lg:table-cell max-w-[120px]">{t("orders.client_note")}</th>
+                <th className="px-3 py-3 text-left hidden sm:table-cell">{t("orders.source")}</th>
+                <th className="px-3 py-3 text-left hidden lg:table-cell">{t("orders.received")}</th>
+                <th className="px-3 py-3 text-right">{t("orders.order_amount")}</th>
+                <th className="px-3 py-3 text-right">{t("orders.initial_balance")}</th>
+                <th className="px-3 py-3 text-right">{t("orders.target_balance")}</th>
+                <th className="px-3 py-3 text-right">{t("orders.latest_balance")}</th>
+                <th className="px-3 py-3 text-right hidden md:table-cell">{t("orders.revenue")}</th>
+                <th className="px-3 py-3 text-left">{t("orders.status")}</th>
+                <th className="px-3 py-3 text-left hidden lg:table-cell">{t("orders.operator_device")}</th>
+                <th className="px-3 py-3 text-left hidden md:table-cell">{t("orders.expected")}</th>
+                <th className="px-3 py-3 text-left hidden md:table-cell">{t("orders.completed_at")}</th>
+                <th className="px-3 py-3 text-left hidden lg:table-cell">{t("orders.time_remaining")}</th>
               </tr>
             </thead>
             <tbody className="divide-y">
