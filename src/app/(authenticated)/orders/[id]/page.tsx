@@ -36,6 +36,7 @@ export default function OrderDetailPage() {
   const { id } = useParams<{ id: string }>();
   const { isAdmin, profile } = useAuth();
   const canEdit = isAdmin || profile?.role === "operator";
+  const isRecorder = profile?.role === "recorder";
   const [order, setOrder] = useState<Record<string, unknown> | null>(null);
   const [sessions, setSessions] = useState<Array<Record<string, unknown>>>([]);
   const [loading, setLoading] = useState(true);
@@ -241,10 +242,10 @@ export default function OrderDetailPage() {
           <InfoBlock label="订单来源" value={ORDER_SOURCE_LABELS[order.order_source as keyof typeof ORDER_SOURCE_LABELS] || (order.order_source as string)} />
           <InfoBlock label="初始余额 / Solde initial" value={formatAmt((order.initial_balance as number) || 0)} />
           <InfoBlock label="订单金额 / Montant" value={formatAmt(orderAmountVal)} />
-          {(order.unit_price as number || 0) > 0 && (
+          {!isRecorder && (order.unit_price as number || 0) > 0 && (
             <InfoBlock label="客单价" value={`¥ ${(order.unit_price as number || 0).toLocaleString("zh-CN")} / 100万`} />
           )}
-          <InfoBlock label="订单收入" value={(order.order_revenue as number || 0) > 0 ? `¥ ${(order.order_revenue as number || 0).toLocaleString("zh-CN")}` : "—"} />
+          {!isRecorder && <InfoBlock label="订单收入" value={(order.order_revenue as number || 0) > 0 ? `¥ ${(order.order_revenue as number || 0).toLocaleString("zh-CN")}` : "—"} />}
           <InfoBlock label="手机目标余额 / Solde cible" value={formatAmt((order.target_amount as number) || 0)} />
           {((order.total_client_amount as number) || 0) !== 0 && (
             <InfoBlock label="客户盈亏 / Solde client" value={((order.total_client_amount as number) || 0) > 0 ? `+${formatAmt((order.total_client_amount as number) || 0)}` : formatAmt((order.total_client_amount as number) || 0)} />
@@ -318,7 +319,7 @@ export default function OrderDetailPage() {
         )}
 
         {/* 标记已收款 */}
-        {isCompletedOrCancelled && !(order.is_settled as boolean) && (
+        {isCompletedOrCancelled && !(order.is_settled as boolean) && canEdit && (
           <div className="mt-4 pt-4 border-t">
             <div className="flex items-end gap-3">
               <div className="flex-1">
@@ -425,7 +426,7 @@ export default function OrderDetailPage() {
         )}
 
         {/* 编辑订单数据 — Admin & Operator */}
-        {canEdit && (
+        {!isRecorder && canEdit && (
           <div className="mt-4 pt-4 border-t">
             <h3 className="font-semibold text-gray-800 mb-3">编辑订单数据 / Modifier la commande</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
