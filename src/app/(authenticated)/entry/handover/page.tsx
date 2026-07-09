@@ -102,7 +102,8 @@ export default function HandoverPage() {
     const endAmt = parseFloat(endAmount);
     if (isNaN(endAmt)) { setPreview(null); return; }
     const resultAmt = calcResultAmount(startAmount, endAmt);
-    const wHours = calcWorkHours(session.start_time as string, endTime);
+    // endTime 是 datetime-local（MG时间，无时区），转 UTC 后再计算
+    const wHours = calcWorkHours(session.start_time as string, mgDatetimeToUTC(endTime));
     const eff = calcEfficiency(resultAmt, wHours);
     setPreview({ startAmount, resultAmount: resultAmt, workHours: wHours, efficiency: eff });
   }, [selectedSession, endAmount, endTime, runningSessions]);
