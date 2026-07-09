@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Input } from "@/components/ui/Input";
 import { createClient } from "@/lib/supabase/client";
 import { useAuth } from "@/lib/hooks/useAuth";
+import { useLocale } from "@/lib/i18n/LocaleContext";
 import {
   ORDER_SOURCE_LABELS,
   ORDER_STATUS_LABELS,
@@ -37,6 +38,7 @@ export default function OrderDetailPage() {
   const { isAdmin, profile } = useAuth();
   const canEdit = isAdmin || profile?.role === "operator";
   const isRecorder = profile?.role === "recorder";
+  const { t, locale } = useLocale();
   const [order, setOrder] = useState<Record<string, unknown> | null>(null);
   const [sessions, setSessions] = useState<Array<Record<string, unknown>>>([]);
   const [loading, setLoading] = useState(true);
@@ -240,23 +242,23 @@ export default function OrderDetailPage() {
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <InfoBlock label="订单来源" value={ORDER_SOURCE_LABELS[order.order_source as keyof typeof ORDER_SOURCE_LABELS] || (order.order_source as string)} />
-          <InfoBlock label="初始余额 / Solde initial" value={formatAmt((order.initial_balance as number) || 0)} />
-          <InfoBlock label="订单金额 / Montant" value={formatAmt(orderAmountVal)} />
+          <InfoBlock label={t("order.detail.initial_balance")} value={formatAmt((order.initial_balance as number) || 0)} />
+          <InfoBlock label={t("order.detail.order_amount")} value={formatAmt(orderAmountVal)} />
           {!isRecorder && (order.unit_price as number || 0) > 0 && (
-            <InfoBlock label="客单价" value={`¥ ${(order.unit_price as number || 0).toLocaleString("zh-CN")} / 100万`} />
+            <InfoBlock label={t("order.detail.unit_price")} value={`¥ ${(order.unit_price as number || 0).toLocaleString("zh-CN")} / 100万`} />
           )}
-          {!isRecorder && <InfoBlock label="订单收入" value={(order.order_revenue as number || 0) > 0 ? `¥ ${(order.order_revenue as number || 0).toLocaleString("zh-CN")}` : "—"} />}
-          <InfoBlock label="手机目标余额 / Solde cible" value={formatAmt((order.target_amount as number) || 0)} />
+          {!isRecorder && <InfoBlock label={t("order.detail.order_revenue")} value={(order.order_revenue as number || 0) > 0 ? `¥ ${(order.order_revenue as number || 0).toLocaleString("zh-CN")}` : "—"} />}
+          <InfoBlock label={t("order.detail.target_balance")} value={formatAmt((order.target_amount as number) || 0)} />
           {((order.total_client_amount as number) || 0) !== 0 && (
-            <InfoBlock label="客户盈亏 / Solde client" value={((order.total_client_amount as number) || 0) > 0 ? `+${formatAmt((order.total_client_amount as number) || 0)}` : formatAmt((order.total_client_amount as number) || 0)} />
+            <InfoBlock label={t("order.detail.client_balance")} value={((order.total_client_amount as number) || 0) > 0 ? `+${formatAmt((order.total_client_amount as number) || 0)}` : formatAmt((order.total_client_amount as number) || 0)} />
           )}
-          <InfoBlock label="已完成 / Complété" value={formatAmt(completedAmount)} highlight={completedAmount >= orderAmountVal} />
-          <InfoBlock label="未完成 / Restant" value={formatAmt(remainingAmount)} highlight={remainingAmount <= 0} />
-          <InfoBlock label="下单时间 / Réception" value={formatDateTime(order.order_received_at as string)} />
-          <InfoBlock label="要求完成时间 / Échéance" value={formatDateTime(order.expected_completion_at as string)} />
-          <InfoBlock label="实际完成时间 / Fini le" value={formatDateTime(order.actual_completed_at as string)} />
+          <InfoBlock label={t("order.detail.completed")} value={formatAmt(completedAmount)} highlight={completedAmount >= orderAmountVal} />
+          <InfoBlock label={t("order.detail.remaining")} value={formatAmt(remainingAmount)} highlight={remainingAmount <= 0} />
+          <InfoBlock label={t("order.detail.received")} value={formatDateTime(order.order_received_at as string)} />
+          <InfoBlock label={t("order.detail.expected")} value={formatDateTime(order.expected_completion_at as string)} />
+          <InfoBlock label={t("order.detail.actual_completed")} value={formatDateTime(order.actual_completed_at as string)} />
           <InfoBlock
-            label="完成状态 / Statut"
+            label={t("order.detail.completion_status")}
             value={
               status === "completed"
                 ? isOnTime
@@ -267,8 +269,8 @@ export default function OrderDetailPage() {
           />
           {(order.current_employee_id as string) && (
             <>
-              <InfoBlock label="当前打手 / Employé" value={emp ? `${emp.employee_code} ${emp.chinese_name}` : "—"} />
-              <InfoBlock label="当前设备 / Machine" value={machine ? `${machine.machine_code} ${machine.machine_name}` : "—"} />
+              <InfoBlock label={t("dash.operator")} value={emp ? `${emp.employee_code} ${emp.chinese_name}` : "—"} />
+              <InfoBlock label={t("order.detail.current_machine")} value={machine ? `${machine.machine_code} / Machine ${String(machine.machine_code).replace(/^M0*/, "")}` : "—"} />
             </>
           )}
         </div>
@@ -512,7 +514,7 @@ export default function OrderDetailPage() {
       )}
 
       {/* Employee summary */}
-      {Object.keys(employeeSummary).length > 0 && (
+      {!isRecorder && Object.keys(employeeSummary).length > 0 && (
         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
           <div className="px-6 py-4 border-b bg-gray-50">
             <h3 className="font-semibold">员工参与汇总 / Résumé par employé</h3>
@@ -565,16 +567,16 @@ export default function OrderDetailPage() {
           <table className="w-full text-sm">
             <thead className="bg-gray-50 border-b">
               <tr>
-                <th className="px-3 py-2 text-left">员工 / Employé</th>
-                <th className="px-3 py-2 text-left hidden md:table-cell">设备 / Machine</th>
-                <th className="px-3 py-2 text-left">开始时间 / Heure début</th>
-                <th className="px-3 py-2 text-left">结束时间 / Heure fin</th>
-                <th className="px-3 py-2 text-right">初始游戏币 / Solde début</th>
-                <th className="px-3 py-2 text-right">结束游戏币 / Solde fin</th>
-                <th className="px-3 py-2 text-right font-medium">成绩(万) / Résultat</th>
-                <th className="px-3 py-2 text-right hidden sm:table-cell">工时 / Heures</th>
-                <th className="px-3 py-2 text-right hidden sm:table-cell">游戏币/每小时 / Pièces/h</th>
-                <th className="px-3 py-2 text-center">状态 / Statut</th>
+                <th className="px-3 py-2 text-left">{t("order.detail.col_emp")}</th>
+                <th className="px-3 py-2 text-left hidden md:table-cell">{t("order.detail.col_device")}</th>
+                <th className="px-3 py-2 text-left">{t("order.detail.col_start_time")}</th>
+                <th className="px-3 py-2 text-left">{t("order.detail.col_end_time")}</th>
+                <th className="px-3 py-2 text-right">{t("order.detail.col_start_amount")}</th>
+                <th className="px-3 py-2 text-right">{t("order.detail.col_end_amount")}</th>
+                <th className="px-3 py-2 text-right font-medium">{t("order.detail.col_result")}</th>
+                <th className="px-3 py-2 text-right hidden sm:table-cell">{t("order.detail.col_hours")}</th>
+                <th className="px-3 py-2 text-right hidden sm:table-cell">{t("order.detail.col_efficiency")}</th>
+                <th className="px-3 py-2 text-center">{t("order.detail.col_status")}</th>
               </tr>
             </thead>
             <tbody className="divide-y">
