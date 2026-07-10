@@ -275,10 +275,29 @@ export default function OrderDetailPage() {
           )}
         </div>
 
-        {((order.client_note as string) || (order.note as string) || (order.responsible_user as string)) && (
-          <div className="mt-4 pt-4 border-t text-sm text-gray-500 space-y-1">
+        {/* 游戏名 — 总是可编辑 */}
+        <div className="mt-4 pt-4 border-t">
+          <label className="block text-xs text-gray-600 mb-1">{t("orders.client_note")}</label>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              defaultValue={(order.client_note as string) || ""}
+              onBlur={async (e) => {
+                const val = e.target.value;
+                if (val !== ((order.client_note as string) || "")) {
+                  await supabase.from("orders").update({ client_note: val || null }).eq("id", id as string);
+                  setOrder({ ...order, client_note: val } as any);
+                }
+              }}
+              placeholder={t("orders.client_note_placeholder")}
+              className="flex-1 rounded border border-gray-300 px-3 py-2 text-sm"
+            />
+          </div>
+        </div>
+
+        {((order.note as string) || (order.responsible_user as string)) && (
+          <div className="mt-2 text-sm text-gray-500 space-y-1">
             {(order.responsible_user as string) && <p>负责人 / Responsable: {order.responsible_user as string}</p>}
-            {(order.client_note as string) && <p>客户备注 / Note client: {order.client_note as string}</p>}
             {(order.note as string) && <p>备注 / Note: {order.note as string}</p>}
           </div>
         )}

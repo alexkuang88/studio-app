@@ -204,10 +204,10 @@ export default function NewOrderPage() {
         />
 
         <Input
-          label="客户备注 / Note client"
+          label={t("new_order.client_note")}
           value={order.client_note}
           onChange={(e) => setOrder({ ...order, client_note: e.target.value })}
-          placeholder="客户名称或其他信息"
+          placeholder={t("new_order.client_note_placeholder")}
         />
 
         {/* 金额计算区域 */}
