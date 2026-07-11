@@ -237,6 +237,14 @@ const zh = {
   "ss.order_placeholder": "请选择订单...",
   "ss.machine_placeholder": "请选择设备...",
   "error": "错误",
+  "new_order.amount_section": "金额设置",
+  "new_order.current_balance": "手机当前余额",
+  "new_order.final_balance": "完成余额",
+  "new_order.confirm": "确认无误，创建订单",
+  "new_order.error_time": "请选择要求完成时间",
+  "new_order.placeholder_source": "请选择来源...",
+  "new_order.placeholder_responsible": "负责人姓名",
+  "new_order.placeholder_note": "订单备注信息...",
 } as const;
 
 const fr: Record<TranslationKey, string> = {
@@ -475,6 +483,14 @@ const fr: Record<TranslationKey, string> = {
   "ss.order_placeholder": "Veuillez choisir une commande",
   "ss.machine_placeholder": "Veuillez choisir une machine",
   "error": "Erreur",
+  "new_order.amount_section": "Paramètres de montant",
+  "new_order.current_balance": "Solde actuel",
+  "new_order.final_balance": "Solde final",
+  "new_order.confirm": "Confirmer et créer",
+  "new_order.error_time": "Veuillez choisir la date limite",
+  "new_order.placeholder_source": "Choisir la source...",
+  "new_order.placeholder_responsible": "Nom du responsable",
+  "new_order.placeholder_note": "Note de commande...",
 } as const;
 
 export const translations: Record<Locale, Record<TranslationKey, string>> = { zh, fr };

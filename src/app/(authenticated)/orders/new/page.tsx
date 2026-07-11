@@ -115,7 +115,7 @@ export default function NewOrderPage() {
       return;
     }
     if (!order.expected_completion_at) {
-      setError("请选择要求完成时间");
+      setError(t("new_order.error_time"));
       return;
     }
 
@@ -173,7 +173,7 @@ export default function NewOrderPage() {
         </Link>
         <div>
           <h1 className="text-2xl font-bold text-gray-900">
-            新建订单 / Nouvelle commande
+            {t("new_order.title")}
           </h1>
         </div>
       </div>
@@ -188,18 +188,18 @@ export default function NewOrderPage() {
         <div className="bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 flex items-center gap-3">
           <span className="text-sm text-gray-500">订单号:</span>
           <span className="text-xl font-mono font-bold text-gray-900">{autoCode}</span>
-          <span className="text-xs text-gray-400 ml-auto">自动生成 / Auto-généré</span>
+          <span className="text-xs text-gray-400 ml-auto">{t("new_order.auto_code")}</span>
         </div>
 
         <Select
-          label="订单来源 / Source *"
+          label={t("new_order.source") + " *"}
           value={order.order_source}
           onChange={(e) => setOrder({ ...order, order_source: e.target.value as OrderSource })}
           options={Object.entries(ORDER_SOURCE_LABELS).map(([v, l]) => ({
             value: v,
             label: l,
           }))}
-          placeholder="请选择来源..."
+          placeholder={t("new_order.placeholder_source")}
           required
         />
 
@@ -213,12 +213,12 @@ export default function NewOrderPage() {
         {/* 金额计算区域 */}
         <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 space-y-4">
           <h3 className="font-semibold text-blue-900 text-sm">
-            金额设置 / Paramètres de montant
+            {t("new_order.amount_section")}
           </h3>
 
           <div className="grid grid-cols-2 gap-4">
             <Input
-              label="手机当前余额 / Solde actuel"
+              label={t("new_order.current_balance")}
               type="number"
               step="any"
               value={order.initial_balance}
@@ -226,7 +226,7 @@ export default function NewOrderPage() {
               placeholder="0"
             />
             <Input
-              label="客户要打金额 / Montant à produire *"
+              label={t("new_order.target") + " *"}
               type="number"
               step="any"
               value={order.target_amount}
@@ -254,7 +254,7 @@ export default function NewOrderPage() {
               </div>
               <div className="text-2xl text-gray-400">=</div>
               <div>
-                <div className="text-xs text-green-600 font-semibold">完成余额 / Solde final</div>
+                <div className="text-xs text-green-600 font-semibold">{t("new_order.final_balance")}</div>
                 <div className="text-2xl font-mono font-bold text-green-600">
                   {finalBalance.toLocaleString("zh-CN")} 万
                 </div>
@@ -290,7 +290,7 @@ export default function NewOrderPage() {
               </div>
               <div className="text-lg text-gray-400 pb-2">=</div>
               <div className="flex-1 text-center">
-                <div className="text-xs text-green-600 font-semibold mb-1">预计收入</div>
+                <div className="text-xs text-green-600 font-semibold mb-1">{t("new_order.estimated_revenue")}</div>
                 <div className="text-2xl font-mono font-bold text-green-600">
                   ¥ {order.unit_price
                     ? ((parseFloat(order.target_amount) || 0) / 100 * parseFloat(order.unit_price)).toLocaleString("zh-CN", {minimumFractionDigits: 0, maximumFractionDigits: 0})
@@ -312,7 +312,7 @@ export default function NewOrderPage() {
             }
           />
           <Input
-            label={`要求完成时间 / Heure limite * (≈${Math.ceil((parseFloat(order.target_amount) || 0) / 125)}小时)`}
+            label={t("new_order.expected") + " *"}
             type="datetime-local"
             value={expectedTime}
             onChange={(e) => {
@@ -324,24 +324,24 @@ export default function NewOrderPage() {
         </div>
 
         <Input
-          label="负责人 / Responsable"
+          label={t("new_order.responsible")}
           value={order.responsible_user}
           onChange={(e) =>
             setOrder({ ...order, responsible_user: e.target.value })
           }
-          placeholder="负责人姓名"
+          placeholder={t("new_order.placeholder_responsible")}
         />
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            备注 / Note
+            {t("new_order.note")}
           </label>
           <textarea
             value={order.note}
             onChange={(e) => setOrder({ ...order, note: e.target.value })}
             rows={3}
             className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="订单备注信息..."
+            placeholder={t("new_order.placeholder_note")}
           />
         </div>
 
@@ -357,7 +357,7 @@ export default function NewOrderPage() {
         <div className="flex gap-3 pt-2">
           <Button type="submit" variant="primary" size="lg" loading={saving}>
             <Save size={18} className="mr-1" />
-            创建订单 / Créer
+            {t("new_order.submit")}
           </Button>
           <Link href="/orders">
             <Button type="button" variant="ghost" size="lg">
@@ -379,7 +379,7 @@ export default function NewOrderPage() {
 
             <div className="bg-gray-50 rounded-xl p-4 space-y-3 text-sm">
               <div className="flex justify-between">
-                <span className="text-gray-500">订单号</span>
+                <span className="text-gray-500">{t("orders.code")}</span>
                 <span className="font-mono font-bold">{autoCode}</span>
               </div>
               <div className="flex justify-between">
@@ -388,7 +388,7 @@ export default function NewOrderPage() {
               </div>
               <hr />
               <div className="flex justify-between">
-                <span className="text-gray-500">手机当前余额</span>
+                <span className="text-gray-500">{t("new_order.current_balance")}</span>
                 <span className="font-mono font-bold text-lg">{snapshot.ib.toLocaleString("zh-CN")} 万</span>
               </div>
               <div className="flex justify-between">
@@ -401,7 +401,7 @@ export default function NewOrderPage() {
               </div>
               {snapshot.up > 0 && (
                 <div className="flex justify-between">
-                  <span className="text-gray-500">预计收入</span>
+                  <span className="text-gray-500">{t("new_order.estimated_revenue")}</span>
                   <span className="font-mono font-bold text-green-600">
                     ¥ {snapshot.rev.toLocaleString("zh-CN")}
                   </span>
@@ -417,7 +417,7 @@ export default function NewOrderPage() {
 
             <div className="flex gap-3">
               <Button variant="primary" size="lg" loading={saving} onClick={doCreate} block>
-                确认无误，创建订单
+                {t("new_order.confirm")}
               </Button>
               <Button variant="ghost" size="lg" onClick={() => setShowConfirm(false)}>
                 返回修改
