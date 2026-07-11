@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { Badge } from "@/components/ui/Badge";
 import { useLocale } from "@/lib/i18n/LocaleContext";
+import { useAuth } from "@/lib/hooks/useAuth";
 import { createClient } from "@/lib/supabase/client";
 import {
   ORDER_SOURCE_LABELS,
@@ -37,6 +38,8 @@ export default function OrdersPage() {
 
 function OrdersContent() {
   const { t } = useLocale();
+  const { profile } = useAuth();
+  const isRecorder = profile?.role === "recorder";
   const searchParams = useSearchParams();
 
   const [orders, setOrders] = useState<Array<Record<string, unknown>>>([]);
@@ -220,7 +223,7 @@ function OrdersContent() {
                 <th className="px-3 py-3 text-right">{t("orders.initial_balance")}</th>
                 <th className="px-3 py-3 text-right">{t("orders.target_balance")}</th>
                 <th className="px-3 py-3 text-right">{t("orders.latest_balance")}</th>
-                <th className="px-3 py-3 text-right hidden md:table-cell">{t("orders.revenue")}</th>
+                {!isRecorder && <th className="px-3 py-3 text-right hidden md:table-cell">{t("orders.revenue")}</th>}
                 <th className="px-3 py-3 text-left">{t("orders.status")}</th>
                 <th className="px-3 py-3 text-left hidden lg:table-cell">{t("orders.operator_device")}</th>
                 <th className="px-3 py-3 text-left hidden md:table-cell">{t("orders.expected")}</th>
@@ -231,13 +234,13 @@ function OrdersContent() {
             <tbody className="divide-y">
               {loading ? (
                 <tr>
-                  <td colSpan={13} className="px-4 py-6 text-center text-gray-500">
+                  <td colSpan={isRecorder ? 12 : 13} className="px-4 py-6 text-center text-gray-500">
                     加载中... / Chargement...
                   </td>
                 </tr>
               ) : orders.length === 0 ? (
                 <tr>
-                  <td colSpan={13} className="px-4 py-6 text-center text-gray-500">
+                  <td colSpan={isRecorder ? 12 : 13} className="px-4 py-6 text-center text-gray-500">
                     暂无订单 / Aucune commande
                   </td>
                 </tr>
@@ -301,9 +304,11 @@ function OrdersContent() {
                       <td className="px-3 py-3 text-right font-mono font-bold text-xs text-blue-700">
                         {(order.latest_balance as number) != null ? `${(order.latest_balance as number).toLocaleString("zh-CN")}` : "—"}
                       </td>
+{!isRecorder && (
                       <td className="px-3 py-3 text-right font-mono text-xs text-green-600 font-medium hidden md:table-cell">
                         {(order.order_revenue as number || 0) > 0 ? `¥ ${(order.order_revenue as number).toLocaleString("zh-CN")}` : "—"}
                       </td>
+                      )}
                       <td className="px-3 py-3">
                         <Badge variant={getStatusBadgeVariant(status)}>
                           {ORDER_STATUS_LABELS[status as OrderStatus] || status}
