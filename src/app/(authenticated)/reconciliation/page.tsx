@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/Badge";
 import { ORDER_SOURCE_LABELS, type OrderSource } from "@/lib/types/database";
 import { formatDateTime, getCurrentMonth } from "@/lib/utils/time-utils";
 import { CheckSquare, Square, DollarSign, TrendingUp, ClipboardCheck } from "lucide-react";
+import Link from "next/link";
 
 interface ReconOrder {
   id: string;
@@ -241,7 +242,9 @@ export default function ReconciliationPage() {
                         {o.is_settled ? <CheckSquare size={18} /> : selected.has(o.id) ? <CheckSquare size={18} className="text-blue-600" /> : <Square size={18} />}
                       </button>
                     </td>
-                    <td className="px-3 py-2 font-mono text-xs font-medium">{o.order_code}</td>
+                    <td className="px-3 py-2 font-mono text-xs font-medium">
+                      <Link href={`/orders/${o.id}`} className="text-blue-600 hover:underline">{o.order_code}</Link>
+                    </td>
                     <td className="px-3 py-2 text-xs text-gray-500 hidden sm:table-cell">
                       {ORDER_SOURCE_LABELS[o.order_source as OrderSource] || o.order_source}
                     </td>
