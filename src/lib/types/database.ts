@@ -123,6 +123,7 @@ export interface Order {
   created_by: string | null;
   is_void: boolean;
   void_reason: string | null;
+  stages?: any[] | null;
   created_at: string;
   updated_at: string;
 }

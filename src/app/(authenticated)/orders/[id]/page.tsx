@@ -275,6 +275,81 @@ export default function OrderDetailPage() {
           )}
         </div>
 
+        {/* ===== 阶段管理 ===== */}
+        {!isRecorder && (
+          <div className="mt-4 pt-4 border-t">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-semibold text-gray-800">
+                阶段管理 / Gestion des étapes
+              </h3>
+              <Button variant="outline" size="sm" onClick={async () => {
+                const name = prompt("阶段名称，如：第一阶段2亿");
+                const amt = prompt("阶段金额(万)，如：20000");
+                if (!name || !amt) return;
+                const stages = (order.stages as any[]) || [];
+                stages.push({ name, amount: parseInt(amt), submitted: false, submittedAt: null });
+                await supabase.from("orders").update({ stages }).eq("id", id as string);
+                setOrder({ ...order, stages } as any);
+              }}>
+                + 添加阶段 / Ajouter
+              </Button>
+            </div>
+
+            {(order.stages as any[])?.length > 0 ? (
+              <div className="space-y-2">
+                {(order.stages as any[]).map((stage: any, idx: number) => {
+                  // Calculate progress: subtract sum of previous stages from completed amount
+                  const prevSum = (order.stages as any[]).slice(0, idx).reduce((s: number, st: any) => s + (st.amount || 0), 0);
+                  const stageCompleted = Math.max(0, Math.min(stage.amount || 0, completedAmount - prevSum));
+                  const stagePct = stage.amount > 0 ? Math.round(stageCompleted / stage.amount * 100) : 0;
+                  const isFull = stagePct >= 100;
+                  const isSubmitted = stage.submitted;
+                  const prevSubmitted = (order.stages as any[]).slice(0, idx).every((s: any) => s.submitted);
+                  const isCurrent = !isSubmitted && !isFull && prevSubmitted;
+
+                  return (
+                    <div key={idx} className={`rounded-lg border p-3 ${isSubmitted ? "bg-green-50 border-green-300" : isCurrent ? "bg-yellow-50 border-yellow-400 ring-2 ring-yellow-300" : isFull ? "bg-blue-50 border-blue-300" : "bg-gray-50 border-gray-200"}`}>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-sm font-medium">{stage.name}{isCurrent && <Badge variant="blue" className="ml-2">⚡ 当前阶段</Badge>}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-gray-500">{stage.amount?.toLocaleString()}万</span>
+                          {isSubmitted ? (
+                            <Badge variant="green">已提交</Badge>
+                          ) : isFull ? (
+                            <Button size="sm" variant="primary" onClick={async () => {
+                              if (!confirm(`确认提交「${stage.name}」?`)) return;
+                              const stages = [...(order.stages as any[])];
+                              stages[idx] = { ...stages[idx], submitted: true, submittedAt: new Date().toISOString() };
+                              await supabase.from("orders").update({ stages }).eq("id", id as string);
+                              setOrder({ ...order, stages } as any);
+                            }}>
+                              ✅ 提交验收
+                            </Button>
+                          ) : (
+                            <span className="text-xs text-gray-400">{stageCompleted.toLocaleString()}/{stage.amount?.toLocaleString()}万 ({stagePct}%)</span>
+                          )}
+                          {canEdit && !isSubmitted && (
+                            <button className="text-xs text-red-400 hover:text-red-600" onClick={async () => {
+                              const stages = (order.stages as any[]).filter((_: any, i: number) => i !== idx);
+                              await supabase.from("orders").update({ stages }).eq("id", id as string);
+                              setOrder({ ...order, stages } as any);
+                            }}>✕</button>
+                          )}
+                        </div>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div className={`h-2 rounded-full transition-all ${isSubmitted ? "bg-green-500" : isCurrent ? "bg-yellow-500 animate-pulse" : stagePct >= 100 ? "bg-blue-500" : "bg-gray-400"}`} style={{ width: `${Math.min(100, stagePct)}%` }} />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <p className="text-sm text-gray-400">尚未设置阶段 / Aucune étape</p>
+            )}
+          </div>
+        )}
+
         {/* 游戏名 — 总是可编辑 */}
         <div className="mt-4 pt-4 border-t">
           <label className="block text-xs text-gray-600 mb-1">{t("orders.client_note")}</label>

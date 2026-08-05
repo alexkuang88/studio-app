@@ -1,0 +1,2 @@
+-- 00008: 大单阶段管理
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS stages JSONB;
