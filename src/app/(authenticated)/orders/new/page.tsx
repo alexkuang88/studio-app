@@ -72,6 +72,7 @@ export default function NewOrderPage() {
   const [saving, setSaving] = useState(false);
   const [manualTime, setManualTime] = useState(false);
   const [isPrepaid, setIsPrepaid] = useState(false);
+  const [stageCount, setStageCount] = useState("");
 
   // 自动计算结单时间（100万/小时），用户手动修改后不再自动覆盖
   const expectedTime = useMemo(() => {
@@ -149,6 +150,7 @@ export default function NewOrderPage() {
         responsible_user: order.responsible_user || null,
         note: order.note || null,
         is_prepaid: isPrepaid,
+        stage_count: stageCount ? parseInt(stageCount) : 0,
       }),
     });
 
@@ -264,6 +266,27 @@ export default function NewOrderPage() {
               💡 订单完成后，手机余额应达到 <strong>{finalBalance.toLocaleString("zh-CN")} 万</strong>
             </p>
           </div>
+
+          {/* 大单拆分阶段 */}
+          {!isRecorder && (
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+            <div className="flex items-end gap-3">
+              <div className="flex-1">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  {t("new_order.stage_count")}
+                </label>
+                <input type="number" value={stageCount} onChange={e => setStageCount(e.target.value)}
+                  placeholder="如 4、6、8" min="1" max="20"
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm" />
+              </div>
+              {stageCount && parseFloat(order.target_amount) > 0 && (
+              <div className="text-sm text-blue-600 pb-2">
+                每段 ≈ {Math.round(parseFloat(order.target_amount) / parseInt(stageCount)).toLocaleString("zh-CN")} 万
+              </div>
+              )}
+            </div>
+          </div>
+          )}
 
           {/* 订单收入 — 录单员不可见 */}
           {!isRecorder && (

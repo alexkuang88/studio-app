@@ -245,6 +245,8 @@ const zh = {
   "new_order.placeholder_source": "请选择来源...",
   "new_order.placeholder_responsible": "负责人姓名",
   "new_order.placeholder_note": "订单备注信息...",
+  "new_order.stage_count": "拆分为几段 / Nombre d'étapes (可选)",
+  "new_order.stage_hint": "每段 ≈",
 } as const;
 
 const fr: Record<TranslationKey, string> = {
@@ -491,6 +493,8 @@ const fr: Record<TranslationKey, string> = {
   "new_order.placeholder_source": "Choisir la source...",
   "new_order.placeholder_responsible": "Nom du responsable",
   "new_order.placeholder_note": "Note de commande...",
+  "new_order.stage_count": "Nombre d'étapes (optionnel)",
+  "new_order.stage_hint": "Par étape ≈",
 } as const;
 
 export const translations: Record<Locale, Record<TranslationKey, string>> = { zh, fr };

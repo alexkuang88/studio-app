@@ -90,6 +90,20 @@ export async function POST(request: NextRequest) {
     insertData.settled_note = "新建时标记已收款";
   }
 
+  // 自动生成阶段拆分
+  const stageCount = parseInt(body.stage_count) || 0;
+  const orderAmount = Math.round(Math.max(0, body.target_amount - (body.initial_balance || 0)));
+  if (stageCount > 1 && orderAmount > 0) {
+    const stageAmount = Math.floor(orderAmount / stageCount);
+    const remainder = orderAmount - stageAmount * stageCount;
+    const stages = [];
+    for (let i = 0; i < stageCount; i++) {
+      const amt = i === stageCount - 1 ? stageAmount + remainder : stageAmount;
+      stages.push({ name: "第" + (i + 1) + "阶段", amount: amt, submitted: false, submittedAt: null });
+    }
+    insertData.stages = stages;
+  }
+
   const { data, error } = await supabase
     .from("orders")
     .insert(insertData)
