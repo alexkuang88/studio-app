@@ -73,6 +73,7 @@ export default function NewOrderPage() {
   const [manualTime, setManualTime] = useState(false);
   const [isPrepaid, setIsPrepaid] = useState(false);
   const [stageCount, setStageCount] = useState("");
+  const [showStages, setShowStages] = useState(false);
 
   // 自动计算结单时间（100万/小时），用户手动修改后不再自动覆盖
   const expectedTime = useMemo(() => {
@@ -269,22 +270,35 @@ export default function NewOrderPage() {
 
           {/* 大单拆分阶段 */}
           {!isRecorder && (
-          <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
-            <div className="flex items-end gap-3">
-              <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t("new_order.stage_count")}
-                </label>
-                <input type="number" value={stageCount} onChange={e => setStageCount(e.target.value)}
-                  placeholder="如 4、6、8" min="1" max="20"
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm" />
+          <div className="border-t pt-3">
+            {!showStages ? (
+              <button type="button" onClick={() => setShowStages(true)}
+                className="text-sm text-blue-600 hover:text-blue-800 underline">
+                + 启用阶段拆分 / Activer les étapes
+              </button>
+            ) : (
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-sm font-medium text-gray-700">
+                    {t("new_order.stage_count")}
+                  </label>
+                  <button type="button" onClick={() => { setShowStages(false); setStageCount(""); }}
+                    className="text-xs text-red-500 hover:text-red-700">✕ 取消</button>
+                </div>
+                <div className="flex items-end gap-3">
+                  <div className="flex-1">
+                    <input type="number" value={stageCount} onChange={e => setStageCount(e.target.value)}
+                      placeholder="如 4、6、8" min="1" max="20"
+                      className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm" />
+                  </div>
+                  {stageCount && parseFloat(order.target_amount) > 0 && (
+                  <div className="text-sm text-blue-600 pb-2 whitespace-nowrap">
+                    每段 ≈ {Math.round(parseFloat(order.target_amount) / parseInt(stageCount)).toLocaleString("zh-CN")} 万
+                  </div>
+                  )}
+                </div>
               </div>
-              {stageCount && parseFloat(order.target_amount) > 0 && (
-              <div className="text-sm text-blue-600 pb-2">
-                每段 ≈ {Math.round(parseFloat(order.target_amount) / parseInt(stageCount)).toLocaleString("zh-CN")} 万
-              </div>
-              )}
-            </div>
+            )}
           </div>
           )}
 
