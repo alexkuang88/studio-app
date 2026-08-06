@@ -493,7 +493,7 @@ const fr: Record<TranslationKey, string> = {
   "new_order.placeholder_source": "Choisir la source...",
   "new_order.placeholder_responsible": "Nom du responsable",
   "new_order.placeholder_note": "Note de commande...",
-  "new_order.stage_count": "Nombre d'étapes (optionnel)",
+  "new_order.stage_count": "Découper en plusieurs phases (optionnel)",
   "new_order.stage_hint": "Par étape ≈",
 } as const;
 
