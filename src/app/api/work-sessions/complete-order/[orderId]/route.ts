@@ -84,6 +84,8 @@ export async function POST(
       .eq("id", runningSession.id);
 
     completedAmount += resultAmt;
+    // 防超额 —— 最多完成到订单金额
+    completedAmount = Math.min(completedAmount, orderAmount);
   }
 
   // 如果没有达到订单金额，且不是强制完成
@@ -145,6 +147,9 @@ export async function POST(
   // 判断是否客户取消：强制完成且原因含"取消"
   const isCancelled = isForceComplete && (force_complete_reason || "").includes("取消");
   const finalStatus = isCancelled ? "cancelled" : "completed";
+
+  // 防超额：最多完成到订单金额
+  completedAmount = Math.min(completedAmount, orderAmount);
 
   // 完成订单
   const { data: updatedOrder, error: updateError } = await supabase
