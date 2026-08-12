@@ -41,35 +41,8 @@ function OrdersContent() {
   const { profile } = useAuth();
   const isRecorder = profile?.role === "recorder";
   const searchParams = useSearchParams();
-  const SCROLL_KEY = "orders_scroll";
-
   const [orders, setOrders] = useState<Array<Record<string, unknown>>>([]);
   const [loading, setLoading] = useState(true);
-
-  // 恢复上次滚动位置 — 等订单数据加载完毕且表格行可点击
-  useEffect(() => {
-    if (orders.length > 0) {
-      const saved = sessionStorage.getItem(SCROLL_KEY);
-      if (saved) {
-        // Delay so the full table including images and font loading takes effect
-        const timer = setInterval(() => {
-          const bodyHeight = document.body.scrollHeight;
-          if (bodyHeight > 1000) {
-            clearInterval(timer);
-            window.scrollTo(0, parseInt(saved));
-            sessionStorage.removeItem(SCROLL_KEY);
-          }
-        }, 100);
-        // Clear after 5 seconds at most
-        setTimeout(() => clearInterval(timer), 5000);
-      }
-    }
-  }, [orders]);
-
-  // 保存滚动位置
-  const handleOrderClick = (e: React.MouseEvent) => {
-    sessionStorage.setItem(SCROLL_KEY, String(window.scrollY));
-  };
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState(searchParams.get("status") || "");
   const [sourceFilter, setSourceFilter] = useState("");
@@ -304,7 +277,6 @@ function OrdersContent() {
                       <td className="px-3 py-3">
                         <Link
                           href={`/orders/${order.id}`}
-                          onClick={handleOrderClick}
                           className="font-mono font-medium text-blue-600 hover:underline"
                         >
                           {order.order_code as string}
