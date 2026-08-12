@@ -41,6 +41,24 @@ function OrdersContent() {
   const { profile } = useAuth();
   const isRecorder = profile?.role === "recorder";
   const searchParams = useSearchParams();
+  const SCROLL_KEY = "orders_scroll";
+
+  // 恢复上次滚动位置
+  useEffect(() => {
+    const saved = sessionStorage.getItem(SCROLL_KEY);
+    if (saved) {
+      const y = parseInt(saved);
+      // 用 requestAnimationFrame 等 DOM 渲染完
+      const raf = () => window.scrollTo(0, y);
+      requestAnimationFrame(() => requestAnimationFrame(raf));
+      sessionStorage.removeItem(SCROLL_KEY);
+    }
+  }, []);
+
+  // 保存滚动位置（点击订单进入详情前）
+  const handleOrderClick = () => {
+    sessionStorage.setItem(SCROLL_KEY, String(window.scrollY));
+  };
 
   const [orders, setOrders] = useState<Array<Record<string, unknown>>>([]);
   const [loading, setLoading] = useState(true);
@@ -278,6 +296,7 @@ function OrdersContent() {
                       <td className="px-3 py-3">
                         <Link
                           href={`/orders/${order.id}`}
+                          onClick={handleOrderClick}
                           className="font-mono font-medium text-blue-600 hover:underline"
                         >
                           {order.order_code as string}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { Input } from "@/components/ui/Input";
@@ -35,6 +35,7 @@ import Link from "next/link";
 
 export default function OrderDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const router = useRouter();
   const { isAdmin, profile } = useAuth();
   const canEdit = isAdmin || profile?.role === "operator";
   const isRecorder = profile?.role === "recorder";
@@ -207,11 +208,9 @@ export default function OrderDetailPage() {
   return (
     <div className="space-y-6 animate-fade-in max-w-5xl">
       <div className="flex items-center gap-4">
-        <Link href="/orders">
-          <Button variant="ghost" size="sm">
-            <ArrowLeft size={18} />
-          </Button>
-        </Link>
+        <Button variant="ghost" size="sm" onClick={() => router.back()}>
+          <ArrowLeft size={18} />
+        </Button>
         <div>
           <h1 className="text-2xl font-bold text-gray-900">
             订单详情 / Détail commande
