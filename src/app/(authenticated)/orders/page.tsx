@@ -46,20 +46,20 @@ function OrdersContent() {
   const [orders, setOrders] = useState<Array<Record<string, unknown>>>([]);
   const [loading, setLoading] = useState(true);
 
-  // 恢复上次滚动位置 — 数据加载完后再滚
+  // 恢复上次滚动位置 — 等订单数据加载完毕
   useEffect(() => {
-    if (!loading) {
+    if (orders.length > 0) {
       const saved = sessionStorage.getItem(SCROLL_KEY);
       if (saved) {
         const y = parseInt(saved);
-        setTimeout(() => window.scrollTo(0, y), 100);
+        setTimeout(() => window.scrollTo(0, y), 200);
         sessionStorage.removeItem(SCROLL_KEY);
       }
     }
-  }, [loading]);
+  }, [orders]);
 
-  // 保存滚动位置（点击订单进入详情前）
-  const handleOrderClick = () => {
+  // 保存滚动位置
+  const handleOrderClick = (e: React.MouseEvent) => {
     sessionStorage.setItem(SCROLL_KEY, String(window.scrollY));
   };
   const [search, setSearch] = useState("");
