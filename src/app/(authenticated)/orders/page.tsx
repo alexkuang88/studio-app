@@ -46,14 +46,22 @@ function OrdersContent() {
   const [orders, setOrders] = useState<Array<Record<string, unknown>>>([]);
   const [loading, setLoading] = useState(true);
 
-  // 恢复上次滚动位置 — 等订单数据加载完毕
+  // 恢复上次滚动位置 — 等订单数据加载完毕且表格行可点击
   useEffect(() => {
     if (orders.length > 0) {
       const saved = sessionStorage.getItem(SCROLL_KEY);
       if (saved) {
-        const y = parseInt(saved);
-        setTimeout(() => window.scrollTo(0, y), 200);
-        sessionStorage.removeItem(SCROLL_KEY);
+        // Delay so the full table including images and font loading takes effect
+        const timer = setInterval(() => {
+          const bodyHeight = document.body.scrollHeight;
+          if (bodyHeight > 1000) {
+            clearInterval(timer);
+            window.scrollTo(0, parseInt(saved));
+            sessionStorage.removeItem(SCROLL_KEY);
+          }
+        }, 100);
+        // Clear after 5 seconds at most
+        setTimeout(() => clearInterval(timer), 5000);
       }
     }
   }, [orders]);
