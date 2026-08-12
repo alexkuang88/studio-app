@@ -27,6 +27,7 @@ import {
 } from "@/lib/utils/calculations";
 import { Plus, Search } from "lucide-react";
 import Link from "next/link";
+import OrderSlidePanel from "@/components/orders/OrderSlidePanel";
 
 export default function OrdersPage() {
   return (
@@ -43,6 +44,7 @@ function OrdersContent() {
   const searchParams = useSearchParams();
   const [orders, setOrders] = useState<Array<Record<string, unknown>>>([]);
   const [loading, setLoading] = useState(true);
+  const [slideOrderId, setSlideOrderId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState(searchParams.get("status") || "");
   const [sourceFilter, setSourceFilter] = useState("");
@@ -275,12 +277,12 @@ function OrdersContent() {
                   return (
                     <tr key={order.id as string} className={`hover:bg-gray-100 ${rowBg}`}>
                       <td className="px-3 py-3">
-                        <Link
-                          href={`/orders/${order.id}`}
-                          className="font-mono font-medium text-blue-600 hover:underline"
+                        <button
+                          onClick={() => setSlideOrderId(order.id as string)}
+                          className="font-mono font-medium text-blue-600 hover:underline cursor-pointer"
                         >
                           {order.order_code as string}
-                        </Link>
+                        </button>
                       </td>
                       <td className="px-3 py-3 hidden lg:table-cell text-xs text-gray-500 max-w-[120px] truncate" title={(order.client_note as string) || ""}>
                         {(order.client_note as string) || "—"}
@@ -355,6 +357,7 @@ function OrdersContent() {
           </table>
         </div>
       </div>
+      {slideOrderId && <OrderSlidePanel orderId={slideOrderId} onClose={() => setSlideOrderId(null)} />}
     </div>
   );
 }
