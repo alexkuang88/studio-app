@@ -43,25 +43,25 @@ function OrdersContent() {
   const searchParams = useSearchParams();
   const SCROLL_KEY = "orders_scroll";
 
-  // 恢复上次滚动位置
+  const [orders, setOrders] = useState<Array<Record<string, unknown>>>([]);
+  const [loading, setLoading] = useState(true);
+
+  // 恢复上次滚动位置 — 数据加载完后再滚
   useEffect(() => {
-    const saved = sessionStorage.getItem(SCROLL_KEY);
-    if (saved) {
-      const y = parseInt(saved);
-      // 用 requestAnimationFrame 等 DOM 渲染完
-      const raf = () => window.scrollTo(0, y);
-      requestAnimationFrame(() => requestAnimationFrame(raf));
-      sessionStorage.removeItem(SCROLL_KEY);
+    if (!loading) {
+      const saved = sessionStorage.getItem(SCROLL_KEY);
+      if (saved) {
+        const y = parseInt(saved);
+        setTimeout(() => window.scrollTo(0, y), 100);
+        sessionStorage.removeItem(SCROLL_KEY);
+      }
     }
-  }, []);
+  }, [loading]);
 
   // 保存滚动位置（点击订单进入详情前）
   const handleOrderClick = () => {
     sessionStorage.setItem(SCROLL_KEY, String(window.scrollY));
   };
-
-  const [orders, setOrders] = useState<Array<Record<string, unknown>>>([]);
-  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState(searchParams.get("status") || "");
   const [sourceFilter, setSourceFilter] = useState("");
