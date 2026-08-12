@@ -208,7 +208,7 @@ export default function OrderDetailPage() {
   return (
     <div className="space-y-6 animate-fade-in max-w-5xl">
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="sm" onClick={() => router.back()}>
+        <Button variant="ghost" size="sm" onClick={() => window.history.back()}>
           <ArrowLeft size={18} />
         </Button>
         <div>
