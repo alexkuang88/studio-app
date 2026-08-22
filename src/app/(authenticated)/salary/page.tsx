@@ -71,6 +71,12 @@ export default function SalaryPage() {
   const premiumRate = data?.salary_rate_premium as number || 800;
   const dailyThreshold = data?.daily_threshold as number || 2200;
   const startDate = data?.tiered_salary_start_date as string || "2026-07-06";
+  const isV3 = data?.is_v3 as boolean || false;
+  const v3Premium = data?.salary_v3_premium as number || 1000;
+  const v3Base = data?.salary_v3_base as number || 700;
+  const v3Threshold = data?.salary_v3_threshold as number || 2000;
+  const v3MaxHours = data?.salary_v3_max_hours as number || 12;
+  const v3StartDate = data?.salary_v3_start_date as string || "2026-09-01";
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -78,7 +84,9 @@ export default function SalaryPage() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">工资统计 / Statistiques salaire</h1>
           <p className="text-sm text-gray-500 mt-1">
-            {isTiered ? (
+            {isV3 ? (
+              <>基础 {v3Base} / 高级 {v3Premium} Ar/100万（{v3MaxHours}小时内≥{v3Threshold}万触发，{v3StartDate}起）</>
+            ) : isTiered ? (
               <>基础 {baseRate} / 高级 {premiumRate} Ar/100万（日产量≥{dailyThreshold}万触发，{startDate}起）</>
             ) : (
               <>工资单价: {salaryRate} Ar/100万 / Taux </>

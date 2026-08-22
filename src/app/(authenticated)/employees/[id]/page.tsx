@@ -23,7 +23,7 @@ import {
   getRecentMonths,
   getMonthLabel,
 } from "@/lib/utils/time-utils";
-import { calcSalary, calcDailyTieredSalary, getMGDay } from "@/lib/utils/calculations";
+import { calcSalary, calcDailyTieredSalary, calcSessionTieredSalary, getMGDay } from "@/lib/utils/calculations";
 import { ArrowLeft, Save } from "lucide-react";
 import Link from "next/link";
 
@@ -59,6 +59,12 @@ export default function EmployeeDetailPage() {
   const [dailyThreshold, setDailyThreshold] = useState(2200);
   const [tieredStartDate, setTieredStartDate] = useState("2026-07-06");
   const [isTiered, setIsTiered] = useState(false);
+  const [v3Premium, setV3Premium] = useState(1000);
+  const [v3Base, setV3Base] = useState(700);
+  const [v3Threshold, setV3Threshold] = useState(2000);
+  const [v3MaxHours, setV3MaxHours] = useState(12);
+  const [v3StartDate, setV3StartDate] = useState("2026-09-01");
+  const [isV3, setIsV3] = useState(false);
   const [dailyBreakdown, setDailyBreakdown] = useState<Array<{day: string; total: number; rate: number; salary: number}>>([]);
   const [monthStats, setMonthStats] = useState({
     totalResult: 0,
@@ -88,7 +94,7 @@ export default function EmployeeDetailPage() {
     supabase
       .from("settings")
       .select("key, value")
-      .in("key", ["salary_rate", "salary_rate_base", "salary_rate_premium", "daily_threshold", "tiered_salary_start_date"])
+      .in("key", ["salary_rate", "salary_rate_base", "salary_rate_premium", "daily_threshold", "tiered_salary_start_date", "salary_v3_premium", "salary_v3_base", "salary_v3_threshold", "salary_v3_max_hours", "salary_v3_start_date"])
       .then(({ data }) => {
         const map: Record<string, string> = {};
         for (const row of (data as Array<{ key: string; value: string }>) || []) {
@@ -103,6 +109,17 @@ export default function EmployeeDetailPage() {
           && map["salary_rate_premium"] !== undefined
           && map["daily_threshold"] !== undefined;
         setIsTiered(hasTiered);
+
+        setV3Premium(parseFloat(map["salary_v3_premium"] || "1000"));
+        setV3Base(parseFloat(map["salary_v3_base"] || "700"));
+        setV3Threshold(parseFloat(map["salary_v3_threshold"] || "2000"));
+        setV3MaxHours(parseFloat(map["salary_v3_max_hours"] || "12"));
+        setV3StartDate(map["salary_v3_start_date"] || "2026-09-01");
+        const hasV3 = map["salary_v3_premium"] !== undefined
+          && map["salary_v3_base"] !== undefined
+          && map["salary_v3_threshold"] !== undefined
+          && map["salary_v3_max_hours"] !== undefined;
+        setIsV3(hasV3);
       });
   }, [id, isNew]);
 
@@ -133,7 +150,7 @@ export default function EmployeeDetailPage() {
           (sum, ws) => sum + ((ws.work_hours as number) || 0), 0
         );
 
-        // Daily breakdown for tiered salary
+        // Daily breakdown for tiered salary（旧算法）
         const dailyTotals: Record<string, number> = {};
         for (const ws of s) {
           const day = getMGDay(ws.end_time as string);
@@ -148,20 +165,29 @@ export default function EmployeeDetailPage() {
         }
         setDailyBreakdown(breakdown);
 
-        // Calculate salary
+        // 按 end_time 拆分新旧算法
+        const allSess = s.map(ws => ({
+          employee_id: id,
+          result_amount: ws.result_amount as number | null,
+          start_time: ws.start_time as string | null,
+          end_time: ws.end_time as string | null,
+          work_hours: ws.work_hours as number | null,
+        }));
+        const preV3 = allSess.filter(x => x.end_time && x.end_time < `${v3StartDate}T00:00:00+03:00`);
+        const v3 = allSess.filter(x => x.end_time && x.end_time >= `${v3StartDate}T00:00:00+03:00`);
+
+        let oldSalary = 0;
+        if (isTiered && preV3.length > 0) {
+          oldSalary = calcDailyTieredSalary(preV3, salaryRateBase, salaryRatePremium, dailyThreshold, tieredStartDate, salaryRate).get(id) || 0;
+        }
+        let v3Salary = 0;
+        if (isV3 && v3.length > 0) {
+          v3Salary = calcSessionTieredSalary(v3, v3Base, v3Premium, v3Threshold, v3MaxHours).get(id) || 0;
+        }
+
         let salary: number;
-        if (isTiered) {
-          const salaryMap = calcDailyTieredSalary(
-            s.map(ws => ({
-              employee_id: id,
-              result_amount: ws.result_amount as number | null,
-              start_time: ws.start_time as string | null,
-              end_time: ws.end_time as string | null,
-              work_hours: ws.work_hours as number | null,
-            })),
-            salaryRateBase, salaryRatePremium, dailyThreshold, tieredStartDate, salaryRate
-          );
-          salary = salaryMap.get(id) || 0;
+        if (isTiered || isV3) {
+          salary = oldSalary + v3Salary;
         } else {
           salary = calcSalary(totalResult, salaryRate);
         }
@@ -180,7 +206,7 @@ export default function EmployeeDetailPage() {
           setAdvances(d.advances || []);
           setAdvTotal(d.total || 0);
         });
-  }, [id, selectedMonth, isNew, salaryRate, salaryRateBase, salaryRatePremium, dailyThreshold, tieredStartDate, isTiered]);
+  }, [id, selectedMonth, isNew, salaryRate, salaryRateBase, salaryRatePremium, dailyThreshold, tieredStartDate, isTiered, v3Premium, v3Base, v3Threshold, v3MaxHours, v3StartDate, isV3]);
 
   const handleSaveAdvance = async () => {
     if (!advAmount || parseFloat(advAmount) <= 0) return;

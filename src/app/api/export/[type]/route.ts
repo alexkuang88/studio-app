@@ -3,7 +3,7 @@
 import { createServerSupabase } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 import ExcelJS from "exceljs";
-import { calcDailyTieredSalary } from "@/lib/utils/calculations";
+import { calcDailyTieredSalary, calcSessionTieredSalary } from "@/lib/utils/calculations";
 
 const EXPORT_TYPES = [
   "orders",
@@ -98,7 +98,7 @@ export async function GET(
         const { data: settingsRows } = await supabase
           .from("settings")
           .select("key, value")
-          .in("key", ["salary_rate", "salary_rate_base", "salary_rate_premium", "daily_threshold", "tiered_salary_start_date"]);
+          .in("key", ["salary_rate", "salary_rate_base", "salary_rate_premium", "daily_threshold", "tiered_salary_start_date", "salary_v3_premium", "salary_v3_base", "salary_v3_threshold", "salary_v3_max_hours", "salary_v3_start_date"]);
 
         const settingsMap: Record<string, string> = {};
         for (const row of settingsRows || []) {
@@ -113,6 +113,16 @@ export async function GET(
         const isTiered = settingsMap["salary_rate_base"] !== undefined
           && settingsMap["salary_rate_premium"] !== undefined
           && settingsMap["daily_threshold"] !== undefined;
+
+        const v3Premium = settingsMap["salary_v3_premium"] ? parseFloat(settingsMap["salary_v3_premium"]) : 1000;
+        const v3Base = settingsMap["salary_v3_base"] ? parseFloat(settingsMap["salary_v3_base"]) : 700;
+        const v3Threshold = settingsMap["salary_v3_threshold"] ? parseFloat(settingsMap["salary_v3_threshold"]) : 2000;
+        const v3MaxHours = settingsMap["salary_v3_max_hours"] ? parseFloat(settingsMap["salary_v3_max_hours"]) : 12;
+        const v3StartDate = settingsMap["salary_v3_start_date"] || "2026-09-01";
+        const isV3 = settingsMap["salary_v3_premium"] !== undefined
+          && settingsMap["salary_v3_base"] !== undefined
+          && settingsMap["salary_v3_threshold"] !== undefined
+          && settingsMap["salary_v3_max_hours"] !== undefined;
 
         const { data: sessions } = await supabase
           .from("work_sessions")
@@ -129,18 +139,20 @@ export async function GET(
           stats[eid].totalHours += (s.work_hours as number) || 0;
         }
 
-        // Tiered salary
+        // 按 end_time 拆分新旧算法
+        const allSessions = (sessions || []) as Array<{ employee_id: string; result_amount: number | null; start_time: string | null; end_time: string | null; work_hours: number | null }>;
+        const preV3Sessions = allSessions.filter(s => s.end_time && s.end_time < `${v3StartDate}T00:00:00+03:00`);
+        const v3Sessions = allSessions.filter(s => s.end_time && s.end_time >= `${v3StartDate}T00:00:00+03:00`);
+
         let tieredSalaryMap: Map<string, number> = new Map();
-        if (isTiered && (sessions || []).length > 0) {
-          tieredSalaryMap = calcDailyTieredSalary(
-            sessions as Array<{ employee_id: string; result_amount: number | null; start_time: string | null; end_time: string | null; work_hours: number | null }>,
-            baseRate,
-            premiumRate,
-            dailyThreshold,
-            startDate,
-            salaryRate
-          );
+        if (isTiered && preV3Sessions.length > 0) {
+          tieredSalaryMap = calcDailyTieredSalary(preV3Sessions, baseRate, premiumRate, dailyThreshold, startDate, salaryRate);
         }
+        let v3SalaryMap: Map<string, number> = new Map();
+        if (isV3 && v3Sessions.length > 0) {
+          v3SalaryMap = calcSessionTieredSalary(v3Sessions, v3Base, v3Premium, v3Threshold, v3MaxHours);
+        }
+        const mergedSalary = (eid: string) => (tieredSalaryMap.get(eid) || 0) + (v3SalaryMap.get(eid) || 0);
 
         const ws = workbook.addWorksheet("工资统计");
         ws.columns = [
@@ -157,8 +169,8 @@ export async function GET(
             const s = stats[emp.id];
             const total = s?.totalResult || 0;
             const hours = s?.totalHours || 0;
-            const salary = isTiered
-              ? (tieredSalaryMap.get(emp.id) || 0)
+            const salary = (isTiered || isV3)
+              ? mergedSalary(emp.id)
               : Math.round((total / 100) * salaryRate);
             return {
               code: emp.employee_code,

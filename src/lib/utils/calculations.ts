@@ -286,3 +286,37 @@ export function calcDailyTieredSalary(
 
   return result;
 }
+
+/**
+ * 阶梯工资 v3：按分段判定（12小时 + 成绩阈值）
+ *
+ * 单个 work_session：
+ * - work_hours <= maxHours 且 result_amount >= threshold → premiumRate
+ * - 其他所有情况 → baseRate
+ *
+ * @returns Map<employeeId, totalSalary>
+ */
+export function calcSessionTieredSalary(
+  sessions: Array<{
+    employee_id: string;
+    result_amount: number | null;
+    work_hours: number | null;
+  }>,
+  baseRate: number,
+  premiumRate: number,
+  threshold: number,
+  maxHours: number
+): Map<string, number> {
+  const result = new Map<string, number>();
+
+  for (const s of sessions) {
+    if (s.result_amount == null) continue;
+    const eid = s.employee_id;
+    const hours = s.work_hours ?? Infinity;
+    const rate = hours <= maxHours && s.result_amount >= threshold ? premiumRate : baseRate;
+    const salary = Math.round((s.result_amount / 100) * rate);
+    result.set(eid, (result.get(eid) || 0) + salary);
+  }
+
+  return result;
+}
